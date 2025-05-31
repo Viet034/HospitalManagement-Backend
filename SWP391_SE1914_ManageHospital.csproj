@@ -20,11 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Mapper\" />
-    <Folder Include="Models\DTO\ResponseDTO\" />
-    <Folder Include="Models\DTO\RequestDTO\" />
-    <Folder Include="Service\" />
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
