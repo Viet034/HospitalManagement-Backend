@@ -9,9 +9,9 @@ namespace SWP391_SE1914_ManageHospital.Controllers
     [ApiController]
     public class NurseController : ControllerBase
     {
-        private readonly NurseService _nurseService;
+        private readonly INurseService _nurseService;
 
-        public NurseController(NurseService nurseService)
+        public NurseController(INurseService nurseService)
         {
             _nurseService = nurseService;
         }
@@ -19,118 +19,41 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllNurses()
         {
-            try
-            {
-                var nurses = await _nurseService.GetAllNurses();
-                return Ok(nurses);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var nurses = await _nurseService.GetAllNursesAsync();
+            return Ok(nurses);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetNurse(int id)
+        public async Task<IActionResult> GetNurseById(int id)
         {
-            try
-            {
-                var nurse = await _nurseService.GetNurseById(id);
-                if (nurse == null) return NotFound();
-                return Ok(nurse);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var nurse = await _nurseService.GetNurseByIdAsync(id);
+            if (nurse == null) return NotFound();
+            return Ok(nurse);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateNurse([FromBody] NurseDTO nurseDto)
         {
-            try
-            {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-                var createdNurse = await _nurseService.CreateNurse(nurseDto);
-                return CreatedAtAction(nameof(GetNurse), new { id = createdNurse.Id }, createdNurse);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            if (nurseDto == null) return BadRequest();
+            var createdNurse = await _nurseService.CreateNurseAsync(nurseDto);
+            return CreatedAtAction(nameof(GetNurseById), new { id = createdNurse.Id }, createdNurse);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateNurse(int id, [FromBody] NurseDTO nurseDto)
         {
-            try
-            {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-                var updatedNurse = await _nurseService.UpdateNurse(id, nurseDto);
-                if (updatedNurse == null) return NotFound();
-                return Ok(updatedNurse);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            if (nurseDto == null) return BadRequest();
+            var updatedNurse = await _nurseService.UpdateNurseAsync(id, nurseDto);
+            if (updatedNurse == null) return NotFound();
+            return Ok(updatedNurse);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteNurse(int id)
         {
-            try
-            {
-                var result = await _nurseService.DeleteNurse(id);
-                if (!result) return NotFound();
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpPost("appointment")]
-        public async Task<IActionResult> CreateNurseAppointment([FromBody] Nurse_AppointmentDTO dto)
-        {
-            try
-            {
-                if (!ModelState.IsValid) return BadRequest(ModelState);
-                var createdDto = await _nurseService.CreateNurseAppointment(dto);
-                return CreatedAtAction(nameof(GetNurseAppointment), new { id = createdDto.Id }, createdDto);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpGet("appointment/{id}")]
-        public async Task<IActionResult> GetNurseAppointment(int id)
-        {
-            try
-            {
-                var appointment = await _nurseService.GetNurseAppointmentById(id);
-                if (appointment == null) return NotFound();
-                return Ok(appointment);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            var result = await _nurseService.DeleteNurseAsync(id);
+            if (!result) return NotFound();
+            return NoContent();
         }
     }
 }

@@ -1,37 +1,59 @@
-using AutoMapper;
-using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
-using SWP391_SE1914_ManageHospital.Ultility;
+using SWP391_SE1914_ManageHospital.Models.Entities;
 
 namespace SWP391_SE1914_ManageHospital.Mapper
 {
-    public class NurseMapper : Profile
+    public class NurseMapper : INurseMapper
     {
-        public NurseMapper()
+        public NurseDTO MapToDto(Nurse nurse)
         {
-            CreateMap<Nurse, NurseDTO>()
-                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
-                .ForMember(dest => dest.Dob, opt => opt.MapFrom(src => src.Dob.ToString("yyyy-MM-dd")))
-                .ForMember(dest => dest.CreateDate, opt => opt.MapFrom(src => src.CreateDate))
-                .ForMember(dest => dest.UpdateDate, opt => opt.MapFrom(src => src.UpdateDate))
-                .ForMember(dest => dest.CreateBy, opt => opt.MapFrom(src => src.CreateBy))
-                .ForMember(dest => dest.UpdateBy, opt => opt.MapFrom(src => src.UpdateBy));
+            if (nurse == null) return null;
+            return new NurseDTO
+            {
+                Id = nurse.Id,
+                Name = nurse.Name,
+                Code = nurse.Code,
+                Gender = nurse.Gender,
+                Dob = nurse.Dob,
+                CCCD = nurse.CCCD,
+                Phone = nurse.Phone,
+                ImageURL = nurse.ImageURL,
+                Status = nurse.Status,
+                UserId = nurse.UserId,
+                DepartmentId = nurse.DepartmentId,
+                CreateDate = nurse.CreateDate,
+                UpdateDate = nurse.UpdateDate,
+                CreateBy = nurse.CreateBy,
+                UpdateBy = nurse.UpdateBy
+            };
+        }
 
-            CreateMap<NurseDTO, Nurse>()
-                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => Enum.Parse<Status.Gender>(src.Gender.ToString())))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<Status.NurseStatus>(src.Status.ToString())))
-                .ForMember(dest => dest.Dob, opt => opt.MapFrom(src => DateTime.Parse(src.Dob)))
-                .ForMember(dest => dest.CreateDate, opt => opt.MapFrom(src => src.CreateDate))
-                .ForMember(dest => dest.UpdateDate, opt => opt.MapFrom(src => src.UpdateDate))
-                .ForMember(dest => dest.CreateBy, opt => opt.MapFrom(src => src.CreateBy))
-                .ForMember(dest => dest.UpdateBy, opt => opt.MapFrom(src => src.UpdateBy));
+        public Nurse MapToEntity(NurseDTO nurseDto)
+        {
+            if (nurseDto == null) return null;
+            return new Nurse
+            {
+                Id = nurseDto.Id,
+                Name = nurseDto.Name,
+                Code = nurseDto.Code,
+                Gender = nurseDto.Gender,
+                Dob = nurseDto.Dob,
+                CCCD = nurseDto.CCCD,
+                Phone = nurseDto.Phone,
+                ImageURL = nurseDto.ImageURL,
+                Status = nurseDto.Status,
+                UserId = nurseDto.UserId,
+                DepartmentId = nurseDto.DepartmentId,
+                CreateDate = nurseDto.CreateDate,
+                UpdateDate = nurseDto.UpdateDate,
+                CreateBy = nurseDto.CreateBy,
+                UpdateBy = nurseDto.UpdateBy
+            };
+        }
 
-            CreateMap<Nurse_Appointment, Nurse_AppointmentDTO>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
-
-            CreateMap<Nurse_AppointmentDTO, Nurse_Appointment>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse<Status.NurseAppointmentStatus>(src.Status.ToString())));
+        public IEnumerable<NurseDTO> MapToDtoList(IEnumerable<Nurse> nurses)
+        {
+            return nurses?.Select(n => MapToDto(n)).ToList() ?? new List<NurseDTO>();
         }
     }
 }
