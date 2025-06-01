@@ -68,6 +68,9 @@ iisexpress/
 *.ruleset
 *.editorconfig
 *.vsconfig
+appsettings.Development.json
+Properties/launchSettings.json
+
 
 
 .sonar/

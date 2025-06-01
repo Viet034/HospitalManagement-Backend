@@ -4,6 +4,7 @@ using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Mapper.Impl;
 using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Service.Impl;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,9 +17,17 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IClinicMapper, ClinicMapper>();
 builder.Services.AddScoped<IClinicService, ClinicService>();
+builder.Services.AddScoped<IDepartmentMapper, DepartmentMapper>();
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 
+<<<<<<< HEAD
 builder.Services.AddScoped<NurseService>();
 builder.Services.AddAutoMapper(typeof(NurseMapper));
+=======
+builder.Services.AddScoped<IpatientMapper, PatientMapper>();
+builder.Services.AddScoped<IPatientService, PatientService>();
+
+>>>>>>> master
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
 
@@ -26,6 +35,12 @@ builder.Services.AddDbContext<ApplicationDBContext>(o =>
     o.UseLazyLoadingProxies()
     .UseMySql(connectionStr, new MySqlServerVersion(new Version(8, 0, 33))));
 
+//chuyen doi datatype enum
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
