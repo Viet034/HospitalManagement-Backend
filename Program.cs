@@ -27,7 +27,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(o =>
     o.UseLazyLoadingProxies()
     .UseMySql(connectionStr, new MySqlServerVersion(new Version(8, 0, 33))));
 
-
+//chuyen doi datatype enum
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
