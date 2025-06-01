@@ -20,7 +20,8 @@ builder.Services.AddScoped<IClinicService, ClinicService>();
 builder.Services.AddScoped<IDepartmentMapper, DepartmentMapper>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 
-
+builder.Services.AddScoped<IpatientMapper, PatientMapper>();
+builder.Services.AddScoped<IPatientService, PatientService>();
 
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
