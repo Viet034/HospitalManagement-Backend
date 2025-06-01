@@ -26,7 +26,7 @@ public class ClinicService : IClinicService
         throw new NotImplementedException();
     }
 
-    public async Task<ClinicResponse> CreateClinicAsync(ClinicCreate create)
+    public async Task<ClinicResponseDTO> CreateClinicAsync(ClinicCreate create)
     {
         //requestDTO -> response
         Clinic entity =  _mapper.CreateToEntity(create);
@@ -37,7 +37,7 @@ public class ClinicService : IClinicService
         return response;
     }
 
-    public async Task<ClinicResponse> FindClinicByIdAsync(int id)
+    public async Task<ClinicResponseDTO> FindClinicByIdAsync(int id)
     {
         var cid = await _context.Clinics.FindAsync(id)
             ?? throw new Exception($"Không có Id {id} tồn tại!");
@@ -46,7 +46,7 @@ public class ClinicService : IClinicService
         return response;
     }
 
-    public async Task<IEnumerable<ClinicResponse>> GetAllClinicAsync()
+    public async Task<IEnumerable<ClinicResponseDTO>> GetAllClinicAsync()
     {
         var cid = await _context.Clinics.ToListAsync();
         if(cid == null)
@@ -71,7 +71,7 @@ public class ClinicService : IClinicService
         
     }
 
-    public async Task<ClinicResponse> SoftDeleteClinicAsync(int id, Status.ClinicStatus newStatus)
+    public async Task<ClinicResponseDTO> SoftDeleteClinicAsync(int id, Status.ClinicStatus newStatus)
     {
         var coId = await _context.Clinics.FindAsync(id)
             ?? throw new KeyNotFoundException($"Không có Id {id} tồn tại");
@@ -84,7 +84,7 @@ public class ClinicService : IClinicService
         return response;
     }
 
-    public async Task<IEnumerable<ClinicResponse>> SearchClinicByKeyAsync(string name)
+    public async Task<IEnumerable<ClinicResponseDTO>> SearchClinicByKeyAsync(string name)
     {
         var cid = await _context.Clinics.FromSqlRaw("Select * from Clinics where Name like {0}", "%" + name + "%").ToListAsync();
         if (cid == null)
@@ -95,7 +95,7 @@ public class ClinicService : IClinicService
         return response;
     }
 
-    public async Task<ClinicResponse> UpdateClinicAsync(int id, ClinicUpdate update)
+    public async Task<ClinicResponseDTO> UpdateClinicAsync(int id, ClinicUpdate update)
     {
 
         var coId = await _context.Clinics.FindAsync(id)
