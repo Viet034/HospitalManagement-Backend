@@ -34,9 +34,9 @@ public class ClinicMapper : IClinicMapper
         return clinic;
     }
 
-    public ClinicResponse EntityToResponse(Clinic entity)
+    public ClinicResponseDTO EntityToResponse(Clinic entity)
     {
-        ClinicResponse response = new ClinicResponse();
+        ClinicResponseDTO response = new ClinicResponseDTO();
         response.Id = entity.Id;
         response.Code = entity.Code;
         response.Name = entity.Name;
@@ -48,7 +48,7 @@ public class ClinicMapper : IClinicMapper
         return response;
     }
 
-    public IEnumerable<ClinicResponse> ListEntityToResponse(IEnumerable<Clinic> entities)
+    public IEnumerable<ClinicResponseDTO> ListEntityToResponse(IEnumerable<Clinic> entities)
     {
         return entities.Select(x => EntityToResponse(x)).ToList();
     }

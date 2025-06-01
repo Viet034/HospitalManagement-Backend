@@ -1,8 +1,7 @@
-﻿using Castle.Core.Resource;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Clinic;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Department;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Service;
 using System.Net;
@@ -10,26 +9,25 @@ using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Controllers;
 
-
 [Route("api/[controller]")]
 [ApiController]
-public class ClinicController : ControllerBase
+public class DepartmentController : ControllerBase
 {
-    private readonly IClinicService _service;
+    private readonly IDepartmentService _service;
 
-    public ClinicController(IClinicService service)
+    public DepartmentController(IDepartmentService service)
     {
         _service = service;
     }
 
-    [HttpPost("add-clinic")]
-    [ProducesResponseType(typeof(IEnumerable<Clinic>), (int)HttpStatusCode.OK)]
+    [HttpPost("add-department")]
+    [ProducesResponseType(typeof(IEnumerable<Department>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-    public async Task<IActionResult> AddClinic([FromBody] ClinicCreate create)
+    public async Task<IActionResult> AddDepartment([FromBody] DepartmentCreate create)
     {
         try
         {
-            var response = await _service.CreateClinicAsync(create);
+            var response = await _service.CreateDepartmentAsync(create);
             return Ok(response);
         }
         catch (Exception ex)
@@ -39,13 +37,13 @@ public class ClinicController : ControllerBase
     }
 
     [HttpGet("get-all")]
-    [ProducesResponseType(typeof(IEnumerable<Clinic>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(IEnumerable<Department>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-    public async Task<ActionResult<IEnumerable<Clinic>>> GetAllClinic()
+    public async Task<ActionResult<IEnumerable<Department>>> GetAllDepartment()
     {
         try
         {
-            var response = await _service.GetAllClinicAsync();
+            var response = await _service.GetAllDepartmentAsync();
             return Ok(response);
         }
         catch (Exception ex)
@@ -55,13 +53,13 @@ public class ClinicController : ControllerBase
     }
 
     [HttpGet("find-by-name/{name}")]
-    [ProducesResponseType(typeof(IEnumerable<Clinic>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(IEnumerable<Department>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
     public async Task<IActionResult> FindByName(string name)
     {
         try
         {
-            var response = await _service.SearchClinicByKeyAsync(name);
+            var response = await _service.SearchDepartmentByKeyAsync(name);
             return Ok(response);
         }
         catch (Exception ex)
@@ -71,13 +69,13 @@ public class ClinicController : ControllerBase
     }
 
     [HttpGet("find-id/{id}")]
-    [ProducesResponseType(typeof(IEnumerable<Clinic>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(IEnumerable<Department>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
     public async Task<IActionResult> FindById(int id)
     {
         try
         {
-            var response = await _service.FindClinicByIdAsync(id);
+            var response = await _service.FindDepartmentByIdAsync(id);
             return Ok(response);
         }
         catch (Exception ex)
@@ -87,14 +85,14 @@ public class ClinicController : ControllerBase
     }
 
     [HttpPut("update/{id}")]
-    [ProducesResponseType(typeof(IEnumerable<Clinic>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(IEnumerable<Department>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
     //[AllowAnonymous]
-    public async Task<IActionResult> UpdateClinic([FromBody] ClinicUpdate update, int id)
+    public async Task<IActionResult> UpdateDepartment([FromBody] DepartmentUpdate update, int id)
     {
         try
         {
-            var response = await _service.UpdateClinicAsync(id, update);
+            var response = await _service.UpdateDepartmentAsync(id, update);
             return Ok(response);
         }
         catch (Exception ex)
@@ -104,14 +102,14 @@ public class ClinicController : ControllerBase
     }
 
     [HttpPut("change-status/{id}")]
-    [ProducesResponseType(typeof(IEnumerable<Clinic>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(IEnumerable<Department>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
     //[Authorize(Roles = "Admin, Employee")]
-    public async Task<IActionResult> SoftDeleteClinic(int id, ClinicStatus newStatus)
+    public async Task<IActionResult> SoftDeleteDepartment(int id, DepartmentStatus newStatus)
     {
         try
         {
-            var response = await _service.SoftDeleteClinicAsync(id, newStatus);
+            var response = await _service.SoftDeleteDepartmentAsync(id, newStatus);
             return Ok(response);
         }
         catch (Exception ex)
@@ -121,14 +119,14 @@ public class ClinicController : ControllerBase
     }
 
     [HttpDelete("delete-permanent/{id}")]
-    [ProducesResponseType(typeof(IEnumerable<Clinic>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(IEnumerable<Department>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
     //[AllowAnonymous]
-    public async Task<IActionResult> HardDeleteClinic(int id)
+    public async Task<IActionResult> HardDeleteDepartment(int id)
     {
         try
         {
-            var response = await _service.HardDeleteClinicAsync(id);
+            var response = await _service.HardDeleteDepartmentAsync(id);
             return Ok(response);
         }
         catch (Exception ex)
