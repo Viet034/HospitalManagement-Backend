@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 
-public class ClinicResponse
+public class ClinicResponseDTO
 {
     public int Id { get; set; }
     public string Name { get; set; }
@@ -15,11 +15,11 @@ public class ClinicResponse
     public string CreateBy { get; set; }
     public string? UpdateBy { get; set; }
 
-    public ClinicResponse()
+    public ClinicResponseDTO()
     {
     }
 
-    public ClinicResponse(int id, string name, string code, ClinicStatus status)
+    public ClinicResponseDTO(int id, string name, string code, ClinicStatus status)
     {
         Id = id;
         Name = name;
