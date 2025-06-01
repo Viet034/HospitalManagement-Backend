@@ -17,8 +17,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IClinicMapper, ClinicMapper>();
 builder.Services.AddScoped<IClinicService, ClinicService>();
 
-
-
+builder.Services.AddScoped<NurseService>();
+builder.Services.AddAutoMapper(typeof(NurseMapper));
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
 
