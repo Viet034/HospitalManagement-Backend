@@ -1,66 +1,68 @@
 using Microsoft.AspNetCore.Mvc;
-using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
+using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class DoctorController : ControllerBase
+namespace SWP391_SE1914_ManageHospital.Controllers
 {
-    private readonly IDoctorService _doctorService;
-
-    public DoctorController(IDoctorService doctorService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class DoctorController : ControllerBase
     {
-        _doctorService = doctorService;
-    }
+        private readonly IDoctorService _doctorService;
 
-    // GET: api/doctor
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<DoctorDTO>>> GetDoctors()
-    {
-        var doctors = await _doctorService.GetAllDoctorsAsync();
-        return Ok(doctors);
-    }
-
-    // GET: api/doctor/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<DoctorDTO>> GetDoctor(int id)
-    {
-        var doctor = await _doctorService.GetDoctorByIdAsync(id);
-        if (doctor == null)
+        public DoctorController(IDoctorService doctorService)
         {
-            return NotFound();
+            _doctorService = doctorService;
         }
-        return Ok(doctor);
-    }
 
-    // POST: api/doctor
-    [HttpPost]
-    public async Task<ActionResult<DoctorDTO>> CreateDoctor(DoctorDTO doctorDTO)
-    {
-        var createdDoctor = await _doctorService.CreateDoctorAsync(doctorDTO);
-        return CreatedAtAction(nameof(GetDoctor), new { id = createdDoctor.Id }, createdDoctor);
-    }
-
-    // PUT: api/doctor/5
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateDoctor(int id, DoctorDTO doctorDTO)
-    {
-        var result = await _doctorService.UpdateDoctorAsync(id, doctorDTO);
-        if (!result)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<DoctorResponseDTO>>> GetDoctors()
         {
-            return BadRequest();
+            var doctors = await _doctorService.GetAllDoctorsAsync();
+            return Ok(doctors);
         }
-        return NoContent();
-    }
 
-    // DELETE: api/doctor/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteDoctor(int id)
-    {
-        var result = await _doctorService.DeleteDoctorAsync(id);
-        if (!result)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<DoctorResponseDTO>> GetDoctor(int id)
         {
-            return NotFound();
+            var doctor = await _doctorService.GetDoctorByIdAsync(id);
+            if (doctor == null)
+            {
+                return NotFound();
+            }
+            return Ok(doctor);
         }
-        return NoContent();
+
+        [HttpPost]
+        public async Task<ActionResult<DoctorResponseDTO>> CreateDoctor(DoctorCreate doctorDTO)
+        {
+            var createdDoctor = await _doctorService.CreateDoctorAsync(doctorDTO);
+            return CreatedAtAction(nameof(GetDoctor), new { id = createdDoctor.Id }, createdDoctor);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateDoctor(int id, DoctorUpdate doctorDTO)
+        {
+            doctorDTO.Id = id; 
+            var result = await _doctorService.UpdateDoctorAsync(id, doctorDTO);
+            if (!result)
+            {
+                return BadRequest();
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDoctor(DoctorDelete doctorDTO)
+        {
+            doctorDTO.Id = id; 
+            var result = await _doctorService.DeleteDoctorAsync(doctorDTO);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
     }
 }

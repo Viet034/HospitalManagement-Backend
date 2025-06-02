@@ -1,9 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
-using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace SWP391_SE1914_ManageHospital.Services
+namespace SWP391_SE1914_ManageHospital.Services.Impl
 {
     public class DoctorService : IDoctorService
     {
@@ -16,7 +19,7 @@ namespace SWP391_SE1914_ManageHospital.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<DoctorDTO>> GetAllDoctorsAsync()
+        public async Task<IEnumerable<DoctorResponseDTO>> GetAllDoctorsAsync()
         {
             var doctors = await _context.Doctors
                 .Include(d => d.Department)
@@ -25,7 +28,7 @@ namespace SWP391_SE1914_ManageHospital.Services
             return doctors.Select(_mapper.MapToDTO);
         }
 
-        public async Task<DoctorDTO> GetDoctorByIdAsync(int id)
+        public async Task<DoctorResponseDTO> GetDoctorByIdAsync(int id)
         {
             var doctor = await _context.Doctors
                 .Include(d => d.Department)
@@ -34,17 +37,15 @@ namespace SWP391_SE1914_ManageHospital.Services
             return doctor != null ? _mapper.MapToDTO(doctor) : null;
         }
 
-        public async Task<DoctorDTO> CreateDoctorAsync(DoctorDTO doctorDTO)
+        public async Task<DoctorResponseDTO> CreateDoctorAsync(DoctorCreate doctorDTO)
         {
             var doctor = _mapper.MapToEntity(doctorDTO);
-            doctor.CreateDate = DateTime.Now;
-            doctor.UpdateDate = DateTime.Now;
             _context.Doctors.Add(doctor);
             await _context.SaveChangesAsync();
             return _mapper.MapToDTO(doctor);
         }
 
-        public async Task<bool> UpdateDoctorAsync(int id, DoctorDTO doctorDTO)
+        public async Task<bool> UpdateDoctorAsync(int id, DoctorUpdate doctorDTO)
         {
             if (id != doctorDTO.Id)
             {
@@ -58,15 +59,15 @@ namespace SWP391_SE1914_ManageHospital.Services
             }
 
             var updatedDoctor = _mapper.MapToEntity(doctorDTO);
-            updatedDoctor.UpdateDate = DateTime.Now;
+            updatedDoctor.CreateDate = doctor.CreateDate; 
             _context.Entry(doctor).CurrentValues.SetValues(updatedDoctor);
             await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<bool> DeleteDoctorAsync(int id)
+        public async Task<bool> DeleteDoctorAsync(DoctorDelete doctorDTO)
         {
-            var doctor = await _context.Doctors.FindAsync(id);
+            var doctor = await _context.Doctors.FindAsync(doctorDTO.Id);
             if (doctor == null)
             {
                 return false;
