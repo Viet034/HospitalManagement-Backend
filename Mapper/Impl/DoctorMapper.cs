@@ -1,0 +1,55 @@
+namespace SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO
+{
+    public class DoctorMapper : IDoctorMapper
+    {
+        public DoctorDTO MapToDTO(Doctor doctor)
+        {
+            return new DoctorDTO
+            {
+                Id = doctor.Id,
+                Name = doctor.Name,
+                Code = doctor.Code,
+                Gender = doctor.Gender,
+                Dob = doctor.Dob,
+                CCCD = doctor.CCCD,
+                Phone = doctor.Phone,
+                ImageURL = doctor.ImageURL,
+                LicenseNumber = doctor.LicenseNumber,
+                YearOfExperience = doctor.YearOfExperience,
+                WorkingHours = doctor.WorkingHours,
+                Status = doctor.Status,
+                UserId = doctor.UserId,
+                DepartmentId = doctor.DepartmentId,
+                CreateDate = doctor.CreateDate,
+                UpdateDate = doctor.UpdateDate,
+                CreateBy = doctor.CreateBy,
+                UpdateBy = doctor.UpdateBy
+            };
+        }
+
+        public Doctor MapToEntity(DoctorDTO doctorDTO)
+        {
+            return new Doctor
+            {
+                Id = doctorDTO.Id,
+                Name = doctorDTO.Name,
+                Code = doctorDTO.Code,
+                Gender = doctorDTO.Gender,
+                Dob = doctorDTO.Dob,
+                CCCD = doctorDTO.CCCD,
+                Phone = doctorDTO.Phone,
+                ImageURL = doctorDTO.ImageURL,
+                LicenseNumber = doctorDTO.LicenseNumber,
+                YearOfExperience = doctorDTO.YearOfExperience,
+                WorkingHours = doctorDTO.WorkingHours,
+                Status = doctorDTO.Status,
+                UserId = doctorDTO.UserId,
+                DepartmentId = doctorDTO.DepartmentId,
+                CreateDate = doctorDTO.CreateDate,
+                UpdateDate = doctorDTO.UpdateDate,
+                CreateBy = doctorDTO.CreateBy,
+                UpdateBy = doctorDTO.UpdateBy
+            };
+        }
+    }
+}
