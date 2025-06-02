@@ -19,12 +19,11 @@ builder.Services.AddScoped<IClinicMapper, ClinicMapper>();
 builder.Services.AddScoped<IClinicService, ClinicService>();
 builder.Services.AddScoped<IDepartmentMapper, DepartmentMapper>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
-
-
 builder.Services.AddScoped<IpatientMapper, PatientMapper>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 
-
+builder.Services.AddScoped<INurseService, NurseService>();
+builder.Services.AddScoped<INurseMapper, NurseMapper>(); 
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
 
