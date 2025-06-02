@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
-using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Mapper;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Service
@@ -18,7 +21,7 @@ namespace SWP391_SE1914_ManageHospital.Service
             _mapper = mapper;
         }
 
-        public async Task<NurseDTO> GetNurseByIdAsync(int id)
+        public async Task<NurseResponseDTO> GetNurseByIdAsync(int id)
         {
             var nurse = await _context.Nurses
                 .Include(n => n.User)
@@ -27,7 +30,7 @@ namespace SWP391_SE1914_ManageHospital.Service
             return _mapper.MapToDto(nurse);
         }
 
-        public async Task<IEnumerable<NurseDTO>> GetAllNursesAsync()
+        public async Task<IEnumerable<NurseResponseDTO>> GetAllNursesAsync()
         {
             var nurses = await _context.Nurses
                 .Include(n => n.User)
@@ -36,9 +39,9 @@ namespace SWP391_SE1914_ManageHospital.Service
             return _mapper.MapToDtoList(nurses);
         }
 
-        public async Task<NurseDTO> CreateNurseAsync(NurseDTO nurseDto)
+        public async Task<NurseResponseDTO> CreateNurseAsync(NurseCreate nurseCreateDto)
         {
-            var nurse = _mapper.MapToEntity(nurseDto);
+            var nurse = _mapper.MapToEntity(nurseCreateDto);
             nurse.CreateDate = DateTime.Now;
             nurse.UpdateDate = DateTime.Now;
 
@@ -48,13 +51,12 @@ namespace SWP391_SE1914_ManageHospital.Service
             return _mapper.MapToDto(nurse);
         }
 
-        public async Task<NurseDTO> UpdateNurseAsync(int id, NurseDTO nurseDto)
+        public async Task<NurseResponseDTO> UpdateNurseAsync(int id, NurseUpdate nurseUpdateDto)
         {
             var nurse = await _context.Nurses.FindAsync(id);
             if (nurse == null) return null;
 
-            nurse = _mapper.MapToEntity(nurseDto);
-            nurse.Id = id; // Đảm bảo không thay đổi Id
+            _mapper.MapToEntity(nurseUpdateDto, nurse);
             nurse.UpdateDate = DateTime.Now;
 
             _context.Nurses.Update(nurse);
@@ -63,7 +65,7 @@ namespace SWP391_SE1914_ManageHospital.Service
             return _mapper.MapToDto(nurse);
         }
 
-        public async Task<bool> DeleteNurseAsync(int id)
+        public async Task<bool> DeleteNurseAsync(int id, NurseDelete nurseDeleteDto)
         {
             var nurse = await _context.Nurses.FindAsync(id);
             if (nurse == null) return false;

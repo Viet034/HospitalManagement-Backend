@@ -1,8 +1,8 @@
-﻿using static SWP391_SE1914_ManageHospital.Ultility.Status;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
-namespace SWP391_SE1914_ManageHospital.Models.Entities
+namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
 {
-    public class Nurse
+    public class NurseResponseDTO
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -19,8 +19,5 @@ namespace SWP391_SE1914_ManageHospital.Models.Entities
         public DateTime? UpdateDate { get; set; }
         public string CreateBy { get; set; } = string.Empty;
         public string? UpdateBy { get; set; }
-
-        public User User { get; set; }
-        public Department Department { get; set; }
     }
 }

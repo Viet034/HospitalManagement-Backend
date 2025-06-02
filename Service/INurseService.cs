@@ -1,11 +1,17 @@
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace SWP391_SE1914_ManageHospital.Service
+    
 {
     public interface INurseService
     {
-        Task<NurseDTO> GetNurseByIdAsync(int id);
-        Task<IEnumerable<NurseDTO>> GetAllNursesAsync();
-        Task<NurseDTO> CreateNurseAsync(NurseDTO nurseDto);
-        Task<NurseDTO> UpdateNurseAsync(int id, NurseDTO nurseDto);
-        Task<bool> DeleteNurseAsync(int id);
+        Task<NurseResponseDTO> GetNurseByIdAsync(int id);
+        Task<IEnumerable<NurseResponseDTO>> GetAllNursesAsync();
+        Task<NurseResponseDTO> CreateNurseAsync(NurseCreate nurseCreateDto);
+        Task<NurseResponseDTO> UpdateNurseAsync(int id, NurseUpdate nurseUpdateDto);
+        Task<bool> DeleteNurseAsync(int id, NurseDelete nurseDeleteDto);
     }
 }

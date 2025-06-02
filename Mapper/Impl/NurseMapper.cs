@@ -1,14 +1,17 @@
-using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
+using System.Collections.Generic;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Mapper
 {
     public class NurseMapper : INurseMapper
     {
-        public NurseDTO MapToDto(Nurse nurse)
+        public NurseResponseDTO MapToDto(Nurse nurse)
         {
             if (nurse == null) return null;
-            return new NurseDTO
+            return new NurseResponseDTO
             {
                 Id = nurse.Id,
                 Name = nurse.Name,
@@ -28,32 +31,44 @@ namespace SWP391_SE1914_ManageHospital.Mapper
             };
         }
 
-        public Nurse MapToEntity(NurseDTO nurseDto)
+        public Nurse MapToEntity(NurseCreate nurseCreateDto)
         {
-            if (nurseDto == null) return null;
+            if (nurseCreateDto == null) return null;
             return new Nurse
             {
-                Id = nurseDto.Id,
-                Name = nurseDto.Name,
-                Code = nurseDto.Code,
-                Gender = nurseDto.Gender,
-                Dob = nurseDto.Dob,
-                CCCD = nurseDto.CCCD,
-                Phone = nurseDto.Phone,
-                ImageURL = nurseDto.ImageURL,
-                Status = nurseDto.Status,
-                UserId = nurseDto.UserId,
-                DepartmentId = nurseDto.DepartmentId,
-                CreateDate = nurseDto.CreateDate,
-                UpdateDate = nurseDto.UpdateDate,
-                CreateBy = nurseDto.CreateBy,
-                UpdateBy = nurseDto.UpdateBy
+                Name = nurseCreateDto.Name,
+                Code = nurseCreateDto.Code,
+                Gender = nurseCreateDto.Gender,
+                Dob = nurseCreateDto.Dob,
+                CCCD = nurseCreateDto.CCCD,
+                Phone = nurseCreateDto.Phone,
+                ImageURL = nurseCreateDto.ImageURL,
+                Status = nurseCreateDto.Status,
+                UserId = nurseCreateDto.UserId,
+                DepartmentId = nurseCreateDto.DepartmentId,
+                CreateBy = nurseCreateDto.CreateBy
             };
         }
 
-        public IEnumerable<NurseDTO> MapToDtoList(IEnumerable<Nurse> nurses)
+        public void MapToEntity(NurseUpdate nurseUpdateDto, Nurse nurse)
         {
-            return nurses?.Select(n => MapToDto(n)).ToList() ?? new List<NurseDTO>();
+            if (nurseUpdateDto == null || nurse == null) return;
+            nurse.Name = nurseUpdateDto.Name;
+            nurse.Code = nurseUpdateDto.Code;
+            nurse.Gender = nurseUpdateDto.Gender;
+            nurse.Dob = nurseUpdateDto.Dob;
+            nurse.CCCD = nurseUpdateDto.CCCD;
+            nurse.Phone = nurseUpdateDto.Phone;
+            nurse.ImageURL = nurseUpdateDto.ImageURL;
+            nurse.Status = nurseUpdateDto.Status;
+            nurse.UserId = nurseUpdateDto.UserId;
+            nurse.DepartmentId = nurseUpdateDto.DepartmentId;
+            nurse.UpdateBy = nurseUpdateDto.UpdateBy;
+        }
+
+        public IEnumerable<NurseResponseDTO> MapToDtoList(IEnumerable<Nurse> nurses)
+        {
+            return nurses?.Select(n => MapToDto(n)).ToList() ?? new List<NurseResponseDTO>();
         }
     }
 }

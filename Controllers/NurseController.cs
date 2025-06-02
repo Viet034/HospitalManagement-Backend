@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Service;
 using System.Threading.Tasks;
 
@@ -32,26 +33,27 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateNurse([FromBody] NurseDTO nurseDto)
+        public async Task<IActionResult> CreateNurse([FromBody] NurseCreate nurseCreateDto)
         {
-            if (nurseDto == null) return BadRequest();
-            var createdNurse = await _nurseService.CreateNurseAsync(nurseDto);
+            if (nurseCreateDto == null) return BadRequest();
+            var createdNurse = await _nurseService.CreateNurseAsync(nurseCreateDto);
             return CreatedAtAction(nameof(GetNurseById), new { id = createdNurse.Id }, createdNurse);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateNurse(int id, [FromBody] NurseDTO nurseDto)
+        public async Task<IActionResult> UpdateNurse(int id, [FromBody] NurseUpdate nurseUpdateDto)
         {
-            if (nurseDto == null) return BadRequest();
-            var updatedNurse = await _nurseService.UpdateNurseAsync(id, nurseDto);
+            if (nurseUpdateDto == null) return BadRequest();
+            var updatedNurse = await _nurseService.UpdateNurseAsync(id, nurseUpdateDto);
             if (updatedNurse == null) return NotFound();
             return Ok(updatedNurse);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteNurse(int id)
+        public async Task<IActionResult> DeleteNurse(int id, [FromBody] NurseDelete nurseDeleteDto)
         {
-            var result = await _nurseService.DeleteNurseAsync(id);
+            if (nurseDeleteDto == null) return BadRequest();
+            var result = await _nurseService.DeleteNurseAsync(id, nurseDeleteDto);
             if (!result) return NotFound();
             return NoContent();
         }
