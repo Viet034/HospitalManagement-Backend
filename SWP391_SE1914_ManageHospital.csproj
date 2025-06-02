@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\DTO\RequestDTO\NewFolder\**" />
+    <Content Remove="Models\DTO\RequestDTO\NewFolder\**" />
+    <EmbeddedResource Remove="Models\DTO\RequestDTO\NewFolder\**" />
+    <None Remove="Models\DTO\RequestDTO\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
@@ -23,10 +30,6 @@
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\DTO\RequestDTO\NewFolder\" />
   </ItemGroup>
 
 </Project>

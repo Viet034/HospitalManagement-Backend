@@ -17,6 +17,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IClinicMapper, ClinicMapper>();
 builder.Services.AddScoped<IClinicService, ClinicService>();
 
+builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
+builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
+
 
 
 
