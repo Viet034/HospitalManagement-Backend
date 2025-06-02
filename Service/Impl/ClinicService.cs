@@ -65,8 +65,8 @@ public class ClinicService : IClinicService
         var cid = await _context.Clinics.FindAsync(id)       
           ??  throw new KeyNotFoundException($"Không có Id {id} tồn tại!");
         
-        _context.Clinics.Remove(cid);
-        _context.SaveChangesAsync();
+         _context.Clinics.Remove(cid);
+        await _context.SaveChangesAsync();
         return true;
         
     }

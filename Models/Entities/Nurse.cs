@@ -20,7 +20,9 @@ namespace SWP391_SE1914_ManageHospital.Models.Entities
         public string CreateBy { get; set; } = string.Empty;
         public string? UpdateBy { get; set; }
 
-        public User User { get; set; }
-        public Department Department { get; set; }
+        public virtual User User { get; set; }
+        public virtual Department Department { get; set; }
+        public virtual ICollection<Nurse_Appointment> Nurse_Appointments { get; set; } = new List<Nurse_Appointment>();
+
     }
 }
