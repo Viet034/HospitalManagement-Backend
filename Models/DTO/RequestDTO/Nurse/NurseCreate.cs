@@ -1,10 +1,9 @@
-﻿using static SWP391_SE1914_ManageHospital.Ultility.Status;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
-namespace SWP391_SE1914_ManageHospital.Models.Entities
+namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse
 {
-    public class Nurse
+    public class NurseCreate
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
         public Gender Gender { get; set; }
@@ -15,14 +14,6 @@ namespace SWP391_SE1914_ManageHospital.Models.Entities
         public NurseStatus Status { get; set; }
         public int UserId { get; set; }
         public int DepartmentId { get; set; }
-        public DateTime CreateDate { get; set; }
-        public DateTime? UpdateDate { get; set; }
         public string CreateBy { get; set; } = string.Empty;
-        public string? UpdateBy { get; set; }
-
-        public virtual User User { get; set; }
-        public virtual Department Department { get; set; }
-        public virtual ICollection<Nurse_Appointment> Nurse_Appointments { get; set; } = new List<Nurse_Appointment>();
-
     }
 }

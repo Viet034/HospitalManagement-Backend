@@ -26,29 +26,27 @@ public class ClinicService : IClinicService
         throw new NotImplementedException();
     }
 
-    public async Task<ClinicResponse> CreateClinicAsync(ClinicCreate create)
+    public async Task<ClinicResponseDTO> CreateClinicAsync(ClinicCreate create)
     {
         //requestDTO -> response
         Clinic entity =  _mapper.CreateToEntity(create);
 
         await _context.Clinics.AddAsync(entity);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
         var response = _mapper.EntityToResponse(entity);
         return response;
     }
 
-    public async Task<ClinicResponse> FindClinicByIdAsync(int id)
+    public async Task<ClinicResponseDTO> FindClinicByIdAsync(int id)
     {
-        var cid = await _context.Clinics.FindAsync(id);
-        if(cid == null)
-        {
-            throw new Exception($"Không có Id {id} tồn tại!");
-        }
+        var cid = await _context.Clinics.FindAsync(id)
+            ?? throw new Exception($"Không có Id {id} tồn tại!");
+        
         var response = _mapper.EntityToResponse(cid);
         return response;
     }
 
-    public async Task<IEnumerable<ClinicResponse>> GetAllClinicAsync()
+    public async Task<IEnumerable<ClinicResponseDTO>> GetAllClinicAsync()
     {
         var cid = await _context.Clinics.ToListAsync();
         if(cid == null)
@@ -64,21 +62,19 @@ public class ClinicService : IClinicService
     */
     public async Task<bool> HardDeleteClinicAsync(int id)
     {
-        var cid = await _context.Clinics.FindAsync(id);
-        if (cid == null)
-        {
-            throw new Exception($"Không có Id {id} tồn tại!");
-        }
-        _context.Clinics.Remove(cid);
-        _context.SaveChangesAsync();
+        var cid = await _context.Clinics.FindAsync(id)       
+          ??  throw new KeyNotFoundException($"Không có Id {id} tồn tại!");
+        
+         _context.Clinics.Remove(cid);
+        await _context.SaveChangesAsync();
         return true;
         
     }
 
-    public async Task<ClinicResponse> SoftDeleteClinicColorAsync(int id, Status.ClinicStatus newStatus)
+    public async Task<ClinicResponseDTO> SoftDeleteClinicAsync(int id, Status.ClinicStatus newStatus)
     {
-        var coId = await _context.Clinics.FindAsync(id);
-        if (coId == null) throw new Exception($"Không có Id {id} tồn tại");
+        var coId = await _context.Clinics.FindAsync(id)
+            ?? throw new KeyNotFoundException($"Không có Id {id} tồn tại");
 
         coId.Status = newStatus;
 
@@ -88,26 +84,37 @@ public class ClinicService : IClinicService
         return response;
     }
 
-    public async Task<IEnumerable<ClinicResponse>> SearchClinicByKeyAsync(string key, string code)
+    public async Task<IEnumerable<ClinicResponseDTO>> SearchClinicByKeyAsync(string name)
     {
-        var cid = await _context.Clinics.Where(x => x.Name == key || x.Code == code).ToListAsync();
+        var cid = await _context.Clinics.FromSqlRaw("Select * from Clinics where Name like {0}", "%" + name + "%").ToListAsync();
         if (cid == null)
         {
-            throw new Exception($"Không có tên {key} nào tồn tại!");
+            throw new Exception($"Không có tên {name} nào tồn tại!");
         }
         var response = _mapper.ListEntityToResponse(cid);
         return response;
     }
 
-    public Task<ClinicResponse> UpdateClinicAsync(int id, ClinicUpdate update)
+    public async Task<ClinicResponseDTO> UpdateClinicAsync(int id, ClinicUpdate update)
     {
-        throw new NotImplementedException();
+
+        var coId = await _context.Clinics.FindAsync(id)
+            ?? throw new KeyNotFoundException($"Không có ID {id} tồn tại");
+
+        var result = _mapper.UpdateToEntity(update);
+        coId.Code = result.Code;
+        coId.Name = result.Name;
+        coId.Status = result.Status;
+        coId.CreateDate = result.CreateDate;
+        coId.UpdateDate = result.UpdateDate;
+        coId.CreateBy = result.CreateBy;
+        coId.UpdateBy = result.UpdateBy;
+        await _context.SaveChangesAsync();
+
+        var response =  _mapper.EntityToResponse(coId);
+        return response;
     }
 
-    public Task<IEnumerable<ClinicResponse>> SearchClinicByKeyAsync(string key)
-    {
-        throw new NotImplementedException();
-    }
 
    
 }

@@ -13,6 +13,6 @@ public interface IClinicMapper
     Clinic DeleteToEntity(ClinicDelete delete);
 
     // Entity(DTO) => Response
-    ClinicResponse EntityToResponse(Clinic entity);
-    IEnumerable<ClinicResponse> ListEntityToResponse(IEnumerable<Clinic> entities);
+    ClinicResponseDTO EntityToResponse(Clinic entity);
+    IEnumerable<ClinicResponseDTO> ListEntityToResponse(IEnumerable<Clinic> entities);
 }

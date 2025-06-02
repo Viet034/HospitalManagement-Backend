@@ -1,4 +1,5 @@
-﻿using static SWP391_SE1914_ManageHospital.Ultility.Status;
+﻿using System.ComponentModel.DataAnnotations;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
 
@@ -6,7 +7,10 @@ public class PatientDTO
 {
     public int Id { get; set; }
     public string Name { get; set; }
+    
     public string Code { get; set; }
+
+    [EnumDataType(typeof(Gender))]
     public Gender Gender { get; set; }
     public DateTime Dob { get; set; }
     public string CCCD { get; set; }
@@ -15,6 +19,8 @@ public class PatientDTO
     public string Address { get; set; }
     public string InsuranceNumber { get; set; }
     public string? Allergies { get; set; }
+
+    [EnumDataType(typeof(PatientStatus))]
     public PatientStatus Status { get; set; }
     public string BloodType { get; set; }
     public string? ImageURL { get; set; }
