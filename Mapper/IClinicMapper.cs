@@ -7,6 +7,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper;
 public interface IClinicMapper
 {
     // request => Entity(DTO)
+    
     Clinic CreateToEntity(ClinicCreate create);
     Clinic UpdateToEntity(ClinicUpdate update);
     Clinic DeleteToEntity(ClinicDelete delete);
