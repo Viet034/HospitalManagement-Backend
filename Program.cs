@@ -20,9 +20,14 @@ builder.Services.AddScoped<IClinicService, ClinicService>();
 builder.Services.AddScoped<IDepartmentMapper, DepartmentMapper>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 
+<<<<<<< HEAD
+builder.Services.AddScoped<NurseService>();
+builder.Services.AddAutoMapper(typeof(NurseMapper));
+=======
 builder.Services.AddScoped<IpatientMapper, PatientMapper>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 
+>>>>>>> master
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
 
