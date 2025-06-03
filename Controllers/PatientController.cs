@@ -4,6 +4,7 @@ using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Patient;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Service;
 using System.Net;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Controllers
 {
@@ -56,11 +57,11 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpGet("FindByName/{name}")]
         [ProducesResponseType(typeof(IEnumerable<Patient>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> FindByName(string key)
+        public async Task<IActionResult> FindByName(string name)
         {
             try
             {
-                var response = await _service.SearchPatientByKeyAsync(key);
+                var response = await _service.SearchPatientByKeyAsync(name);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -84,5 +85,43 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPut("update/{id}")]
+        [ProducesResponseType(typeof(IEnumerable<Patient>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+
+        public async Task<IActionResult> UpdatePatient([FromBody] PatientUpdate update, int id)
+        {
+            try
+            {
+                var respone = await _service.UpdatePatientAsync(id, update);
+                return Ok(respone);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());  
+            }
+            
+
+        }
+
+        [HttpPut("change-status/{id}")]
+        [ProducesResponseType(typeof(IEnumerable<Patient>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+
+        public async Task<IActionResult> SoftDeletePatient(int id, PatientStatus newStatus)
+        {
+            try
+            {
+                var respone = await _service.SoftDeletePatientColorAsync(id, newStatus);
+                return Ok(respone);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+        }
+
+
     }
 }
