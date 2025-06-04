@@ -40,6 +40,7 @@ public class ApplicationDBContext : DbContext
     public DbSet<Supply_Inventory> Supply_Inventories { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<User_Role> User_Roles { get; set; }
+    public DbSet<UserProfile> UserProfiles { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Appointment>(entity =>
@@ -892,6 +893,23 @@ public class ApplicationDBContext : DbContext
                  .HasForeignKey(cus => cus.RoleId).OnDelete(DeleteBehavior.Cascade);
 
 
+        });
+
+        modelBuilder.Entity<UserProfile>(entity =>
+        {
+            entity.ToTable("UserProfiles");
+            entity.HasKey(a => a.Id);
+            entity.Property(a => a.Id).ValueGeneratedOnAdd();
+            entity.Property(a => a.Phone).IsRequired().HasMaxLength(15);
+            entity.Property(a => a.CreateDate).IsRequired();
+            entity.Property(a => a.CreateBy).IsRequired().HasMaxLength(100);
+            entity.Property(a => a.UpdateDate).IsRequired();
+            entity.Property(a => a.UpdateBy).IsRequired().HasMaxLength(100);
+
+            entity.HasOne(p => p.User)
+                .WithOne(u => u.UserProfile)
+                .HasForeignKey<UserProfile>(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

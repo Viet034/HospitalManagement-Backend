@@ -46,6 +46,21 @@ public class ClinicService : IClinicService
         return response;
     }
 
+    public async Task<IEnumerable<ClinicResponseDTO>> GetActiveClinicAsync()
+    {
+        var clinics = await _context.Clinics
+            .Where(c => c.Status == ClinicStatus.Available)
+            .ToListAsync();
+
+        if (clinics == null || !clinics.Any())
+        {
+            throw new Exception("Không có phòng khám nào đang hoạt động");
+        }
+
+        var response = _mapper.ListEntityToResponse(clinics);
+        return response;
+    }
+
     public async Task<IEnumerable<ClinicResponseDTO>> GetAllClinicAsync()
     {
         var cid = await _context.Clinics.ToListAsync();
