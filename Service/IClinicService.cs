@@ -8,6 +8,7 @@ namespace SWP391_SE1914_ManageHospital.Service;
 public interface IClinicService
 {
     public Task<IEnumerable<ClinicResponseDTO>> GetAllClinicAsync();
+    public Task<IEnumerable<ClinicResponseDTO>> GetActiveClinicAsync();
     public Task<IEnumerable<ClinicResponseDTO>> SearchClinicByKeyAsync(string name);
     public Task<ClinicResponseDTO> UpdateClinicAsync(int id, ClinicUpdate update);
     public Task<ClinicResponseDTO> CreateClinicAsync(ClinicCreate create);

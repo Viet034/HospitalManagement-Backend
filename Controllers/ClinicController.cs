@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Clinic;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Service;
 using System.Net;
@@ -46,6 +47,22 @@ public class ClinicController : ControllerBase
         try
         {
             var response = await _service.GetAllClinicAsync();
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.ToString());
+        }
+    }
+
+    [HttpGet("get-active")]
+    [ProducesResponseType(typeof(IEnumerable<ClinicResponseDTO>), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+    public async Task<ActionResult<IEnumerable<ClinicResponseDTO>>> GetActiveClinic()
+    {
+        try
+        {
+            var response = await _service.GetActiveClinicAsync();
             return Ok(response);
         }
         catch (Exception ex)
