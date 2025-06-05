@@ -31,6 +31,7 @@ builder.Services.AddScoped<IRoleMapper, RoleMapper>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
 
+
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 
@@ -38,7 +39,16 @@ builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 
 
 builder.Services.AddScoped<INurseService, NurseService>();
+builder.Services.AddScoped<INurseMapper, NurseMapper>();
+
+
+builder.Services.AddScoped<IMedicineService, MedicineService>();
+
+
+
+builder.Services.AddScoped<INurseService, NurseService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>(); 
+
 
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
@@ -160,6 +170,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
+
 
 app.UseHttpsRedirection();
 
