@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-<<<<<<< HEAD
+
     <Compile Remove="Models\DTO\RequestDTO\NewFolder\**" />
     <Content Remove="Models\DTO\RequestDTO\NewFolder\**" />
     <EmbeddedResource Remove="Models\DTO\RequestDTO\NewFolder\**" />
@@ -15,9 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-=======
+
     <PackageReference Include="AutoMapper" Version="10.1.1" />
->>>>>>> 20a657c04d902a172fe42578d686779f1c30fe61
+
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
@@ -36,12 +36,10 @@
     </Content>
   </ItemGroup>
 
-<<<<<<< HEAD
-=======
+
   <ItemGroup>
     <Folder Include="Models\DTO\RequestDTO\Authenication\" />
     <Folder Include="Models\DTO\RequestDTO\NewFolder\" />
   </ItemGroup>
 
->>>>>>> 20a657c04d902a172fe42578d686779f1c30fe61
 </Project>

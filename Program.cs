@@ -22,16 +22,19 @@ builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IpatientMapper, PatientMapper>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 
-<<<<<<< HEAD
+
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 
 
 
-=======
 builder.Services.AddScoped<INurseService, NurseService>();
-builder.Services.AddScoped<INurseMapper, NurseMapper>(); 
->>>>>>> 20a657c04d902a172fe42578d686779f1c30fe61
+builder.Services.AddScoped<INurseMapper, NurseMapper>();
+
+
+builder.Services.AddScoped<IMedicineService, MedicineService>();
+
+
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
 
@@ -53,6 +56,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
+
 
 app.UseHttpsRedirection();
 
