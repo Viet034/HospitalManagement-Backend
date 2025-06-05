@@ -2,5 +2,3 @@
 
 GET {{SWP391_SE1914_ManageHospital_HostAddress}}/weatherforecast/
 Accept: application/json
-
-###
