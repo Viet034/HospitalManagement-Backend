@@ -21,10 +21,7 @@ builder.Services.AddScoped<IDepartmentMapper, DepartmentMapper>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IDoctorMapper, DoctorMapper>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
-<<<<<<< HEAD
-builder.Services.AddScoped<NurseService>();
-builder.Services.AddAutoMapper(typeof(NurseMapper));
-=======
+
 builder.Services.AddScoped<IpatientMapper, PatientMapper>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 
