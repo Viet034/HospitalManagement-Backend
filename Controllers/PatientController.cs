@@ -122,6 +122,22 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
         }
 
+        [HttpDelete("delete-patient/{id}")]
+        [ProducesResponseType(typeof(IEnumerable<Patient>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
 
+        public async Task<IActionResult> HardDeletePatient(int id)
+        {
+            try
+            {
+                var respone = await _service.HardDeletePatientAsync(id);
+                return Ok(respone);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+
+        }
     }
 }
