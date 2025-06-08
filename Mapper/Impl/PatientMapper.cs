@@ -58,6 +58,8 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             return patient;
         }
 
+
+
         public PatientRespone EntityToRespone(Patient entity)
         {
             PatientRespone respone = new PatientRespone();
