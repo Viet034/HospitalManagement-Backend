@@ -10,7 +10,7 @@ public class ApplicationDBContext : DbContext
     public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
     {
     }
-
+    public DbSet<LaboratoryStaff> LaboratoryStaffs { get; set; }
     public DbSet<Appointment> Appointments { get; set; }
     public DbSet<Clinic> Clinics { get; set; }
     public DbSet<Department> Departments { get; set; }
