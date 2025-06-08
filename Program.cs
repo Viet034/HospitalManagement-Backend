@@ -37,13 +37,16 @@ builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 
 
 
-<<<<<<< HEAD
+
 builder.Services.AddScoped<INurseService, NurseService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>();
 
-builder.Services.AddScoped<IMedicalRecordMapper, MedicalRecordMapper>();
-builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
-=======
+builder.Services.AddScoped<IMedicalRecordListMapper, MedicalRecordListMapper>();
+builder.Services.AddScoped<IMedicalRecordListService, MedicalRecordListService>();
+
+builder.Services.AddScoped<IMedicalRecordDetailMapper, MedicalRecordDetailMapper>();
+builder.Services.AddScoped<IMedicalRecordDetailService, MedicalRecordDetailService>();
+
 
 builder.Services.AddScoped<INurseService, NurseService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>();
@@ -57,7 +60,7 @@ builder.Services.AddScoped<INurseService, NurseService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>(); 
 
 
->>>>>>> origin
+
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
 

@@ -3,11 +3,11 @@ using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 
 namespace SWP391_SE1914_ManageHospital.Mapper.Impl
 {
-    public class MedicalRecordMapper : IMedicalRecordMapper
+    public class MedicalRecordDetailMapper : IMedicalRecordDetailMapper
     {
-        public MedicalRecordResponse EntityToResponse(Medical_Record entity)
+        public MedicalRecordDetailResponse EntityToDetailResponse(Medical_Record entity)
         {
-            return new MedicalRecordResponse
+            return new MedicalRecordDetailResponse
             {
                 Id = entity.Id,
                 Diagnosis = entity.Diagnosis,
@@ -21,11 +21,6 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
                 AppointmentId = entity.AppointmentId,
                 PrescriptionId = entity.PrescriptionId
             };
-        }
-
-        public IEnumerable<MedicalRecordResponse> ListEntityToResponse(IEnumerable<Medical_Record> entities)
-        {
-            return entities.Select(EntityToResponse);
         }
     }
 }
