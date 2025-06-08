@@ -103,7 +103,7 @@ public class AuthService : IAuthService
         await _context.Patients.AddAsync(patient);
 
         // 6. Gán role PATIENT (nếu dùng User_Role)
-        var patientRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "PATIENT");
+        var patientRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name.Trim().ToLower() == "bệnh nhân");
         if (patientRole != null)
         {
             await _context.User_Roles.AddAsync(new User_Role
