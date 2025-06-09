@@ -139,5 +139,49 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
             return _mapper.EntityToRespone(patient);
         }
+
+        public async Task<List<MedicalRecordHistoryDTO>> GetMedicalHistoryByPatientId(int patientId)
+        {
+            var records = await _context.Medical_Records
+                .Include(m => m.Doctor)
+                .Include(m => m.Appointment)
+                    .ThenInclude(a => a.Clinic)
+                .Where(m => m.PatientId == patientId)
+                .Select(m => new MedicalRecordHistoryDTO
+                {
+                    AppointmentCode = m.Appointment.Code,
+                    Diagnosis = m.Diagnosis,
+                    TestResults = m.TestResults,
+                    DoctorName = m.Doctor.Name,
+                    ClinicName = m.Appointment.Clinic.Name,
+                    AppointmentDate = m.Appointment.AppointmentDate
+                }).ToListAsync();
+
+            return records;
+        }
+
+        public async Task<List<PrescriptionDTO>> GetPrescriptionsByPatientId(int patientId)
+        {
+            var result = await _context.Prescriptions
+                .Include(p => p.Doctor)
+                .Include(p => p.PrescriptionDetails)
+                    .ThenInclude(d => d.Medicine)
+                .Where(p => p.PatientId == patientId)
+                .Select(p => new PrescriptionDTO
+                {
+                    PrescriptionCode = p.Code,
+                    CreateDate = p.CreateDate,
+                    DoctorName = p.Doctor.Name,
+                    Medicines = p.PrescriptionDetails.Select(d => new MedicineDetailDTO
+                    {
+                        MedicineName = d.Medicine.Name,
+                        Quantity = d.Quantity,
+                        Usage = d.Usage
+                    }).ToList()
+                }).ToListAsync();
+
+            return result;
+        }
     }
+
 }

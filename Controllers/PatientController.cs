@@ -84,5 +84,19 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("MedicalHistory/{patientId}")]
+        public async Task<IActionResult> GetMedicalHistory(int patientId)
+        {
+            var result = await _service.GetMedicalHistoryByPatientId(patientId);
+            return Ok(result);
+        }
+
+        [HttpGet("Prescriptions/{patientId}")]
+        public async Task<IActionResult> GetPrescriptions(int patientId)
+        {
+            var result = await _service.GetPrescriptionsByPatientId(patientId);
+            return Ok(result);
+        }
     }
 }
