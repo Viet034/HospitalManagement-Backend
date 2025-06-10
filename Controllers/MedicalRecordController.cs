@@ -31,4 +31,5 @@ public class MedicalRecordController : ControllerBase
             return NotFound();
         return Ok(detail);
     }
+
 }

@@ -7,6 +7,7 @@ using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
 using System.Security.Cryptography;
 
+
 namespace SWP391_SE1914_ManageHospital.Service.Impl;
 
 public class DepartmentService : IDepartmentService
@@ -20,16 +21,43 @@ public class DepartmentService : IDepartmentService
         _mapper = mapper;
     }
 
-    public Task<string> CheckUniqueCodeAsync()
+    public async Task<string> CheckUniqueCodeAsync()
     {
-        throw new NotImplementedException();
+        string newCode;
+        bool isExist;
+
+        do
+        {
+            newCode = GenerateCode.GenerateDepartmentCode();
+            _context.ChangeTracker.Clear();
+            isExist = await _context.Departments.AnyAsync(p => p.Code == newCode);
+        }
+        while (isExist);
+
+        return newCode;
     }
 
     public async Task<DepartmentResponseDTO> CreateDepartmentAsync(DepartmentCreate create)
     {
+        if (await _context.Departments.AnyAsync(x => x.Name == create.Name))
+        {
+            throw new Exception("Tên đã được sử dụng");
+        }
         //requestDTO -> response
         Department entity = _mapper.CreateToEntity(create);
+        if (!string.IsNullOrEmpty(create.Code) && create.Code != "string")
+        {
+            entity.Code = create.Code;
+        }
+        else
+        {
+            entity.Code = await CheckUniqueCodeAsync();
+        }
 
+        while (await _context.Departments.AnyAsync(p => p.Code == entity.Code))
+        {
+            entity.Code = await CheckUniqueCodeAsync();
+        }
         await _context.Departments.AddAsync(entity);
         await _context.SaveChangesAsync();
         var response = _mapper.EntityToResponse(entity);

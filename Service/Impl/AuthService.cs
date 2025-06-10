@@ -19,28 +19,104 @@ public class AuthService : IAuthService
         _passwordHasher = passwordHasher;
     }
 
-    public Task<bool> ChangePasswordAsync(int userId, UserType userType, string oldPassword, string newPassword)
+    public async Task<bool> ChangePasswordAsync(int userId, UserType userType, string oldPassword, string newPassword)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null || !_passwordHasher.VerifyPassword(oldPassword, user.Password))
+            {
+                throw new Exception("Mật khẩu cũ không đúng!");
+            }
+            user.Password = _passwordHasher.HashPassword(newPassword);
+            await _context.SaveChangesAsync();
+            return true;
+        }catch (Exception ex)
+        {
+            return false;
+        }  
     }
 
-    public Task<bool> ForgotPasswordAsync(string email, UserType userType)
+    public async Task<bool> ForgotPasswordAsync(string email, UserType userType)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var user = await _context.Users
+                .Include(u => u.Patients)
+                .Include(u => u.Doctors)
+                .Include(u => u.Nurses)
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null) throw new Exception("Email không tồn tại!");
+
+            var roles = await _context.User_Roles
+                .Where(ur => ur.UserId == user.Id)
+                .Select(ur => ur.Role.Name.Trim().ToLower())
+                .ToListAsync();
+
+            if (!roles.Contains(userType.ToString().ToLower()))
+                throw new Exception("Email không đúng!");
+
+            user.ResetPasswordToken = Guid.NewGuid().ToString();
+            user.ResetPasswordTokenExpiryTime = DateTime.Now.AddHours(1); // Token 1h
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // Xử lý lỗi nếu cần
+            throw new Exception("Quên mật khẩu không thành công", ex);
+        }
     }
 
     public Task<LoginResponse> LoginAsync(LoginRequest request)
     {
-        throw new NotImplementedException();
+        try
+        {
+            throw new Exception("Đăng nhập không thành công");
+        }
+        catch (Exception ex)
+        {
+            // Xử lý lỗi nếu cần
+            throw new Exception("Đăng nhập không thành công", ex);
+        }
     }
 
-    public Task<bool> LogoutAsync(int userId, UserType userType)
+    public async Task<bool> LogoutAsync(int userId, UserType userType)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if (userType == UserType.Patient)
+            {
+                var user = await _context.Users.FindAsync(userId);
+                if (user != null)
+                {
+                    user.RefreshToken = null; // Xóa RefreshToken
+                    user.RefreshTokenExpiryTime = null; // Xóa thời gian hết hạn RefreshToken
+                }
+                else
+                {
+                    return false; // Người dùng không tồn tại
+                }
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Xử lý lỗi nếu cần
+            throw new Exception("Đăng xuất không thành công", ex);
+        }
     }
 
-    public Task<LoginResponse> RefreshTokenAsync(string refreshToken)
+    public async Task<LoginResponse> RefreshTokenAsync(string refreshToken)
     {
+        
         throw new NotImplementedException();
     }
 
@@ -122,10 +198,30 @@ public class AuthService : IAuthService
             FullName = patient.Name,
             Email = newUser.Email
         };
-    }   
+    }
 
-    public Task<bool> ResetPasswordAsync(string token, string newPassword, UserType userType)
+    public async Task<bool> ResetPasswordAsync(string token, string newPassword, UserType userType)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var user = await _context.Users
+                .Include(u => u.Patients)
+                .Include(u => u.Doctors)
+                .Include(u => u.Nurses)
+                .FirstOrDefaultAsync(u => u.ResetPasswordToken == token && u.ResetPasswordTokenExpiryTime > DateTime.Now.AddHours(7));
+            if (user == null) throw new Exception("Token không hợp lệ hoặc đã hết hạn!");
+            var hasshedPassword = _passwordHasher.HashPassword(newPassword);
+
+            user.Password = hasshedPassword;
+            user.ResetPasswordToken = null; // Xóa token sau khi reset
+            user.ResetPasswordTokenExpiryTime = null; // Xóa thời gian hết hạn token
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // Xử lý lỗi nếu cần
+            throw new Exception("Đặt lại mật khẩu không thành công", ex);
+        }
     }
 }
