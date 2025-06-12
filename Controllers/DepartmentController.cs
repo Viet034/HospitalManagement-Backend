@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Clinic;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Department;
@@ -23,6 +24,7 @@ public class DepartmentController : ControllerBase
     [HttpPost("add-department")]
     [ProducesResponseType(typeof(IEnumerable<Department>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+    [Authorize(Roles = "Admin,Nurse")]
     public async Task<IActionResult> AddDepartment([FromBody] DepartmentCreate create)
     {
         try

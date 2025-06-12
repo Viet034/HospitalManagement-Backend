@@ -35,27 +35,20 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 
-
-
-
 builder.Services.AddScoped<INurseService, NurseService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>();
 
 builder.Services.AddScoped<IMedicalRecordMapper, MedicalRecordMapper>();
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
-
-builder.Services.AddScoped<INurseService, NurseService>();
-builder.Services.AddScoped<INurseMapper, NurseMapper>();
 
 
 builder.Services.AddScoped<IMedicineService, MedicineService>();
-
-
-
-builder.Services.AddScoped<INurseService, NurseService>();
-builder.Services.AddScoped<INurseMapper, NurseMapper>(); 
-
+/*
+var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
+Console.WriteLine(hash);
+*/
 
 
 

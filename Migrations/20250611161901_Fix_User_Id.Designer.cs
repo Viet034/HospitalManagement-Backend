@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SWP391_SE1914_ManageHospital.Data;
 
@@ -11,9 +12,11 @@ using SWP391_SE1914_ManageHospital.Data;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250611161901_Fix_User_Id")]
+    partial class Fix_User_Id
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1522,17 +1525,21 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.Property<string>("RefreshToken")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .IsRequired()
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("ResetPasswordToken")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
                     b.Property<DateTime?>("ResetPasswordTokenExpiryTime")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("datetime(6)");
 

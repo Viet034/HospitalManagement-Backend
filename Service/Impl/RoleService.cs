@@ -4,6 +4,7 @@ using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Role;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
+using SWP391_SE1914_ManageHospital.Ultility;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl;
 
@@ -18,16 +19,42 @@ public class RoleService : IRoleService
         _mapper = mapper;
     }
 
-    public Task<string> CheckUniqueCodeAsync()
+    public async Task<string> CheckUniqueCodeAsync()
     {
-        throw new NotImplementedException();
+        string newCode;
+        bool isExist;
+
+        do
+        {
+            newCode = GenerateCode.GenerateRolesCode();
+            _context.ChangeTracker.Clear();
+            isExist = await _context.Roles.AnyAsync(p => p.Code == newCode);
+        }
+        while (isExist);
+
+        return newCode;
     }
 
     public async Task<RoleResponseDTO> CreateRoleAsync(RoleCreate create)
     {
-        
+        if (await _context.Roles.AnyAsync(x => x.Name == create.Name))
+        {
+            throw new Exception("Tên đã được sử dụng");
+        }
         Role entity = _mapper.CreateToEntity(create);
+        if (!string.IsNullOrEmpty(create.Code) && create.Code != "string")
+        {
+            entity.Code = create.Code;
+        }
+        else
+        {
+            entity.Code = await CheckUniqueCodeAsync();
+        }
 
+        while (await _context.Roles.AnyAsync(p => p.Code == entity.Code))
+        {
+            entity.Code = await CheckUniqueCodeAsync();
+        }
         await _context.Roles.AddAsync(entity);
         await _context.SaveChangesAsync();
         var response = _mapper.EntityToResponse(entity);
