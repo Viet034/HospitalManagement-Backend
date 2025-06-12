@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using static SWP391_SE1914_ManageHospital.Ultility.Status;
+﻿using static SWP391_SE1914_ManageHospital.Ultility.Status;
+using System.ComponentModel.DataAnnotations;
 
-namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Authenication;
+namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse;
 
-public class PatientRegisterRequest
+public class NurseRegisterRequest
 {
     // USER
     [Required]
@@ -34,9 +34,6 @@ public class PatientRegisterRequest
     [Phone]
     public string Phone { get; set; }
 
-    [Required]
-    public string EmergencyContact { get; set; }
+    public int DepartmentId { get; set; } 
 
-    [Required]
-    public string Address { get; set; }
 }

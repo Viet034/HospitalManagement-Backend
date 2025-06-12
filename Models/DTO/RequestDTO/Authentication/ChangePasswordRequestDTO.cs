@@ -10,4 +10,5 @@ public class ChangePasswordRequestDTO
     [Required]
     [MinLength(6)]
     public string NewPassword { get; set; }
+    public string ConfirmPassword { get; set; }
 }
