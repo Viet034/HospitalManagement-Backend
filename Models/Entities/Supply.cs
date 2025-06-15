@@ -6,8 +6,13 @@ public class Supply : BaseEntity
 {
     public SupplyStatus Status { get; set; }
     public string Description { get; set; }
-    public string Unit { get; set; }
+    public int UnitId { get; set; }
+    public virtual Unit Unit { get; set; }
+
     public int AppointmentId { get; set; }
     public virtual Appointment Appointment { get; set; }
     public virtual ICollection<Supply_Inventory> Supply_Inventories { get; set; } = new List<Supply_Inventory>();
+
+    public virtual ICollection<Medicine_Inventory> Medicine_Inventories { get; set; }
+
 }

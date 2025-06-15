@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SWP391_SE1914_ManageHospital.Data;
 
@@ -11,9 +12,11 @@ using SWP391_SE1914_ManageHospital.Data;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250615122605_AddImageUrlToMedicineAndCategory")]
+    partial class AddImageUrlToMedicineAndCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -747,10 +750,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
-
                     b.Property<int>("MedicineCategoryId")
                         .HasColumnType("int");
 
@@ -806,10 +805,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Name")
                         .IsRequired()

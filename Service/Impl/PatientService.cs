@@ -82,6 +82,27 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return true;
         }
 
+        
+
+        public async Task<IEnumerable<PatientInfoAdmin>> PatientInfoAdAsync()
+        {
+            var appointments = await _context.Appointments
+                .Include(a => a.Patient)
+                .Include(a => a.Medical_Record)
+                    .ThenInclude(mr => mr.Doctor)
+                .Include(a => a.Invoice)
+                .ToListAsync();
+
+            if (!appointments.Any())
+            {
+                throw new Exception("Không tìm thấy lịch sử khám của bệnh nhân.");
+            }
+
+            var result = _mapper.PatientInfoAdmins(appointments);
+            return result;
+        }
+
+
         public async Task<IEnumerable<PatientRespone>> SearchPatientByKeyAsync(string key)
         {
             var result = await _context.Patients

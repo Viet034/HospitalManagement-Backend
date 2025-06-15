@@ -5,6 +5,8 @@ using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Service;
 using System.Net;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
+using SWP391_SE1914_ManageHospital.Service.Impl;
 
 namespace SWP391_SE1914_ManageHospital.Controllers
 {
@@ -138,6 +140,22 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                 return BadRequest(ex.ToString());
             }
 
+        }
+
+        [HttpGet("PatientInfoAd")]
+        [ProducesResponseType(typeof(IEnumerable<PatientInfoAdmin>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<IEnumerable<PatientInfoAdmin>>> GetAllPatientBillingHistory()
+        {
+            try
+            {
+                var response = await _service.PatientInfoAdAsync();
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message); 
+            }
         }
     }
 }

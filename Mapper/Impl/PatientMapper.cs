@@ -2,6 +2,7 @@
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Patient;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Mapper.Impl
 {
@@ -87,6 +88,51 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
         public IEnumerable<PatientRespone> ListEntityToRespone(IEnumerable<Patient> entities)
         {
             return entities.Select(e => EntityToRespone(e)).ToList();
+        }
+
+        public IEnumerable<PatientInfoAdmin> PatientInfoAdmins(IEnumerable<Appointment> appointments)
+        {
+            List<PatientInfoAdmin> result = new List<PatientInfoAdmin>();
+
+            foreach (Appointment appointment in appointments)
+            {
+                PatientInfoAdmin dto = new PatientInfoAdmin();
+                dto.PatientCode = appointment.Patient?.Code;
+                dto.PatientName = appointment.Patient?.Name;
+                dto.Phone = appointment.Patient?.Phone;
+                dto.AppointmentDate = appointment.AppointmentDate;
+
+                var MedicineRecord = appointment.Medical_Record;
+                dto.Diagnosis = MedicineRecord?.Diagnosis;
+                dto.DoctorName = MedicineRecord?.Doctor?.Name;
+
+                // Lấy Invoice nếu có
+                if (appointment.Invoice != null)
+                {
+                    dto.TotalAmount = appointment.Invoice.TotalAmount;
+                    dto.Status = appointment.Invoice.Status;
+                }
+                else
+                {
+                    dto.TotalAmount = 0;
+                    dto.Status = InvoiceStatus.Unpaid;
+                }
+
+
+                // Trạng thái tài khoản bệnh nhân
+                if (appointment.Patient != null)
+                {
+                    dto.StatusAcount = appointment.Patient.Status;
+                }
+                else
+                {
+                    dto.StatusAcount = Ultility.Status.PatientStatus.Active;
+                }
+
+
+                result.Add(dto);
+            }
+            return result;  
         }
 
         public Patient UpdateToEntity(PatientUpdate update)

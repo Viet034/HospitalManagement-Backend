@@ -503,7 +503,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Quantity = table.Column<int>(type: "int", maxLength: 100, nullable: false),
                     BatchNumber = table.Column<int>(type: "int", maxLength: 100, nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "decimal(65,30)", maxLength: 100, nullable: false),
+                    
+                    Price = table.Column<decimal>(type: "decimal(65,30)", maxLength: 100, nullable: false),
                     ImportDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ExpiryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     SupplierName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)

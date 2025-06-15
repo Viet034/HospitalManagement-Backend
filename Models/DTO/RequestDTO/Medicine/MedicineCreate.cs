@@ -9,7 +9,7 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Medicine
         public string Code { get; set; }
         public string Description { get; set; }
         public string Dosage { get; set; }
-        public string Unit { get; set; }
+        public int UnitId { get; set; }
         public int MedicineCategoryId { get; set; }
 
         [EnumDataType(typeof(MedicineStatus))]

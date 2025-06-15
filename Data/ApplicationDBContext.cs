@@ -40,6 +40,9 @@ public class ApplicationDBContext : DbContext
     public DbSet<Supply_Inventory> Supply_Inventories { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<User_Role> User_Roles { get; set; }
+    public DbSet<Unit> Units { get; set; }
+    public DbSet<MedicineDetail> MedicineDetails { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Appointment>(entity =>
@@ -94,6 +97,29 @@ public class ApplicationDBContext : DbContext
 
         });
 
+        modelBuilder.Entity<MedicineDetail>(entity =>
+        {
+            entity.ToTable("medicine_detail");
+
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Ingredients);
+            entity.Property(e => e.ExpiryDate);
+            entity.Property(e => e.Manufacturer).HasMaxLength(100);
+            entity.Property(e => e.Warning);
+            entity.Property(e => e.StorageInstructions);
+            entity.Property(e => e.Status);
+            entity.Property(e => e.CreateDate).IsRequired();
+            entity.Property(e => e.UpdateDate).IsRequired();
+            entity.Property(e => e.CreateBy).HasMaxLength(100);
+            entity.Property(e => e.UpdateBy).HasMaxLength(100);
+
+            entity.HasOne(e => e.Medicine)
+                  .WithOne() 
+                  .HasForeignKey<MedicineDetail>(e => e.MedicineId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+
         modelBuilder.Entity<Clinic>(entity =>
         {
             entity.ToTable("Clinics");
@@ -144,6 +170,29 @@ public class ApplicationDBContext : DbContext
                 .WithOne(a => a.Department)
                 .HasForeignKey(a => a.DepartmentId).OnDelete(DeleteBehavior.Cascade);
         });
+
+        modelBuilder.Entity<Unit>(entity =>
+        {
+            entity.ToTable("Units");
+
+            entity.HasKey(u => u.Id);
+
+            entity.Property(u => u.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(u => u.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.Property(u => u.Status)
+                .IsRequired();
+
+            entity.HasMany(u => u.Medicines)
+                .WithOne(m => m.Unit)
+                .HasForeignKey(m => m.UnitId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
 
         modelBuilder.Entity<Disease>(entity =>
         {
@@ -444,10 +493,11 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.Code).IsRequired().HasMaxLength(100);
             entity.Property(a => a.CreateDate).IsRequired();
             entity.Property(a => a.UpdateDate).IsRequired();
-            entity.Property(a => a.Unit).IsRequired();
             entity.Property(a => a.Dosage).IsRequired().HasMaxLength(100);
             entity.Property(a => a.CreateBy).IsRequired().HasMaxLength(100);
             entity.Property(a => a.UpdateBy).IsRequired().HasMaxLength(100);
+            entity.Property(a => a.ImageUrl)
+                .HasMaxLength(255);
 
             entity.Property(emp => emp.Status).IsRequired()
                 .HasConversion(status => (int)status,  // Lưu số nguyên vào database
@@ -471,6 +521,17 @@ public class ApplicationDBContext : DbContext
                 .WithOne(a => a.Medicine)
                 .HasForeignKey(a => a.MedicineId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(a => a.Unit)
+                .WithMany(u => u.Medicines)
+                .HasForeignKey(a => a.UnitId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Medicine>()
+                .HasOne(m => m.MedicineDetail)
+                .WithOne(d => d.Medicine)
+                .HasForeignKey<MedicineDetail>(d => d.MedicineId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
         });
 
         modelBuilder.Entity<Medicine_Inventory>(entity =>
@@ -494,8 +555,12 @@ public class ApplicationDBContext : DbContext
                  .WithMany(cv => cv.Medicine_Inventories)
                  .HasForeignKey(cus => cus.MedicineId)
                  .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Medicine_Inventory>()
+                    .HasOne(m => m.Supply)
+                    .WithMany(s => s.Medicine_Inventories)
+                    .HasForeignKey(m => m.SupplyId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-           
         });
 
         modelBuilder.Entity<MedicineCategory>(entity =>
@@ -505,6 +570,7 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.Id).ValueGeneratedOnAdd();
             entity.Property(a => a.Name).IsRequired().HasMaxLength(100);
             entity.Property(a => a.Description).IsRequired().HasMaxLength(100);
+            entity.Property(a => a.ImageUrl).HasMaxLength(255);
 
             entity.Property(emp => emp.Status).IsRequired()
                 .HasConversion(status => (int)status,  // Lưu số nguyên vào database
@@ -825,7 +891,10 @@ public class ApplicationDBContext : DbContext
                  .WithMany(cv => cv.Supplies)
                  .HasForeignKey(cus => cus.AppointmentId).OnDelete(DeleteBehavior.Cascade);
 
-
+            entity.HasOne(s => s.Unit)
+                .WithMany(u => u.Supplies) 
+                .HasForeignKey(s => s.UnitId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Supply_Inventory>(entity =>
@@ -837,8 +906,11 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.ImportDate).IsRequired().HasMaxLength(100);
             entity.Property(a => a.ExpiryDate).IsRequired();
             entity.Property(a => a.SupplierName).IsRequired().HasMaxLength(100);
+            entity.Property(s => s.BatchNumber)
+                .IsRequired()
+                .HasMaxLength(50);
 
-           entity.HasOne(p => p.Supply)
+            entity.HasOne(p => p.Supply)
                  .WithMany(cv => cv.Supply_Inventories)
                  .HasForeignKey(cus => cus.SupplyId).OnDelete(DeleteBehavior.Cascade);
 
