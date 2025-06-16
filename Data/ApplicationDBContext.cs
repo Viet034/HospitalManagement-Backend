@@ -544,7 +544,6 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.UnitPrice).IsRequired().HasMaxLength(100);
             entity.Property(a => a.ImportDate).IsRequired();
             entity.Property(a => a.ExpiryDate).IsRequired();
-            entity.Property(a => a.SupplierName).IsRequired().HasMaxLength(100);
 
             entity.Property(emp => emp.Status).IsRequired()
                 .HasConversion(status => (int)status,  // Lưu số nguyên vào database
@@ -878,7 +877,7 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.UpdateDate).IsRequired();
             entity.Property(a => a.UpdateBy).IsRequired().HasMaxLength(100);
             entity.Property(a => a.Description).IsRequired().HasMaxLength(100);
-            entity.Property(a => a.Unit).IsRequired().HasMaxLength(100);
+           
 
             entity.Property(emp => emp.Status).IsRequired()
                 .HasConversion(status => (int)status,  // Lưu số nguyên vào database
@@ -891,7 +890,7 @@ public class ApplicationDBContext : DbContext
                  .WithMany(cv => cv.Supplies)
                  .HasForeignKey(cus => cus.AppointmentId).OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(s => s.Unit)
+            entity.HasOne(s => s.UnitNavigation)
                 .WithMany(u => u.Supplies) 
                 .HasForeignKey(s => s.UnitId)
                 .OnDelete(DeleteBehavior.Restrict);

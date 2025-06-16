@@ -7,7 +7,7 @@ public class Supply : BaseEntity
     public SupplyStatus Status { get; set; }
     public string Description { get; set; }
     public int UnitId { get; set; }
-    public virtual Unit Unit { get; set; }
+    public virtual Unit UnitNavigation { get; set; }
 
     public int AppointmentId { get; set; }
     public virtual Appointment Appointment { get; set; }
