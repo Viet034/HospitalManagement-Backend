@@ -58,7 +58,7 @@ public class AuthenticationController : ControllerBase
         }
     }
     [HttpPost("register/nurse")]
-    [AllowAnonymous]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RegisterNurseAsync([FromBody] NurseRegisterRequest request)
     {
         try
