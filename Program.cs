@@ -27,13 +27,17 @@ builder.Services.AddScoped<IDepartmentMapper, DepartmentMapper>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IpatientMapper, PatientMapper>();
 builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRoleMapper, RoleMapper>();
 builder.Services.AddScoped<IRoleService, RoleService>();
-
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
+builder.Services.AddScoped<INurseMapper, NurseMapper>();
+builder.Services.AddScoped<INurseService, NurseService>();
 
 
 
@@ -48,16 +52,14 @@ builder.Services.AddScoped<IMedicalRecordDetailMapper, MedicalRecordDetailMapper
 builder.Services.AddScoped<IMedicalRecordDetailService, MedicalRecordDetailService>();
 
 
-builder.Services.AddScoped<INurseService, NurseService>();
-builder.Services.AddScoped<INurseMapper, NurseMapper>();
 
 
 builder.Services.AddScoped<IMedicineService, MedicineService>();
+/*
+var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
+Console.WriteLine(hash);
+*/
 
-
-
-builder.Services.AddScoped<INurseService, NurseService>();
-builder.Services.AddScoped<INurseMapper, NurseMapper>(); 
 
 
 
@@ -74,20 +76,16 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-
-//  CORS service
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        builder =>
-        {
-            builder
-                .AllowAnyOrigin()     //  origin
-                .AllowAnyMethod()      //  HTTP methods
-                .AllowAnyHeader();     //  headers
-        });
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin() // hoặc chỉ định cụ thể nếu cần: .WithOrigins("http://localhost:5500")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
-//Quazt
+//QuaztMore actions
 builder.Services.AddQuartz(q =>
 {
     var jobKey = new JobKey("MyCronJob");
@@ -182,10 +180,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
-
-
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 

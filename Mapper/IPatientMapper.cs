@@ -14,5 +14,6 @@ namespace SWP391_SE1914_ManageHospital.Mapper
         // Entity(DTO) => Response
         PatientRespone EntityToRespone(Patient entity);
         IEnumerable<PatientRespone> ListEntityToRespone (IEnumerable<Patient> entities);
+        IEnumerable<PatientInfoAdmin> PatientInfoAdmins (IEnumerable<Appointment> appointments);
     }
 }

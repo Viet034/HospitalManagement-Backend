@@ -22,6 +22,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Status = table.Column<int>(type: "int", maxLength: 100, nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Code = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
@@ -98,11 +99,21 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                    ImageUrl = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Description = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Code = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    CreateBy = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UpdateBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -165,6 +176,51 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "suppliers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Phone = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Address = table.Column<string>(type: "TEXT", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Code = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    CreateBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UpdateBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_suppliers", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Units",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Units", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -175,12 +231,12 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     Password = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    RefreshToken = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                    RefreshToken = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    ResetPasswordToken = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    ResetPasswordToken = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ResetPasswordTokenExpiryTime = table.Column<DateTime>(type: "datetime(6)", maxLength: 100, nullable: false)
+                    ResetPasswordTokenExpiryTime = table.Column<DateTime>(type: "datetime(6)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -222,16 +278,49 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "medicine_imports",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Notes = table.Column<string>(type: "TEXT", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SupplierId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Code = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    CreateBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UpdateBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_medicine_imports", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_medicine_imports_suppliers_SupplierId",
+                        column: x => x.SupplierId,
+                        principalTable: "suppliers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Medicines",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ImageUrl = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Unit = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UnitId = table.Column<int>(type: "int", nullable: false),
                     Dosage = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     MedicineCategoryId = table.Column<int>(type: "int", nullable: false),
@@ -255,6 +344,12 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         principalTable: "MedicineCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Medicines_Units_UnitId",
+                        column: x => x.UnitId,
+                        principalTable: "Units",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -340,6 +435,10 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Code = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Gender = table.Column<int>(type: "int", maxLength: 100, nullable: false),
                     Dob = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CCCD = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
@@ -351,10 +450,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Code = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreateBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
@@ -496,6 +591,93 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "medicine_detail",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    MedicineId = table.Column<int>(type: "int", nullable: false),
+                    Ingredients = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    Manufacturer = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Warning = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    StorageInstructions = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreateBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UpdateBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "TEXT", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_medicine_detail", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_medicine_detail_Medicines_MedicineId",
+                        column: x => x.MedicineId,
+                        principalTable: "Medicines",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "medicine_import_details",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ImportId = table.Column<int>(type: "int", nullable: false),
+                    MedicineId = table.Column<int>(type: "int", nullable: false),
+                    BatchNumber = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UnitId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Code = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    CreateBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UpdateBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_medicine_import_details", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_medicine_import_details_Medicines_MedicineId",
+                        column: x => x.MedicineId,
+                        principalTable: "Medicines",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_medicine_import_details_Units_UnitId",
+                        column: x => x.UnitId,
+                        principalTable: "Units",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_medicine_import_details_medicine_imports_ImportId",
+                        column: x => x.ImportId,
+                        principalTable: "medicine_imports",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Medicine_Inventories",
                 columns: table => new
                 {
@@ -506,8 +688,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     UnitPrice = table.Column<decimal>(type: "decimal(65,30)", maxLength: 100, nullable: false),
                     ImportDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ExpiryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    SupplierName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Status = table.Column<int>(type: "int", nullable: false),
                     MedicineId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -976,9 +1156,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Unit = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     AppointmentId = table.Column<int>(type: "int", nullable: false),
+                    UnitId = table.Column<int>(type: "int", nullable: true),
                     Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Code = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
@@ -999,6 +1178,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         principalTable: "Appointments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Supplies_Units_UnitId",
+                        column: x => x.UnitId,
+                        principalTable: "Units",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -1128,6 +1312,32 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 column: "PrescriptionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_medicine_detail_MedicineId",
+                table: "medicine_detail",
+                column: "MedicineId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_medicine_import_details_ImportId",
+                table: "medicine_import_details",
+                column: "ImportId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_medicine_import_details_MedicineId",
+                table: "medicine_import_details",
+                column: "MedicineId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_medicine_import_details_UnitId",
+                table: "medicine_import_details",
+                column: "UnitId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_medicine_imports_SupplierId",
+                table: "medicine_imports",
+                column: "SupplierId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Medicine_Inventories_MedicineId",
                 table: "Medicine_Inventories",
                 column: "MedicineId");
@@ -1136,6 +1346,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 name: "IX_Medicines_MedicineCategoryId",
                 table: "Medicines",
                 column: "MedicineCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Medicines_UnitId",
+                table: "Medicines",
+                column: "UnitId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Notifications_UserId",
@@ -1208,6 +1423,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 column: "AppointmentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Supplies_UnitId",
+                table: "Supplies",
+                column: "UnitId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Supply_Inventories_SupplyId",
                 table: "Supply_Inventories",
                 column: "SupplyId");
@@ -1239,6 +1459,12 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 name: "InvoiceDetail");
 
             migrationBuilder.DropTable(
+                name: "medicine_detail");
+
+            migrationBuilder.DropTable(
+                name: "medicine_import_details");
+
+            migrationBuilder.DropTable(
                 name: "Medicine_Inventories");
 
             migrationBuilder.DropTable(
@@ -1260,6 +1486,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 name: "User_Roles");
 
             migrationBuilder.DropTable(
+                name: "medicine_imports");
+
+            migrationBuilder.DropTable(
                 name: "Nurses");
 
             migrationBuilder.DropTable(
@@ -1275,10 +1504,16 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 name: "Roles");
 
             migrationBuilder.DropTable(
+                name: "suppliers");
+
+            migrationBuilder.DropTable(
                 name: "MedicineCategories");
 
             migrationBuilder.DropTable(
                 name: "Appointments");
+
+            migrationBuilder.DropTable(
+                name: "Units");
 
             migrationBuilder.DropTable(
                 name: "Clinics");
