@@ -86,7 +86,13 @@ public class GenerateCode
     public static string GeneratePrescriptionCode()
     {
 
-        int proImage = random.Next(100000, 999999);
-        return "PRE" + proImage;
+        int proRand = random.Next(100000, 999999);
+        return "PRE" + proRand;
+    }
+    public static string GenerateRolesCode()
+    {
+
+        int roleRand = random.Next(100000, 999999);
+        return "ROL" + roleRand;
     }
 }

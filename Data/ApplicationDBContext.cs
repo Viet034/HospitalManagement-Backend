@@ -985,10 +985,10 @@ public class ApplicationDBContext : DbContext
             entity.HasKey(a => a.Id);
             entity.Property(a => a.Id).ValueGeneratedOnAdd();
             entity.Property(a => a.Password).IsRequired().HasMaxLength(100);
-            entity.Property(a => a.RefreshToken).IsRequired().HasMaxLength(100);
-            entity.Property(a => a.RefreshTokenExpiryTime).IsRequired();
-            entity.Property(a => a.ResetPasswordToken).IsRequired().HasMaxLength(100);
-            entity.Property(a => a.ResetPasswordTokenExpiryTime).IsRequired().HasMaxLength(100);
+            entity.Property(a => a.RefreshToken).HasMaxLength(100);
+            entity.Property(a => a.RefreshTokenExpiryTime);
+            entity.Property(a => a.ResetPasswordToken).HasMaxLength(100);
+            entity.Property(a => a.ResetPasswordTokenExpiryTime).HasMaxLength(100);
 
             entity.HasMany(d => d.User_Roles)
                .WithOne(a => a.User)

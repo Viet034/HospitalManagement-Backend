@@ -26,11 +26,24 @@ builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 
-
-
-
 builder.Services.AddScoped<INurseService, NurseService>();
+
 builder.Services.AddScoped<INurseMapper, NurseMapper>(); 
+
+
+builder.Services.AddScoped<INurseMapper, NurseMapper>();
+
+builder.Services.AddScoped<IMedicalRecordMapper, MedicalRecordMapper>();
+builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+
+
+builder.Services.AddScoped<IMedicineService, MedicineService>();
+/*
+var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
+Console.WriteLine(hash);
+*/
 
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
