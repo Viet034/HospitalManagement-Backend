@@ -14,7 +14,7 @@ namespace SWP391_SE1914_ManageHospital.Service
                 Name = m.Name,
                 
                 Description = m.Description,
-                ImageURL = m.ImageURL,
+                ImageURL = m.ImageUrl,
                 Status = m.Status,
                 
             };

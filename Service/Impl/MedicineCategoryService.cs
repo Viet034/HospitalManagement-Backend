@@ -43,7 +43,7 @@ namespace SWP391_SE1914_ManageHospital.Service
                 Name = request.Name,
                 
                 Description = request.Description,
-                ImageURL = request.ImageURL,
+                ImageUrl = request.ImageUrl,
                 Status = request.Status,
                 CreateDate = DateTime.Now,
                 CreateBy = request.CreateBy
@@ -61,7 +61,7 @@ namespace SWP391_SE1914_ManageHospital.Service
             entity.Name = request.Name;
             
             entity.Description = request.Description;
-            entity.ImageURL = request.ImageURL;
+            entity.ImageUrl = request.ImageUrl;
             entity.Status = request.Status;
             entity.UpdateDate = DateTime.Now;
             entity.UpdateBy = request.CreateBy;

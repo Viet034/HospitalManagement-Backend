@@ -46,9 +46,8 @@ builder.Services.AddScoped<INurseService, NurseService>();
 
 builder.Services.AddScoped<IMedicalRecordMapper, MedicalRecordMapper>();
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
-builder.Services.AddScoped<INurseService, NurseService>();
-builder.Services.AddScoped<INurseMapper, NurseMapper>();
 
 
 builder.Services.AddScoped<IMedicineService, MedicineService>();
@@ -57,15 +56,6 @@ var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
 Console.WriteLine(hash);
 */
 
-builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
-builder.Services.AddScoped<IMedicineCategoryMapper, MedicineCategoryMapper>();
-
-
-builder.Services.AddScoped<INurseService, NurseService>();
-builder.Services.AddScoped<INurseMapper, NurseMapper>(); 
-
-
-
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
 
@@ -73,7 +63,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(o =>
     o.UseLazyLoadingProxies()
     .UseMySql(connectionStr, new MySqlServerVersion(new Version(8, 0, 33))));
 
-
+//chuyen doi datatype enum
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -83,7 +73,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin() // hoặc chỉ định cụ thể nếu cần: .WithOrigins("http://localhost:5500")
+        policy.AllowAnyOrigin()
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -192,3 +182,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
