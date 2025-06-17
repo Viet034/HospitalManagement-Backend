@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Quartz;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Mapper.Impl;
 using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Service.Impl;
+using SWP391_SE1914_ManageHospital.Ultility;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,17 +23,22 @@ builder.Services.AddScoped<IDepartmentMapper, DepartmentMapper>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IpatientMapper, PatientMapper>();
 builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRoleMapper, RoleMapper>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
-
+builder.Services.AddScoped<INurseMapper, NurseMapper>();
 builder.Services.AddScoped<INurseService, NurseService>();
 
-builder.Services.AddScoped<INurseMapper, NurseMapper>(); 
 
 
-builder.Services.AddScoped<INurseMapper, NurseMapper>();
+
+
+
 
 builder.Services.AddScoped<IMedicalRecordMapper, MedicalRecordMapper>();
 builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
@@ -67,6 +74,19 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+//QuaztMore actions
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey("MyCronJob");
+
+    q.AddJob<MyCronJob>(opts => opts.WithIdentity(jobKey));
+
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("MyCronTrigger")
+        .WithSimpleSchedule(x => x.WithIntervalInSeconds(60).RepeatForever()));
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
