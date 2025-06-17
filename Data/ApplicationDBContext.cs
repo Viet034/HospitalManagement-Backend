@@ -40,6 +40,7 @@ public class ApplicationDBContext : DbContext
     public DbSet<Supply_Inventory> Supply_Inventories { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<User_Role> User_Roles { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Appointment>(entity =>

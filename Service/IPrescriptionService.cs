@@ -2,5 +2,6 @@
 {
     public interface IPrescriptionService
     {
+        bool CreatePrescription(CreatePrescriptionDTO dto);
     }
 }
