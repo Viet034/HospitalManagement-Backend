@@ -42,6 +42,10 @@ public class ApplicationDBContext : DbContext
     public DbSet<User_Role> User_Roles { get; set; }
     public DbSet<Unit> Units { get; set; }
     public DbSet<MedicineDetail> MedicineDetails { get; set; }
+    public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<MedicineImport> MedicineImports { get; set; }
+    public DbSet<MedicineImportDetail> MedicineImportDetails { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -112,6 +116,7 @@ public class ApplicationDBContext : DbContext
             entity.Property(e => e.UpdateDate).IsRequired();
             entity.Property(e => e.CreateBy).HasMaxLength(100);
             entity.Property(e => e.UpdateBy).HasMaxLength(100);
+            entity.Property(e => e.Description).HasColumnType("TEXT");
 
             entity.HasOne(e => e.Medicine)
                   .WithOne() 
@@ -119,6 +124,72 @@ public class ApplicationDBContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
+        // Supplier
+        modelBuilder.Entity<Supplier>(entity =>
+        {
+            entity.ToTable("suppliers");
+
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.Address).HasColumnType("TEXT");
+            entity.Property(e => e.CreateDate).IsRequired();
+            entity.Property(e => e.UpdateDate);
+            entity.Property(e => e.CreateBy).HasMaxLength(100);
+            entity.Property(e => e.UpdateBy).HasMaxLength(100);
+        });
+
+        // MedicineImport
+        modelBuilder.Entity<MedicineImport>(entity =>
+        {
+            entity.ToTable("medicine_imports");
+
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Code).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Notes).HasColumnType("TEXT");
+            entity.Property(e => e.CreateDate).IsRequired();
+            entity.Property(e => e.UpdateDate);
+            entity.Property(e => e.CreateBy).HasMaxLength(100);
+            entity.Property(e => e.UpdateBy).HasMaxLength(100);
+
+            entity.HasOne(e => e.Supplier)
+                  .WithMany(s => s.MedicineImports)
+                  .HasForeignKey(e => e.SupplierId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // MedicineImportDetail
+        modelBuilder.Entity<MedicineImportDetail>(entity =>
+        {
+            entity.ToTable("medicine_import_details");
+
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.BatchNumber).HasMaxLength(50);
+            entity.Property(e => e.Quantity).IsRequired();
+            entity.Property(e => e.UnitPrice).IsRequired().HasColumnType("decimal(65,30)");
+            entity.Property(e => e.ExpiryDate).IsRequired();
+            entity.Property(e => e.CreateDate).IsRequired();
+            entity.Property(e => e.UpdateDate);
+            entity.Property(e => e.CreateBy).HasMaxLength(100);
+            entity.Property(e => e.UpdateBy).HasMaxLength(100);
+
+            entity.HasOne(e => e.Medicine)
+                  .WithMany(m => m.MedicineImportDetails)
+                  .HasForeignKey(e => e.MedicineId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Import)
+                  .WithMany(i => i.MedicineImportDetails)
+                  .HasForeignKey(e => e.ImportId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Unit)
+                  .WithMany()
+                  .HasForeignKey(e => e.UnitId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+        });
 
         modelBuilder.Entity<Clinic>(entity =>
         {
@@ -137,9 +208,13 @@ public class ApplicationDBContext : DbContext
                 .HasConversion(status => (int)status,  // Lưu số nguyên vào database
                 value => (ClinicStatus)value);
 
+            entity.Property(e => e.Type).IsRequired()
+        .HasConversion(type => (int)type, value => (ClinicType)value);
+
             entity.HasMany(d => d.Appointments)
                 .WithOne(a => a.Clinic)
                 .HasForeignKey(a => a.ClinicId).OnDelete(DeleteBehavior.Cascade);
+
 
         });
 
@@ -554,11 +629,7 @@ public class ApplicationDBContext : DbContext
                  .WithMany(cv => cv.Medicine_Inventories)
                  .HasForeignKey(cus => cus.MedicineId)
                  .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<Medicine_Inventory>()
-                    .HasOne(m => m.Supply)
-                    .WithMany(s => s.Medicine_Inventories)
-                    .HasForeignKey(m => m.SupplyId)
-                    .OnDelete(DeleteBehavior.Restrict);
+     
 
         });
 
@@ -889,11 +960,6 @@ public class ApplicationDBContext : DbContext
             entity.HasOne(p => p.Appointment)
                  .WithMany(cv => cv.Supplies)
                  .HasForeignKey(cus => cus.AppointmentId).OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(s => s.UnitNavigation)
-                .WithMany(u => u.Supplies) 
-                .HasForeignKey(s => s.UnitId)
-                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Supply_Inventory>(entity =>
@@ -905,9 +971,6 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.ImportDate).IsRequired().HasMaxLength(100);
             entity.Property(a => a.ExpiryDate).IsRequired();
             entity.Property(a => a.SupplierName).IsRequired().HasMaxLength(100);
-            entity.Property(s => s.BatchNumber)
-                .IsRequired()
-                .HasMaxLength(50);
 
             entity.HasOne(p => p.Supply)
                  .WithMany(cv => cv.Supply_Inventories)

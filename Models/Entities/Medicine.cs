@@ -18,5 +18,7 @@ public class Medicine : BaseEntity
     public virtual ICollection<Medicine_Inventory> Medicine_Inventories { get; set; } = new List<Medicine_Inventory>();
     public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; } = new List<InvoiceDetail>();
     public virtual MedicineDetail MedicineDetail { get; set; }
+    public virtual ICollection<MedicineImportDetail> MedicineImportDetails { get; set; } = new List<MedicineImportDetail>();
+
 
 }

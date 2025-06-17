@@ -12,8 +12,8 @@ using SWP391_SE1914_ManageHospital.Data;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250615125259_AddMedicineDetailTable")]
-    partial class AddMedicineDetailTable
+    [Migration("20250616190854_InitFull")]
+    partial class InitFull
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -833,6 +833,63 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.ToTable("MedicineCategories", (string)null);
                 });
 
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.MedicineDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CreateBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Ingredients")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Manufacturer")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int>("MedicineId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StorageInstructions")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UpdateBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Warning")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MedicineId")
+                        .IsUnique();
+
+                    b.ToTable("medicine_detail", (string)null);
+                });
+
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Medicine_Inventory", b =>
                 {
                     b.Property<int>("Id")
@@ -860,11 +917,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
-
-                    b.Property<string>("SupplierName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
 
                     b.Property<decimal>("UnitPrice")
                         .HasMaxLength(100)
@@ -1461,10 +1513,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                    b.Property<int?>("UnitId")
+                        .HasColumnType("int");
 
                     b.Property<string>("UpdateBy")
                         .IsRequired()
@@ -1479,6 +1529,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.HasIndex("AppointmentId");
 
+                    b.HasIndex("UnitId");
+
                     b.ToTable("Supplies", (string)null);
                 });
 
@@ -1489,6 +1541,10 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BatchNumber")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("datetime(6)");
@@ -1824,6 +1880,17 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.MedicineDetail", b =>
+                {
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Medicine", "Medicine")
+                        .WithOne("MedicineDetail")
+                        .HasForeignKey("SWP391_SE1914_ManageHospital.Models.Entities.MedicineDetail", "MedicineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Medicine");
+                });
+
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Medicine_Inventory", b =>
                 {
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Medicine", "Medicine")
@@ -1971,6 +2038,10 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Unit", null)
+                        .WithMany("Supplies")
+                        .HasForeignKey("UnitId");
+
                     b.Navigation("Appointment");
                 });
 
@@ -2070,6 +2141,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 {
                     b.Navigation("InvoiceDetails");
 
+                    b.Navigation("MedicineDetail")
+                        .IsRequired();
+
                     b.Navigation("Medicine_Inventories");
 
                     b.Navigation("PrescriptionDetails");
@@ -2130,6 +2204,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Unit", b =>
                 {
                     b.Navigation("Medicines");
+
+                    b.Navigation("Supplies");
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.User", b =>
