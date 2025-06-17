@@ -12,8 +12,8 @@ using SWP391_SE1914_ManageHospital.Data;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250617033432_AddNewTablesAndFields")]
-    partial class AddNewTablesAndFields
+    [Migration("20250617143453_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1772,21 +1772,17 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.Property<string>("RefreshToken")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
-                        .IsRequired()
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("ResetPasswordToken")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
                     b.Property<DateTime?>("ResetPasswordTokenExpiryTime")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("datetime(6)");
 
