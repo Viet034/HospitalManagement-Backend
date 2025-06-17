@@ -1,5 +1,6 @@
 ﻿using Castle.Core.Resource;
 using Microsoft.EntityFrameworkCore;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
@@ -12,6 +13,7 @@ public class ApplicationDBContext : DbContext
     }
 
     public DbSet<Appointment> Appointments { get; set; }
+    
     public DbSet<Clinic> Clinics { get; set; }
     public DbSet<Department> Departments { get; set; }
     public DbSet<Disease> Diseases { get; set; }

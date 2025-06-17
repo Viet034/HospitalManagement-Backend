@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Models.Entities;
