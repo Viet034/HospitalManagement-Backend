@@ -115,4 +115,9 @@ public static class Status
     {
         Consultation = 0, Lab = 1
     }
+
+    public enum PrescribedMedication
+    {
+        Yes = 1, No = 0 
+    }
 }

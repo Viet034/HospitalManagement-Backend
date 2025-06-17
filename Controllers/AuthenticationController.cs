@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Authenication;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Authentication;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Patient;
 using SWP391_SE1914_ManageHospital.Service;
 using System.Security.Claims;
 
@@ -14,17 +16,35 @@ namespace SWP391_SE1914_ManageHospital.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly IAuthService _service;
+    private readonly INurseService _nurseService;
     private readonly ILogger<AuthenticationController> _logger;
 
-    public AuthenticationController(IAuthService service, ILogger<AuthenticationController> logger)
+    public AuthenticationController(IAuthService service, ILogger<AuthenticationController> logger, INurseService nurseService)
     {
         _service = service;
         _logger = logger;
+        _nurseService = nurseService;
     }
 
+    [HttpPost("login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
+    {
+        Console.WriteLine($"Received login request: Email={request.Email}, UserType={request.UserType}");
+
+        try
+        {
+            var response = await _service.LoginAsync(request);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return Unauthorized(ex.ToString());
+        }
+    }
     [HttpPost("register/patient")]
     [AllowAnonymous]
-    public async Task<IActionResult> RegisterPatient([FromBody] PatientRegisterRequest request)
+    public async Task<IActionResult> RegisterPatientAsync([FromBody] PatientRegisterRequest request)
     {
         try
         {
@@ -33,7 +53,22 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during patient registration");
+            _logger.LogError(ex, "Lỗi khi tạo tài khoản bệnh nhân!");
+            return BadRequest(ex.ToString());
+        }
+    }
+    [HttpPost("register/nurse")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RegisterNurseAsync([FromBody] NurseRegisterRequest request)
+    {
+        try
+        {
+            var response = await _nurseService.NurseRegisterAsync(request);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Tạo tài khoản y tá lỗi!");
             return BadRequest(ex.ToString());
         }
     }
@@ -43,7 +78,6 @@ public class AuthenticationController : ControllerBase
     {
         try
         {
-            // Lấy thông tin từ token
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var userTypeClaim = User.FindFirst("UserType")?.Value;
 
@@ -51,22 +85,22 @@ public class AuthenticationController : ControllerBase
                 !int.TryParse(userIdClaim, out int userId) ||
                 !Enum.TryParse<UserType>(userTypeClaim, out UserType userType))
             {
-                return Unauthorized("Invalid token");
+                return Unauthorized("Token không hợp lệ.");
             }
 
-            // Gọi service với đầy đủ thông tin
             var result = await _service.ChangePasswordAsync(
                 userId,
                 userType,
                 request.OldPassword,
-                request.NewPassword
+                request.NewPassword,
+                request.ConfirmPassword
             );
 
             return Ok("Đổi mật khẩu thành công");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in ChangePassword");
+            _logger.LogError(ex, "Lỗi khi đổi mật khẩu.");
             return BadRequest(ex.Message);
         }
     }
@@ -80,7 +114,7 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in ForgotPassword");
+            _logger.LogError(ex, "Lỗi khi quên mật khẩu");
             return BadRequest(ex.Message);
         }
     }
@@ -94,7 +128,7 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in ResetPassword");
+            _logger.LogError(ex, "Lỗi khi đặt lại mật khẩu");
             return BadRequest(ex.Message);
         }
     }

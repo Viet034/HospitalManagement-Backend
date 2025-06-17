@@ -762,6 +762,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<int>("Prescribed")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -1769,21 +1772,17 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasColumnType("varchar(100)");
 
                     b.Property<string>("RefreshToken")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
-                        .IsRequired()
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("ResetPasswordToken")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
                     b.Property<DateTime?>("ResetPasswordTokenExpiryTime")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("datetime(6)");
 
