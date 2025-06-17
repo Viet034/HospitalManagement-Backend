@@ -578,6 +578,9 @@ public class ApplicationDBContext : DbContext
             entity.Property(emp => emp.Status).IsRequired()
                 .HasConversion(status => (int)status,  // Lưu số nguyên vào database
                 value => (MedicineStatus)value);
+            entity.Property(e => e.Prescribed).IsRequired()
+                .HasConversion(v => (int)v, 
+                v => (PrescribedMedication)v);
 
 
             entity.HasOne(p => p.MedicineCategory)

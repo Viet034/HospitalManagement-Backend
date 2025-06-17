@@ -9,8 +9,8 @@ public class Medicine : BaseEntity
     public MedicineStatus Status { get; set; }
     public string Description { get; set; }
     public int UnitId { get; set; }
-    public virtual Unit Unit { get; set; } 
-
+    public virtual Unit Unit { get; set; }
+    public PrescribedMedication Prescribed { get; set; }
     public string Dosage { get; set; }
     public int MedicineCategoryId { get; set; }
     public virtual MedicineCategory MedicineCategory { get; set; }
