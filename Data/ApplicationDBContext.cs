@@ -209,7 +209,8 @@ public class ApplicationDBContext : DbContext
                 value => (ClinicStatus)value);
 
             entity.Property(e => e.Type).IsRequired()
-        .HasConversion(type => (int)type, value => (ClinicType)value);
+                .HasConversion(type => (int)type
+                , value => (ClinicType)value);
 
             entity.HasMany(d => d.Appointments)
                 .WithOne(a => a.Clinic)
