@@ -26,7 +26,7 @@ public class MedicineService : IMedicineService
                 Code = m.Code,
                 Description = m.Description,
                 Dosage = m.Dosage,
-                Unit = m.Unit,
+                Unit = m.Unit != null ? m.Unit.Name : "",
                 Status = m.Status ,
                 MedicineCategoryId = m.MedicineCategoryId,
                 CreateDate = m.CreateDate,
@@ -49,7 +49,7 @@ public class MedicineService : IMedicineService
             Code = m.Code,
             Description = m.Description,
             Dosage = m.Dosage,
-            Unit = m.Unit,
+            Unit = m.Unit != null ? m.Unit.Name : "",
             Status = m.Status,
             MedicineCategoryId = m.MedicineCategoryId,
             CreateDate = m.CreateDate,
@@ -67,7 +67,7 @@ public class MedicineService : IMedicineService
             Code = request.Code,
             Description = request.Description,
             Dosage = request.Dosage,
-            Unit = request.Unit,
+            UnitId = request.UnitId,
             MedicineCategoryId = request.MedicineCategoryId,
             Status = request.Status,
             CreateDate = request.CreateDate,
@@ -91,7 +91,7 @@ public class MedicineService : IMedicineService
         m.Code = request.Code;
         m.Description = request.Description;
         m.Dosage = request.Dosage;
-        m.Unit = request.Unit;
+        m.UnitId = request.UnitId;
         m.MedicineCategoryId = request.MedicineCategoryId;
         m.Status = request.Status;
         m.UpdateDate = request.UpdateDate;
