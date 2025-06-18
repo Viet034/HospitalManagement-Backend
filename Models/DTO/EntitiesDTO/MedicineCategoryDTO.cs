@@ -6,7 +6,7 @@ public class MedicineCategoryDTO
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public 
+     
     public string Description { get; set; }
     public MedicineCategoryStatus Status { get; set; }
    
