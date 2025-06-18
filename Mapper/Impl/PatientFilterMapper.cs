@@ -1,22 +1,39 @@
-﻿using SWP391_SE1914_ManageHospital.Models.Entities;
-using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
+﻿using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
+using SWP391_SE1914_ManageHospital.Models.Entities;
+using SWP391_SE1914_ManageHospital.Models.Helps;
+using System;
+using System.Collections.Generic;
 
-namespace SWP391_SE1914_ManageHospital.Mapper;
-
-public class PatientFilterMapper : IPatientFilterMapper
+namespace SWP391_SE1914_ManageHospital.Mapper.Impl
 {
-    public PatientFilterResponse EntityToResponse(Patient entity)
+    public class PatientFilterMapper : IPatientFilterMapper
     {
-        return new PatientFilterResponse
+        public PatientFilterResponse EntityToResponse(Patient entity, DateTime examinationTime, string appointmentStatus)
         {
-            Id = entity.Id,
-            Name = entity.Name
-            // Map thêm trường nếu cần
-        };
-    }
+            PatientFilterResponse response = new PatientFilterResponse();
+            response.Id = entity.Id;
+            response.Name = entity.Name;
+            response.ExaminationTime = examinationTime;
+            response.AppointmentStatus = appointmentStatus;
 
-    public IEnumerable<PatientFilterResponse> ListEntityToResponse(IEnumerable<Patient> entities)
-    {
-        return entities.Select(EntityToResponse);
+            return response;
+        }
+
+        public List<PatientFilterResponse> ListEntityToResponse(List<PatientAppointmentData> patientDataList)
+        {
+            List<PatientFilterResponse> result = new List<PatientFilterResponse>();
+
+            foreach (PatientAppointmentData data in patientDataList)
+            {
+                PatientFilterResponse response = EntityToResponse(
+                    data.Patient,
+                    data.ExaminationTime,
+                    data.AppointmentStatus);
+
+                result.Add(response);
+            }
+
+            return result;
+        }
     }
 }
