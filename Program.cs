@@ -38,6 +38,16 @@ builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>();
 builder.Services.AddScoped<INurseService, NurseService>();
 
+builder.Services.AddScoped<IMedicineService, MedicineService>();
+builder.Services.AddScoped<IMedicineMapper, MedicineMapper>();
+
+builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
+builder.Services.AddScoped<IMedicineCategoryMapper, MedicineCategoryMapper>();
+
+// Đăng ký service
+builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
+
+
 
 
 
@@ -50,7 +60,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 
-builder.Services.AddScoped<IMedicineService, MedicineService>();
+
 /*
 var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
 Console.WriteLine(hash);

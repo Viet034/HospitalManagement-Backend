@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Medicine;
-using SWP391_SE1914_ManageHospital.Service.Impl;
+using SWP391_SE1914_ManageHospital.Service;
+
+namespace SWP391_SE1914_ManageHospital.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -13,38 +16,49 @@ public class MedicineController : ControllerBase
         _service = service;
     }
 
-    [HttpGet("Get_all")]
+    [HttpGet]
     public async Task<IActionResult> GetAll()
     {
         var result = await _service.GetAllAsync();
         return Ok(result);
     }
 
-    [HttpGet("Get_By_Id")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var item = await _service.GetByIdAsync(id);
-        return item == null ? NotFound() : Ok(item);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] MedicineCreate request)
-    {
-        var result = await _service.CreateAsync(request);
+        var result = await _service.GetByIdAsync(id);
+        if (result == null) return NotFound();
         return Ok(result);
     }
 
-    [HttpPut("Update_by_Id")]
-    public async Task<IActionResult> Update(int id, [FromBody] MedicineCreate request)
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] MedicineRequest request)
     {
-        var updated = await _service.UpdateAsync(id, request);
-        return updated ? Ok() : NotFound();
+        var result = await _service.CreateAsync(request);
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-    [HttpDelete("Delete_By_Id")]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] MedicineRequest request)
+    {
+        var result = await _service.UpdateAsync(id, request);
+        if (result == null) return NotFound();
+        return Ok(result);
+    }
+
+    [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await _service.DeleteAsync(id);
-        return deleted ? Ok() : NotFound();
+        var success = await _service.DeleteAsync(id);
+        if (!success) return NotFound();
+        return NoContent();
     }
+
+    [HttpGet("prescribed/{value}")]
+    public async Task<IActionResult> GetByPrescribed(int value)
+    {
+        var result = await _service.GetByPrescribedAsync(value);
+        return Ok(result);
+    }
+
 }

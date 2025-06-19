@@ -651,7 +651,9 @@ public class ApplicationDBContext : DbContext
             entity.Property(emp => emp.Status).IsRequired()
                 .HasConversion(status => (int)status,  // Lưu số nguyên vào database
                 value => (MedicineCategoryStatus)value);
-
+            entity.Property(a => a.Code)
+                  .IsRequired()
+                  .HasColumnType("longtext");
 
             entity.HasMany(a => a.Medicines)
             .WithOne(a => a.MedicineCategory)

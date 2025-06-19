@@ -5,10 +5,10 @@ namespace SWP391_SE1914_ManageHospital.Service
 {
     public interface IMedicineCategoryService
     {
-        Task<List<MedicineCategoryResponseDTO>> GetAllAsync();
-        Task<MedicineCategoryResponseDTO?> GetByIdAsync(int id);
-        Task<MedicineCategoryResponseDTO> CreateAsync(MedicineCategoryCreate request);
-        Task<bool> UpdateAsync(int id, MedicineCategoryCreate request);
+        Task<List<MedicineCategoryResponse>> GetAllAsync();
+        Task<MedicineCategoryResponse?> GetByIdAsync(int id);
+        Task<MedicineCategoryResponse> CreateAsync(MedicineCategoryRequest request);
+        Task<MedicineCategoryResponse?> UpdateAsync(int id, MedicineCategoryRequest request);
         Task<bool> DeleteAsync(int id);
     }
 }
