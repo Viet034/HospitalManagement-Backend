@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <Folder Include="Models\DTO\RequestDTO\NewFolder\" />
+    <Folder Include="Models\DTO\ResponseDTO\Payment\" />
   </ItemGroup>
 
 </Project>
