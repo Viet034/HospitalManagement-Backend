@@ -10,7 +10,6 @@ public class Medicine_Inventory
     public decimal UnitPrice { get; set; }
     public DateTime ImportDate { get; set; }
     public DateTime ExpiryDate { get; set; }
-    public string SupplierName { get; set; }
     public MedicineInventoryStatus Status { get; set; }
     public int MedicineId { get; set; }
     public virtual Medicine Medicine { get; set; }

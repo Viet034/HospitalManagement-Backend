@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-
     <Compile Remove="Models\DTO\RequestDTO\NewFolder\**" />
     <Content Remove="Models\DTO\RequestDTO\NewFolder\**" />
     <EmbeddedResource Remove="Models\DTO\RequestDTO\NewFolder\**" />
@@ -15,8 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-
-    <PackageReference Include="AutoMapper" Version="10.1.1" />
 
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
@@ -36,11 +33,8 @@
     </Content>
   </ItemGroup>
 
-
-
   <ItemGroup>
     <Folder Include="Models\DTO\RequestDTO\NewFolder\" />
   </ItemGroup>
-
 
 </Project>

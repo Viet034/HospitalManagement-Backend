@@ -13,5 +13,6 @@ namespace SWP391_SE1914_ManageHospital.Service
         public Task<bool> HardDeletePatientAsync(int id);
         public Task<PatientRespone> FindPatientByIdAsync(int id);
         public Task<string> CheckUniqueCodeAsync();
+        public Task<IEnumerable<PatientInfoAdmin>> PatientInfoAdAsync();
     }
 }

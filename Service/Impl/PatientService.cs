@@ -61,7 +61,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
         public async Task<IEnumerable<PatientRespone>> GetAllPatientAsync()
         {
             var patients = await _context.Patients.ToListAsync();
-            if (!patients.Any())
+            if (patients == null)
             {
                 throw new Exception("No Patient");
             }
@@ -82,10 +82,31 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return true;
         }
 
+        
+
+        public async Task<IEnumerable<PatientInfoAdmin>> PatientInfoAdAsync()
+        {
+            var appointments = await _context.Appointments
+                .Include(a => a.Patient)
+                .Include(a => a.Medical_Record)
+                    .ThenInclude(mr => mr.Doctor)
+                .Include(a => a.Invoice)
+                .ToListAsync();
+
+            if (!appointments.Any())
+            {
+                throw new Exception("Không tìm thấy lịch sử khám của bệnh nhân.");
+            }
+
+            var result = _mapper.PatientInfoAdmins(appointments);
+            return result;
+        }
+
+
         public async Task<IEnumerable<PatientRespone>> SearchPatientByKeyAsync(string key)
         {
             var result = await _context.Patients
-                .Where(p => p.Name.Contains(key) || p.Phone.Contains(key) || p.CCCD.Contains(key) || p.Code.Contains(key))
+                .Where(p => p.Name.Contains(key))
                 .ToListAsync();
 
             if (!result.Any())
