@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -6,15 +7,23 @@ using Quartz;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Mapper.Impl;
+using SWP391_SE1914_ManageHospital.Models;
 using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Service.Impl;
 using SWP391_SE1914_ManageHospital.Ultility;
 using System.Text;
 using System.Text.Json.Serialization;
+using YourProject.Mapping;
+using AutoMapper;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+
+// Replace the ambiguous call with a more explicit one by specifying the assemblies manually.
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -37,6 +46,7 @@ builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>();
 builder.Services.AddScoped<INurseService, NurseService>();
+builder.Services.AddScoped<ILabRequestService, LabRequestService>();
 
 
 
@@ -73,7 +83,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin() 
+        policy.AllowAnyOrigin()
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -170,7 +180,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LabRequest API v1"));
 }
 
 app.UseHttpsRedirection();

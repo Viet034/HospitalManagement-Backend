@@ -1,5 +1,6 @@
 ﻿using Castle.Core.Resource;
 using Microsoft.EntityFrameworkCore;
+using SWP391_SE1914_ManageHospital.Models;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
@@ -10,6 +11,8 @@ public class ApplicationDBContext : DbContext
     public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
     {
     }
+    public DbSet<LabRequest> LabRequests { get; set; }
+    public DbSet<LabResult> LabResults { get; set; }
 
     public DbSet<Appointment> Appointments { get; set; }
     public DbSet<Clinic> Clinics { get; set; }
@@ -49,6 +52,7 @@ public class ApplicationDBContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Appointment>(entity =>
         {
             entity.ToTable("Appointments");
@@ -100,6 +104,76 @@ public class ApplicationDBContext : DbContext
 
 
         });
+        modelBuilder.Entity<LabRequest>(entity =>
+        {
+            entity.ToTable("lab_requests"); // Tên bảng
+
+            entity.HasKey(e => e.Id); // Khóa chính của bảng
+
+            // Các trường trong LabRequest
+            entity.Property(e => e.DoctorId)
+                .IsRequired(); // DoctorId là bắt buộc
+
+            entity.Property(e => e.PatientId)
+                .IsRequired(); // PatientId là bắt buộc
+
+            entity.Property(e => e.AppointmentId)
+                .IsRequired(); // AppointmentId là bắt buộc
+
+            entity.Property(e => e.MedicalRecordId)
+                .IsRequired(); // MedicalRecordId là bắt buộc
+
+            entity.Property(e => e.TestType)
+                .IsRequired()
+                .HasMaxLength(100); // Loại xét nghiệm, giới hạn độ dài 100 ký tự
+
+            entity.Property(e => e.Description)
+                .HasColumnType("TEXT"); // Mô tả có thể dài
+
+            entity.Property(e => e.RequestDate)
+                .IsRequired(); // Ngày yêu cầu xét nghiệm, bắt buộc
+
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasMaxLength(50); // Trạng thái phiếu yêu cầu (vd: "Chưa thực hiện", "Đang thực hiện", "Hoàn thành")
+
+            entity.Property(e => e.ResultText)
+                .HasColumnType("TEXT"); // Kết quả xét nghiệm dưới dạng văn bản
+
+            entity.Property(e => e.ResultFileUrl)
+                .HasMaxLength(255); // Đường dẫn tới file kết quả (PDF/ảnh)
+
+            entity.Property(e => e.ResultDate)
+                .IsRequired(); // Ngày nhận kết quả
+
+            entity.Property(e => e.CreateDate)
+                .IsRequired(); // Ngày tạo phiếu chỉ định
+
+            entity.Property(e => e.UpdateDate)
+                .IsRequired(); // Ngày cập nhật phiếu chỉ định
+
+            entity.Property(e => e.CreateBy)
+                .HasMaxLength(100); // Người tạo phiếu chỉ định
+
+            entity.Property(e => e.UpdateBy)
+                .HasMaxLength(100); // Người cập nhật phiếu chỉ định
+
+            // Quan hệ giữa LabRequest và Medicine (hoặc bất kỳ thực thể nào liên quan)
+            entity.HasOne(e => e.Doctor) // Chú ý nếu có quan hệ với các bảng khác
+                .WithOne()
+                .HasForeignKey<LabRequest>(e => e.DoctorId) // Liên kết với Medicine
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Patient) // Chú ý nếu có quan hệ với các bảng khác
+                .WithOne()
+                .HasForeignKey<LabRequest>(e => e.PatientId) // Liên kết với Medicine
+                .OnDelete(DeleteBehavior.Cascade);
+           
+        });
+        modelBuilder.Entity<LabResult>()
+        .Property(r => r.AttachmentUrl)
+        .HasMaxLength(255);
+        // Các cấu hình khác nếu cần
+
 
         modelBuilder.Entity<MedicineDetail>(entity =>
         {
