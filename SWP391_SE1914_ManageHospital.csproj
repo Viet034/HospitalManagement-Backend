@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Models\DTO\RequestDTO\NewFolder\**" />
-    <Content Remove="Models\DTO\RequestDTO\NewFolder\**" />
-    <EmbeddedResource Remove="Models\DTO\RequestDTO\NewFolder\**" />
-    <None Remove="Models\DTO\RequestDTO\NewFolder\**" />
-  </ItemGroup>
-
-  <ItemGroup>
 
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />
@@ -34,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\DTO\RequestDTO\NewFolder\" />
     <Folder Include="Models\DTO\ResponseDTO\Payment\" />
   </ItemGroup>
 
