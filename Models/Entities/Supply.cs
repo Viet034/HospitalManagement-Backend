@@ -10,5 +10,5 @@ public class Supply : BaseEntity
     public int AppointmentId { get; set; }
     public virtual Appointment Appointment { get; set; }
     public virtual ICollection<Supply_Inventory> Supply_Inventories { get; set; } = new List<Supply_Inventory>();
-
+    public object Unit { get; internal set; }
 }
