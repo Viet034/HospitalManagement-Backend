@@ -1,14 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
+using SWP391_SE1914_ManageHospital.Mapper;
+using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
-using SWP391_SE1914_ManageHospital.Mapper;
+using SWP391_SE1914_ManageHospital.Ultility;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
-using System.Text.RegularExpressions;
-using SWP391_SE1914_ManageHospital.Ultility;
 
 namespace SWP391_SE1914_ManageHospital.Service
 {
@@ -34,6 +36,7 @@ namespace SWP391_SE1914_ManageHospital.Service
             return _mapper.MapToDto(nurse);
         }
 
+
         public async Task<IEnumerable<NurseResponseDTO>> GetAllNursesAsync()
         {
             var nurses = await _context.Nurses
@@ -42,6 +45,18 @@ namespace SWP391_SE1914_ManageHospital.Service
                 .ToListAsync();
             return _mapper.MapToDtoList(nurses);
         }
+        public async Task<IEnumerable<NurseResponseDTO>> GetNurseByNameAsync(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return Enumerable.Empty<NurseResponseDTO>();
+            var nurses = await _context.Nurses
+                .Include(n => n.User)
+                .Include(n => n.Department)
+                .Where(n => EF.Functions.Like(n.Name, $"%{name}%"))
+                .ToListAsync();
+            return _mapper.MapToDtoList(nurses);
+        }
+
 
         public async Task<NurseResponseDTO> CreateNurseAsync(NurseCreate nurseCreateDto)
         {
