@@ -39,6 +39,10 @@ builder.Services.AddScoped<INurseMapper, NurseMapper>();
 builder.Services.AddScoped<INurseService, NurseService>();
 
 
+builder.Services.AddScoped<IMedicineManageForAdminService, MedicineManageForAdminService>();
+builder.Services.AddScoped<IMedicineManageForAdminMapper, MedicineManageForAdminMapper>();
+
+
 
 
 
