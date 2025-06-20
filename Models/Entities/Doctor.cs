@@ -22,4 +22,7 @@ public class Doctor : BaseEntity
     public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
     public virtual ICollection<Prescription> Prescriptions { get; set; } = new List<Prescription>();
 
+    public virtual ICollection<Doctor_Shift> Doctor_Shifts { get; set; } = new List<Doctor_Shift>();
+
+
 }

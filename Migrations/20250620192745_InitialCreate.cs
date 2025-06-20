@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     /// <inheritdoc />
-    public partial class AddPrescribedToMedicine : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -641,6 +641,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    ManufactureDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ExpiryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UnitId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "longtext", nullable: false)
@@ -679,26 +680,37 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Medicine_Inventories",
+                name: "doctor_shifts",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Quantity = table.Column<int>(type: "int", maxLength: 100, nullable: false),
-                    BatchNumber = table.Column<int>(type: "int", maxLength: 100, nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "decimal(65,30)", maxLength: 100, nullable: false),
-                    ImportDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    ExpiryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    MedicineId = table.Column<int>(type: "int", nullable: false)
+                    DoctorId = table.Column<int>(type: "int", nullable: false),
+                    ShiftDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    ShiftType = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    StartTime = table.Column<TimeSpan>(type: "time(6)", nullable: false),
+                    EndTime = table.Column<TimeSpan>(type: "time(6)", nullable: false),
+                    Notes = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Code = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreateBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UpdateBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Medicine_Inventories", x => x.Id);
+                    table.PrimaryKey("PK_doctor_shifts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Medicine_Inventories_Medicines_MedicineId",
-                        column: x => x.MedicineId,
-                        principalTable: "Medicines",
+                        name: "FK_doctor_shifts_Doctors_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "Doctors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -777,6 +789,40 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         principalTable: "Patients",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Medicine_Inventories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Quantity = table.Column<int>(type: "int", maxLength: 100, nullable: false),
+                    BatchNumber = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UnitPrice = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    ImportDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    MedicineId = table.Column<int>(type: "int", nullable: false),
+                    ImportDetailId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Medicine_Inventories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Medicine_Inventories_Medicines_MedicineId",
+                        column: x => x.MedicineId,
+                        principalTable: "Medicines",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Medicine_Inventories_medicine_import_details_ImportDetailId",
+                        column: x => x.ImportDetailId,
+                        principalTable: "medicine_import_details",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -1243,6 +1289,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 column: "DoctorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_doctor_shifts_DoctorId",
+                table: "doctor_shifts",
+                column: "DoctorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Doctors_DepartmentId",
                 table: "Doctors",
                 column: "DepartmentId");
@@ -1324,9 +1375,10 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 column: "ImportId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_medicine_import_details_MedicineId",
+                name: "IX_medicine_import_details_MedicineId_BatchNumber",
                 table: "medicine_import_details",
-                column: "MedicineId");
+                columns: new[] { "MedicineId", "BatchNumber" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_medicine_import_details_UnitId",
@@ -1337,6 +1389,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 name: "IX_medicine_imports_SupplierId",
                 table: "medicine_imports",
                 column: "SupplierId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Medicine_Inventories_ImportDetailId",
+                table: "Medicine_Inventories",
+                column: "ImportDetailId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Medicine_Inventories_MedicineId",
@@ -1454,6 +1511,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 name: "Doctor_Appointment");
 
             migrationBuilder.DropTable(
+                name: "doctor_shifts");
+
+            migrationBuilder.DropTable(
                 name: "Feedbacks");
 
             migrationBuilder.DropTable(
@@ -1461,9 +1521,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
             migrationBuilder.DropTable(
                 name: "medicine_detail");
-
-            migrationBuilder.DropTable(
-                name: "medicine_import_details");
 
             migrationBuilder.DropTable(
                 name: "Medicine_Inventories");
@@ -1487,7 +1544,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 name: "User_Roles");
 
             migrationBuilder.DropTable(
-                name: "medicine_imports");
+                name: "medicine_import_details");
 
             migrationBuilder.DropTable(
                 name: "Nurses");
@@ -1496,25 +1553,28 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 name: "Payments");
 
             migrationBuilder.DropTable(
-                name: "Medicines");
-
-            migrationBuilder.DropTable(
                 name: "Supplies");
 
             migrationBuilder.DropTable(
                 name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "suppliers");
+                name: "Medicines");
 
             migrationBuilder.DropTable(
-                name: "MedicineCategories");
+                name: "medicine_imports");
 
             migrationBuilder.DropTable(
                 name: "Appointments");
 
             migrationBuilder.DropTable(
+                name: "MedicineCategories");
+
+            migrationBuilder.DropTable(
                 name: "Units");
+
+            migrationBuilder.DropTable(
+                name: "suppliers");
 
             migrationBuilder.DropTable(
                 name: "Clinics");
