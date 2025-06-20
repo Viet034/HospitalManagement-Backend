@@ -1,14 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
+using SWP391_SE1914_ManageHospital.Mapper;
+using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
-using SWP391_SE1914_ManageHospital.Mapper;
+using SWP391_SE1914_ManageHospital.Service;
+using SWP391_SE1914_ManageHospital.Ultility;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
-using System.Text.RegularExpressions;
-using SWP391_SE1914_ManageHospital.Ultility;
 
 namespace SWP391_SE1914_ManageHospital.Service
 {
@@ -43,6 +45,18 @@ namespace SWP391_SE1914_ManageHospital.Service
             return _mapper.MapToDtoList(nurses);
         }
 
+        public async Task<IEnumerable<NurseResponseDTO>> GetNurseByNameAsync(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return Enumerable.Empty<NurseResponseDTO>();
+            var nurses = await _context.Nurses
+                .Include(n => n.User)
+                .Include(n => n.Department)
+                .Where(n => EF.Functions.Like(n.Name, $"%{name}%"))
+                .ToListAsync();
+            return _mapper.MapToDtoList(nurses);
+        }
+
         public async Task<NurseResponseDTO> CreateNurseAsync(NurseCreate nurseCreateDto)
         {
             var nurse = _mapper.MapToEntity(nurseCreateDto);
@@ -54,6 +68,7 @@ namespace SWP391_SE1914_ManageHospital.Service
 
             return _mapper.MapToDto(nurse);
         }
+
         public async Task<string> CheckUniqueCodeAsync()
         {
             string newCode;
@@ -63,12 +78,13 @@ namespace SWP391_SE1914_ManageHospital.Service
             {
                 newCode = GenerateCode.GeneratePatientCode();
                 _context.ChangeTracker.Clear();
-                isExist = await _context.Patients.AnyAsync(p => p.Code == newCode);
+                isExist = await _context.Nurses.AnyAsync(n => n.Code == newCode);
             }
             while (isExist);
 
             return newCode;
         }
+
         public async Task<NurseRegisterResponse> NurseRegisterAsync(NurseRegisterRequest request)
         {
             var department = await _context.Departments.FirstOrDefaultAsync(d => d.Id == request.DepartmentId);
@@ -112,8 +128,8 @@ namespace SWP391_SE1914_ManageHospital.Service
                 Dob = request.Dob,
                 CCCD = request.CCCD,
                 Phone = request.Phone,
-                Status = NurseStatus.Available,
                 ImageURL = "",
+                Status = NurseStatus.Available,
                 CreateDate = DateTime.Now.AddHours(7),
                 UpdateDate = DateTime.Now.AddHours(7),
                 CreateBy = request.FullName,
@@ -130,11 +146,11 @@ namespace SWP391_SE1914_ManageHospital.Service
                 nurse.Code = await CheckUniqueCodeAsync();
             }
 
-            while (await _context.Nurses.AnyAsync(p => p.Code == nurse.Code))
+            while (await _context.Nurses.AnyAsync(n => n.Code == nurse.Code))
             {
                 nurse.Code = await CheckUniqueCodeAsync();
             }
-            
+
             await _context.Nurses.AddAsync(nurse);
 
             var nurseRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name.Trim().ToLower() == "nurse");
@@ -154,6 +170,7 @@ namespace SWP391_SE1914_ManageHospital.Service
                 Email = newUser.Email,
             };
         }
+
         public async Task<NurseResponseDTO> UpdateNurseAsync(int id, NurseUpdate nurseUpdateDto)
         {
             var nurse = await _context.Nurses.FindAsync(id);

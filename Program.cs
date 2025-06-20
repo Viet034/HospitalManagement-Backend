@@ -8,6 +8,7 @@ using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Mapper.Impl;
 using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Service.Impl;
+using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Ultility;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -31,6 +32,8 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRoleMapper, RoleMapper>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IDoctorMapper, DoctorMapper>();
+builder.Services.AddScoped<IDoctorService, DoctorService>();
 
 
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();

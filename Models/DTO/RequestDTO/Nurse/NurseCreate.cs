@@ -15,4 +15,5 @@ public class NurseCreate
     public int UserId { get; set; }
     public int DepartmentId { get; set; }
     public string CreateBy { get; set; } = string.Empty;
+    
 }

@@ -17,22 +17,30 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             _nurseService = nurseService;
         }
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAllNurses()
         {
             var nurses = await _nurseService.GetAllNursesAsync();
             return Ok(nurses);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("FindById/{id}")]
         public async Task<IActionResult> GetNurseById(int id)
         {
             var nurse = await _nurseService.GetNurseByIdAsync(id);
             if (nurse == null) return NotFound();
             return Ok(nurse);
         }
+        [HttpGet("FindByName/{name}")]
+        public async Task<IActionResult> GetNurseByName(string name)
+        {
+            var nurses = await _nurseService.GetNurseByNameAsync(name);
+            if (nurses == null || !nurses.Any())
+                return NotFound();
+            return Ok(nurses);
+        }
 
-        [HttpPost]
+        [HttpPost("AddNurse")]
         public async Task<IActionResult> CreateNurse([FromBody] NurseCreate nurseCreateDto)
         {
             if (nurseCreateDto == null) return BadRequest();
@@ -40,7 +48,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             return CreatedAtAction(nameof(GetNurseById), new { id = createdNurse.Id }, createdNurse);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("UpdateNurse/{id}")]
         public async Task<IActionResult> UpdateNurse(int id, [FromBody] NurseUpdate nurseUpdateDto)
         {
             if (nurseUpdateDto == null) return BadRequest();
@@ -49,7 +57,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             return Ok(updatedNurse);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("DeleteNurse/{id}")]
         public async Task<IActionResult> DeleteNurse(int id, [FromBody] NurseDelete nurseDeleteDto)
         {
             if (nurseDeleteDto == null) return BadRequest();
