@@ -25,6 +25,10 @@ builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<IpatientMapper, PatientMapper>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 
+// Add Appointment services
+builder.Services.AddScoped<IAppointmentMapper, AppointmentMapper>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 
@@ -43,6 +47,18 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+
+// Add CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin() 
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -53,6 +69,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Use CORS
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
