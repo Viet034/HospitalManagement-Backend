@@ -1,5 +1,5 @@
-﻿using SWP391_SE1914_ManageHospital.Models.Entities;
-using SWP391_SE1914_ManageHospital.Repositories;
+﻿using SWP391_SE1914_ManageHospital.Data;
+using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Service;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
