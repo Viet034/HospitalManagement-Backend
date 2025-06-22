@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class AddPrescribedToMedicine : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -321,6 +321,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     Description = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     UnitId = table.Column<int>(type: "int", nullable: false),
+                    Prescribed = table.Column<int>(type: "int", nullable: false),
                     Dosage = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     MedicineCategoryId = table.Column<int>(type: "int", nullable: false),
