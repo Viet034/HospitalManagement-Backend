@@ -1,22 +1,44 @@
-﻿namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
+﻿using System;
+
+namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
 {
     public class MedicalRecordDetailResponse
     {
-        // Lấy đầy đủ thông tin chi tiết
         public int Id { get; set; }
-        public string Diagnosis { get; set; } = default!;
-        public string TestResults { get; set; } = default!;
+
+        public string Diagnosis { get; set; }
+
+        public string TestResults { get; set; }
+
         public string? Notes { get; set; }
-        public string Status { get; set; } = default!;
+
+        public string Status { get; set; }
+
         public DateTime CreateDate { get; set; }
-        public string DoctorName { get; set; } = default!;
-        public string PatientName { get; set; } = default!;
-        public string DiseaseName { get; set; } = default!;
+
+        public string DoctorName { get; set; }
+
+        public string PatientName { get; set; }
+
+        public string DiseaseName { get; set; }
+
         public int AppointmentId { get; set; }
+
         public int PrescriptionId { get; set; }
 
         public MedicalRecordDetailResponse()
         {
+            this.Id = 0;
+            this.Diagnosis = string.Empty;
+            this.TestResults = string.Empty;
+            this.Notes = null;
+            this.Status = string.Empty;
+            this.CreateDate = DateTime.MinValue;
+            this.DoctorName = string.Empty;
+            this.PatientName = string.Empty;
+            this.DiseaseName = string.Empty;
+            this.AppointmentId = 0;
+            this.PrescriptionId = 0;
         }
 
         public MedicalRecordDetailResponse(
@@ -32,17 +54,17 @@
             int appointmentId,
             int prescriptionId)
         {
-            Id = id;
-            Diagnosis = diagnosis;
-            TestResults = testResults;
-            Notes = notes;
-            Status = status;
-            CreateDate = createDate;
-            DoctorName = doctorName;
-            PatientName = patientName;
-            DiseaseName = diseaseName;
-            AppointmentId = appointmentId;
-            PrescriptionId = prescriptionId;
+            this.Id = id;
+            this.Diagnosis = diagnosis;
+            this.TestResults = testResults;
+            this.Notes = notes;
+            this.Status = status;
+            this.CreateDate = createDate;
+            this.DoctorName = doctorName;
+            this.PatientName = patientName;
+            this.DiseaseName = diseaseName;
+            this.AppointmentId = appointmentId;
+            this.PrescriptionId = prescriptionId;
         }
     }
 }

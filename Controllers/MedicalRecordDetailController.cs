@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicalRecord;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Service;
+using System;
+using System.Net;
 
 namespace SWP391_SE1914_ManageHospital.Controllers
 {
     [ApiController]
-    [Route("api/medical-record-details")]
+    [Route("api/medical-record")]
     public class MedicalRecordDetailController : ControllerBase
     {
         private readonly IMedicalRecordDetailService _detailService;
@@ -18,24 +21,24 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             _logger = logger;
         }
 
-        /// <summary>
         /// [VIEW DETAIL] Lấy thông tin chi tiết một Medical Record theo ID.
-        /// </summary>
-        /// <param name="medicalRecordId">ID của Medical Record</param>
-        /// <returns>MedicalRecordDetailResponse</returns>
-        [HttpGet("{medicalRecord-View}")]
+        [HttpGet("view/{medicalRecordId}")]
+        [ProducesResponseType(typeof(MedicalRecordDetailResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public IActionResult GetMedicalRecordDetail(int medicalRecordId)
         {
             try
             {
-                if (medicalRecordId <= 0)
-                    return BadRequest("ID Medical Record không hợp lệ");
-
                 var detail = _detailService.GetMedicalRecordDetail(medicalRecordId);
                 if (detail == null)
                     return NotFound($"Không tìm thấy Medical Record với ID: {medicalRecordId}");
 
                 return Ok(detail);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Dữ liệu đầu vào không hợp lệ: {Message}", ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -44,18 +47,26 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
         }
 
-        /// <summary>
         /// [CREATE] Tạo mới một Medical Record.
-        /// </summary>
-        /// <param name="request">Thông tin Medical Record cần tạo</param>
-        /// <returns>MedicalRecordDetailResponse</returns>
-        [HttpPost("{medicalRecord-Create}")]
+        [HttpPost("create")]
+        [ProducesResponseType(typeof(MedicalRecordDetailResponse), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public IActionResult CreateMedicalRecord([FromBody] MedicalRecordCreateRequest request)
         {
             try
             {
                 var result = _detailService.CreateMedicalRecord(request);
                 return CreatedAtAction(nameof(GetMedicalRecordDetail), new { medicalRecordId = result.Id }, result);
+            }
+            catch (ArgumentNullException ex)
+            {
+                _logger.LogWarning(ex, "Dữ liệu đầu vào không hợp lệ: {Message}", ex.Message);
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Dữ liệu đầu vào không hợp lệ: {Message}", ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -64,19 +75,26 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
         }
 
-        /// <summary>
         /// [UPDATE] Cập nhật thông tin một Medical Record theo ID.
-        /// </summary>
-        /// <param name="medicalRecordId">ID của Medical Record cần cập nhật</param>
-        /// <param name="request">Thông tin cập nhật</param>
-        /// <returns>MedicalRecordDetailResponse</returns>
-        [HttpPut("{medicalRecord-Update}")]
+        [HttpPut("update/{medicalRecordId}")]
+        [ProducesResponseType(typeof(MedicalRecordDetailResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public IActionResult UpdateMedicalRecord(int medicalRecordId, [FromBody] MedicalRecordUpdateRequest request)
         {
             try
             {
                 var result = _detailService.UpdateMedicalRecord(medicalRecordId, request);
                 return Ok(result);
+            }
+            catch (ArgumentNullException ex)
+            {
+                _logger.LogWarning(ex, "Dữ liệu đầu vào không hợp lệ: {Message}", ex.Message);
+                return BadRequest(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Dữ liệu đầu vào không hợp lệ: {Message}", ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -85,12 +103,10 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
         }
 
-        /// <summary>
         /// [DELETE] Xóa một Medical Record theo ID.
-        /// </summary>
-        /// <param name="medicalRecordId">ID của Medical Record cần xóa</param>
-        /// <returns>NoContent nếu xóa thành công</returns>
-        [HttpDelete("{medicalRecord-Delete}")]
+        [HttpDelete("delete/{medicalRecordId}")]
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public IActionResult DeleteMedicalRecord(int medicalRecordId)
         {
             try
@@ -100,6 +116,11 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                     return NotFound($"Không tìm thấy Medical Record với ID: {medicalRecordId}");
 
                 return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Dữ liệu đầu vào không hợp lệ: {Message}", ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

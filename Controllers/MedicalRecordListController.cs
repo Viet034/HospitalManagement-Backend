@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using SWP391_SE1914_ManageHospital.Service;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SWP391_SE1914_ManageHospital.Service;
+using System.Linq;
 
 namespace SWP391_SE1914_ManageHospital.Controllers
 {
@@ -22,15 +24,26 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         {
             try
             {
-                if (patientId <= 0)
-                    return BadRequest("ID bệnh nhân không hợp lệ");
-
+                _logger.LogInformation("Đang lấy danh sách medical records cho bệnh nhân ID: {PatientId}", patientId);
                 var records = _listService.GetMedicalRecordsByPatientId(patientId);
-                return Ok(records);
+
+                // Tạo đối tượng response bao gồm tổng số bản ghi và danh sách
+                var response = new
+                {
+                    TotalCount = records.Count(),
+                    Records = records
+                };
+
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Dữ liệu đầu vào không hợp lệ: {Message}", ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Đã xảy ra lỗi khi lấy hồ sơ bệnh án để lấy ID bệnh nhân {PatientId}", patientId);
+                _logger.LogError(ex, "Đã xảy ra lỗi khi lấy hồ sơ bệnh án cho ID bệnh nhân {PatientId}", patientId);
                 return StatusCode(500, "Đã xảy ra lỗi khi lấy danh sách Medical Records");
             }
         }

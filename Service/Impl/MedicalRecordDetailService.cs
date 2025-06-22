@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
@@ -24,13 +25,27 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
         {
             try
             {
+                if (medicalRecordId <= 0)
+                {
+                    throw new ArgumentException("ID Medical Record không hợp lệ", nameof(medicalRecordId));
+                }
+
                 var record = _context.Medical_Records
                     .Include(mr => mr.Doctor)
                     .Include(mr => mr.Patient)
                     .Include(mr => mr.Disease)
                     .FirstOrDefault(mr => mr.Id == medicalRecordId);
 
-                return record == null ? null : _detailMapper.EntityToDetailResponse(record);
+                if (record == null)
+                {
+                    return null;
+                }
+
+                return _detailMapper.EntityToDetailResponse(record);
+            }
+            catch (ArgumentException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -42,16 +57,31 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
         {
             try
             {
+                if (request == null)
+                {
+                    throw new ArgumentNullException(nameof(request), "Thông tin Medical Record không được để trống");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Diagnosis))
+                {
+                    throw new ArgumentException("Chẩn đoán không được để trống", nameof(request));
+                }
+
+                ValidateRelatedEntities(request.DoctorId, request.PatientId, request.DiseaseId);
+
                 var entity = _detailMapper.CreateRequestToEntity(request);
                 _context.Medical_Records.Add(entity);
                 _context.SaveChanges();
 
-                // Load navigation properties for response
                 _context.Entry(entity).Reference(e => e.Doctor).Load();
                 _context.Entry(entity).Reference(e => e.Patient).Load();
                 _context.Entry(entity).Reference(e => e.Disease).Load();
 
                 return _detailMapper.EntityToDetailResponse(entity);
+            }
+            catch (ArgumentException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -63,6 +93,23 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
         {
             try
             {
+                if (id <= 0)
+                {
+                    throw new ArgumentException("ID Medical Record không hợp lệ", nameof(id));
+                }
+
+                if (request == null)
+                {
+                    throw new ArgumentNullException(nameof(request), "Thông tin cập nhật không được để trống");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Diagnosis))
+                {
+                    throw new ArgumentException("Chẩn đoán không được để trống", nameof(request));
+                }
+
+                ValidateRelatedEntities(request.DoctorId, request.PatientId, request.DiseaseId);
+
                 var entity = _context.Medical_Records
                     .Include(mr => mr.Doctor)
                     .Include(mr => mr.Patient)
@@ -70,17 +117,22 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                     .FirstOrDefault(mr => mr.Id == id);
 
                 if (entity == null)
-                    throw new Exception("Medical record not found");
+                {
+                    throw new ArgumentException($"Không tìm thấy Medical Record với ID: {id}", nameof(id));
+                }
 
                 _detailMapper.UpdateEntityFromRequest(entity, request);
                 _context.SaveChanges();
 
-                // Reload navigation properties in case of change
                 _context.Entry(entity).Reference(e => e.Doctor).Load();
                 _context.Entry(entity).Reference(e => e.Patient).Load();
                 _context.Entry(entity).Reference(e => e.Disease).Load();
 
                 return _detailMapper.EntityToDetailResponse(entity);
+            }
+            catch (ArgumentException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -92,17 +144,52 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
         {
             try
             {
+                if (id <= 0)
+                {
+                    throw new ArgumentException("ID Medical Record không hợp lệ", nameof(id));
+                }
+
                 var entity = _context.Medical_Records.FirstOrDefault(mr => mr.Id == id);
                 if (entity == null)
+                {
                     return false;
+                }
 
                 _context.Medical_Records.Remove(entity);
                 _context.SaveChanges();
                 return true;
             }
+            catch (ArgumentException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 throw new Exception($"Lỗi khi xoá Medical Record ID: {id}", ex);
+            }
+        }
+
+        private void ValidateRelatedEntities(int doctorId, int patientId, int diseaseId)
+        {
+            // Kiểm tra bác sĩ tồn tại
+            bool doctorExists = _context.Doctors.Any(d => d.Id == doctorId);
+            if (!doctorExists)
+            {
+                throw new ArgumentException($"Không tìm thấy bác sĩ với ID: {doctorId}", nameof(doctorId));
+            }
+
+            // Kiểm tra bệnh nhân tồn tại
+            bool patientExists = _context.Patients.Any(p => p.Id == patientId);
+            if (!patientExists)
+            {
+                throw new ArgumentException($"Không tìm thấy bệnh nhân với ID: {patientId}", nameof(patientId));
+            }
+
+            // Kiểm tra bệnh tồn tại
+            bool diseaseExists = _context.Diseases.Any(d => d.Id == diseaseId);
+            if (!diseaseExists)
+            {
+                throw new ArgumentException($"Không tìm thấy bệnh với ID: {diseaseId}", nameof(diseaseId));
             }
         }
     }
