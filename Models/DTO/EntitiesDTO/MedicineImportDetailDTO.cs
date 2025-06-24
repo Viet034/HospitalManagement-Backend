@@ -8,6 +8,7 @@
         public string BatchNumber { get; set; } = string.Empty;
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
+        public DateTime ManufactureDate { get; set; }
         public DateTime ExpiryDate { get; set; }
         public int UnitId { get; set; }                
         public DateTime CreateDate { get; set; }
