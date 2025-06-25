@@ -31,6 +31,7 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRoleMapper, RoleMapper>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
@@ -41,12 +42,15 @@ builder.Services.AddScoped<INurseService, NurseService>();
 
 
 
+builder.Services.AddScoped<INurseService, NurseService>();
+builder.Services.AddScoped<INurseMapper, NurseMapper>();
 
+builder.Services.AddScoped<IMedicalRecordListMapper, MedicalRecordListMapper>();
+builder.Services.AddScoped<IMedicalRecordListService, MedicalRecordListService>();
 
+builder.Services.AddScoped<IMedicalRecordDetailMapper, MedicalRecordDetailMapper>();
+builder.Services.AddScoped<IMedicalRecordDetailService, MedicalRecordDetailService>();
 
-builder.Services.AddScoped<IMedicalRecordMapper, MedicalRecordMapper>();
-builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 
@@ -55,6 +59,9 @@ builder.Services.AddScoped<IMedicineService, MedicineService>();
 var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
 Console.WriteLine(hash);
 */
+
+
+
 
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
