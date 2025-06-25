@@ -15,9 +15,13 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
+
+
 builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -47,6 +51,10 @@ builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>();
 builder.Services.AddScoped<INurseService, NurseService>();
 
+
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+
 builder.Services.AddScoped<ISupplierMapper, SupplierMapper>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IMedicineImportMapper, MedicineImportMapper>();
@@ -56,6 +64,7 @@ builder.Services.AddScoped<IMedicineImportDetailService, MedicineImportDetailSer
 
 builder.Services.AddScoped<IMedicineManageForAdminService, MedicineManageForAdminService>();
 builder.Services.AddScoped<IMedicineManageForAdminMapper, MedicineManageForAdminMapper>();
+
 
 
 

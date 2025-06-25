@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+
     <Compile Remove="Models\DTO\RequestDTO\MedicineImportDetail\**" />
     <Content Remove="Models\DTO\RequestDTO\MedicineImportDetail\**" />
     <EmbeddedResource Remove="Models\DTO\RequestDTO\MedicineImportDetail\**" />
@@ -19,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+
 
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
 
@@ -40,5 +42,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+
+  <ItemGroup>
+    <Folder Include="Models\DTO\ResponseDTO\Payment\" />
+  </ItemGroup>
+
 
 </Project>
