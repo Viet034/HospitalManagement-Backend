@@ -9,7 +9,12 @@
         public string Name { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
         public string Dosage { get; set; } = string.Empty;
+
         public int UnitId { get; set; }
+
+        public int UnitId { get; set; };
+        public MedicineStatus Status { get; set; }
+
         public int MedicineCategoryId { get; set; }
         public string Prescribed { get; set; } = string.Empty;
 

@@ -47,6 +47,7 @@ public class ApplicationDBContext : DbContext
     public DbSet<Supplier> Suppliers { get; set; }
     public DbSet<MedicineImport> MedicineImports { get; set; }
     public DbSet<MedicineImportDetail> MedicineImportDetails { get; set; }
+    public DbSet<Doctor_Shift> Doctor_Shifts { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -101,6 +102,34 @@ public class ApplicationDBContext : DbContext
                 .HasForeignKey(cus => cus.ReceptionId).OnDelete(DeleteBehavior.Cascade);
 
 
+        });
+
+        modelBuilder.Entity<Doctor_Shift>(entity =>
+        {
+            entity.ToTable("doctor_shifts");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.ShiftType)
+                  .IsRequired()
+                  .HasMaxLength(50);
+
+            entity.Property(e => e.StartTime).IsRequired();
+            entity.Property(e => e.EndTime).IsRequired();
+            entity.Property(e => e.ShiftDate).IsRequired();
+
+            entity.Property(e => e.Notes).HasMaxLength(255);
+
+
+            entity.Property(e => e.CreateDate).IsRequired();
+            entity.Property(e => e.UpdateDate).IsRequired();
+            entity.Property(e => e.CreateBy).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.UpdateBy).HasMaxLength(100).IsRequired();
+
+            entity.HasOne(e => e.Doctor)
+                  .WithMany(d => d.Doctor_Shifts)
+                  .HasForeignKey(e => e.DoctorId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<MedicineDetail>(entity =>
@@ -170,6 +199,7 @@ public class ApplicationDBContext : DbContext
             entity.Property(e => e.BatchNumber).HasMaxLength(50);
             entity.Property(e => e.Quantity).IsRequired();
             entity.Property(e => e.UnitPrice).IsRequired().HasColumnType("decimal(65,30)");
+            entity.Property(e => e.ManufactureDate).IsRequired();
             entity.Property(e => e.ExpiryDate).IsRequired();
             entity.Property(e => e.CreateDate).IsRequired();
             entity.Property(e => e.UpdateDate);
@@ -190,7 +220,7 @@ public class ApplicationDBContext : DbContext
                   .WithMany()
                   .HasForeignKey(e => e.UnitId)
                   .OnDelete(DeleteBehavior.Restrict);
-
+            entity.HasIndex(e => new { e.MedicineId, e.BatchNumber }).IsUnique();
         });
 
         modelBuilder.Entity<Clinic>(entity =>
@@ -622,7 +652,9 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.Id).ValueGeneratedOnAdd();
             entity.Property(a => a.Quantity).IsRequired().HasMaxLength(100);
             entity.Property(a => a.BatchNumber).IsRequired().HasMaxLength(100);
-            entity.Property(a => a.UnitPrice).IsRequired().HasMaxLength(100);
+            entity.Property(a => a.UnitPrice)
+           .IsRequired()
+           .HasColumnType("decimal(65,30)");
             entity.Property(a => a.ImportDate).IsRequired();
             entity.Property(a => a.ExpiryDate).IsRequired();
 
@@ -635,7 +667,10 @@ public class ApplicationDBContext : DbContext
                  .WithMany(cv => cv.Medicine_Inventories)
                  .HasForeignKey(cus => cus.MedicineId)
                  .OnDelete(DeleteBehavior.Cascade);
-     
+            entity.HasOne(i => i.ImportDetail)
+                .WithMany(d => d.Inventories)
+                .HasForeignKey(i => i.ImportDetailId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         });
 
