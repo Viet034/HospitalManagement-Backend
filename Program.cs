@@ -14,6 +14,8 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpContextAccessor();
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -38,6 +40,16 @@ builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>();
 builder.Services.AddScoped<INurseService, NurseService>();
+
+builder.Services.AddScoped<ISupplierMapper, SupplierMapper>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<IMedicineImportMapper, MedicineImportMapper>();
+builder.Services.AddScoped<IMedicineImportService, MedicineImportService>();
+builder.Services.AddScoped<IMedicineImportDetailMapper, MedicineImportDetailMapper>();
+builder.Services.AddScoped<IMedicineImportDetailService, MedicineImportDetailService>();
+
+builder.Services.AddScoped<IMedicineManageForAdminService, MedicineManageForAdminService>();
+builder.Services.AddScoped<IMedicineManageForAdminMapper, MedicineManageForAdminMapper>();
 
 
 
@@ -146,7 +158,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebBanAoo API", Version = "v1" });
 
-    // Th�m c?u h�nh security
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
