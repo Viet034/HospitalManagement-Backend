@@ -8,13 +8,20 @@ using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Mapper.Impl;
 using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Service.Impl;
+using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Ultility;
 using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
+
+
+builder.Services.AddHttpContextAccessor();
+
 // Add services to the container.
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -32,6 +39,12 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRoleMapper, RoleMapper>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
+builder.Services.AddScoped<IDoctorMapper, DoctorMapper>();
+builder.Services.AddScoped<IDoctorService, DoctorService>();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+
 
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
@@ -39,14 +52,32 @@ builder.Services.AddScoped<INurseMapper, NurseMapper>();
 builder.Services.AddScoped<INurseService, NurseService>();
 
 
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+
+builder.Services.AddScoped<ISupplierMapper, SupplierMapper>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<IMedicineImportMapper, MedicineImportMapper>();
+builder.Services.AddScoped<IMedicineImportService, MedicineImportService>();
+builder.Services.AddScoped<IMedicineImportDetailMapper, MedicineImportDetailMapper>();
+builder.Services.AddScoped<IMedicineImportDetailService, MedicineImportDetailService>();
+
+builder.Services.AddScoped<IMedicineManageForAdminService, MedicineManageForAdminService>();
+builder.Services.AddScoped<IMedicineManageForAdminMapper, MedicineManageForAdminMapper>();
 
 
 
 
 
-builder.Services.AddScoped<IMedicalRecordMapper, MedicalRecordMapper>();
-builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<INurseService, NurseService>();
+builder.Services.AddScoped<INurseMapper, NurseMapper>();
+
+builder.Services.AddScoped<IMedicalRecordListMapper, MedicalRecordListMapper>();
+builder.Services.AddScoped<IMedicalRecordListService, MedicalRecordListService>();
+
+builder.Services.AddScoped<IMedicalRecordDetailMapper, MedicalRecordDetailMapper>();
+builder.Services.AddScoped<IMedicalRecordDetailService, MedicalRecordDetailService>();
+
 
 
 
@@ -55,6 +86,9 @@ builder.Services.AddScoped<IMedicineService, MedicineService>();
 var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
 Console.WriteLine(hash);
 */
+
+
+
 
 
 var connectionStr = builder.Configuration.GetConnectionString("MySQL");
@@ -139,7 +173,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebBanAoo API", Version = "v1" });
 
-    // Th�m c?u h�nh security
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
