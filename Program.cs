@@ -51,6 +51,16 @@ builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>();
 builder.Services.AddScoped<INurseService, NurseService>();
 
+builder.Services.AddScoped<IMedicineService, MedicineService>();
+builder.Services.AddScoped<IMedicineMapper, MedicineMapper>();
+
+builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
+builder.Services.AddScoped<IMedicineCategoryMapper, MedicineCategoryMapper>();
+
+// Đăng ký service
+builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
+
+
 
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
@@ -81,7 +91,7 @@ builder.Services.AddScoped<IMedicalRecordDetailService, MedicalRecordDetailServi
 
 
 
-builder.Services.AddScoped<IMedicineService, MedicineService>();
+
 /*
 var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
 Console.WriteLine(hash);
@@ -107,7 +117,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin() 
+        policy.AllowAnyOrigin()
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -216,3 +226,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+

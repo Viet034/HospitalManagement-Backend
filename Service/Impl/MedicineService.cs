@@ -1,113 +1,68 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using SWP391_SE1914_ManageHospital.Data;
-using SWP391_SE1914_ManageHospital.Models;
+using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Medicine;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
-using SWP391_SE1914_ManageHospital.Models.Entities;
-using SWP391_SE1914_ManageHospital.Ultility;
 
 public class MedicineService : IMedicineService
 {
     private readonly ApplicationDBContext _context;
+    private readonly IMedicineMapper _mapper;
 
-    public MedicineService(ApplicationDBContext context)
+    public MedicineService(ApplicationDBContext context, IMedicineMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
-    public async Task<List<MedicineResponseDTO>> GetAllAsync()
+    public async Task<List<MedicineResponse>> GetAllAsync()
     {
-        return await _context.Medicines
-            .Select(m => new MedicineResponseDTO
-            {
-                Id = m.Id,
-                Name = m.Name,
-                Code = m.Code,
-                Description = m.Description,
-                Dosage = m.Dosage,
-                Unit = m.Unit != null ? m.Unit.Name : "",
-                Status = m.Status ,
-                MedicineCategoryId = m.MedicineCategoryId,
-                CreateDate = m.CreateDate,
-                UpdateDate = m.UpdateDate,
-                CreateBy = m.CreateBy,
-                UpdateBy = m.UpdateBy
-            })
-            .ToListAsync();
+        var list = await _context.Medicines.AsNoTracking().ToListAsync();
+        return list.Select(_mapper.MapToDTO).ToList();
     }
 
-    public async Task<MedicineResponseDTO?> GetByIdAsync(int id)
+    public async Task<MedicineResponse?> GetByIdAsync(int id)
     {
-        var m = await _context.Medicines.FindAsync(id);
-        if (m == null) return null;
-
-        return new MedicineResponseDTO
-        {
-            Id = m.Id,
-            Name = m.Name,
-            Code = m.Code,
-            Description = m.Description,
-            Dosage = m.Dosage,
-            Unit = m.Unit != null ? m.Unit.Name : "",
-            Status = m.Status,
-            MedicineCategoryId = m.MedicineCategoryId,
-            CreateDate = m.CreateDate,
-            UpdateDate = m.UpdateDate,
-            CreateBy = m.CreateBy,
-            UpdateBy = m.UpdateBy
-        };
+        var entity = await _context.Medicines.FindAsync(id);
+        return entity == null ? null : _mapper.MapToDTO(entity);
     }
 
-    public async Task<MedicineResponseDTO> CreateAsync(MedicineCreate request)
+    public async Task<MedicineResponse> CreateAsync(MedicineRequest request)
     {
-        var m = new Medicine
-        {
-            Name = request.Name,
-            Code = request.Code,
-            Description = request.Description,
-            Dosage = request.Dosage,
-            UnitId = request.UnitId,
-            MedicineCategoryId = request.MedicineCategoryId,
-            Status = request.Status,
-            CreateDate = request.CreateDate,
-            UpdateDate = request.UpdateDate,
-            CreateBy = request.CreateBy,
-            UpdateBy = request.UpdateBy
-        };
-
-        _context.Medicines.Add(m);
+        var entity = _mapper.MapToEntity(request);
+        _context.Medicines.Add(entity);
         await _context.SaveChangesAsync();
-
-        return await GetByIdAsync(m.Id) ?? throw new Exception("Tạo thất bại");
+        return _mapper.MapToDTO(entity);
     }
 
-    public async Task<bool> UpdateAsync(int id, MedicineCreate request)
+    public async Task<MedicineResponse?> UpdateAsync(int id, MedicineRequest request)
     {
-        var m = await _context.Medicines.FindAsync(id);
-        if (m == null) return false;
+        var entity = await _context.Medicines.FindAsync(id);
+        if (entity == null) return null;
 
-        m.Name = request.Name;
-        m.Code = request.Code;
-        m.Description = request.Description;
-        m.Dosage = request.Dosage;
-        m.UnitId = request.UnitId;
-        m.MedicineCategoryId = request.MedicineCategoryId;
-        m.Status = request.Status;
-        m.UpdateDate = request.UpdateDate;
-        m.UpdateBy = request.UpdateBy;
-
+        _mapper.MapToExistingEntity(request, entity);
         await _context.SaveChangesAsync();
-        return true;
+        return _mapper.MapToDTO(entity);
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var m = await _context.Medicines.FindAsync(id);
-        if (m == null) return false;
+        var entity = await _context.Medicines.FindAsync(id);
+        if (entity == null) return false;
 
-        _context.Medicines.Remove(m);
+        _context.Medicines.Remove(entity);
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<List<MedicineResponse>> GetByPrescribedAsync(int prescribed)
+    {
+        var list = await _context.Medicines
+            .Where(m => (int)m.Prescribed == prescribed)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return list.Select(_mapper.MapToDTO).ToList();
+    }
+
 }
