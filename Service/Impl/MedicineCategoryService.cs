@@ -18,7 +18,7 @@ namespace SWP391_SE1914_ManageHospital.Service
             _mapper = mapper;
         }
 
-        public async Task<List<MedicineCategoryResponse>> GetAllAsync()
+        public async Task<List<MedicineCategoryResponseDTO>> GetAllAsync()
         {
             var list = await _context.MedicineCategories
                                      .AsNoTracking()
