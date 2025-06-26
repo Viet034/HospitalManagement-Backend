@@ -2,7 +2,7 @@
 
 namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
 {
-    public class MedicineResponse
+    public class MedicineResponseDTO
     {
         public int Id { get; set; }
         public string? ImageUrl { get; set; }

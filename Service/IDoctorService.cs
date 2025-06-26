@@ -1,4 +1,5 @@
 ﻿using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Doctor;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,5 +15,7 @@ namespace SWP391_SE1914_ManageHospital.Service
         Task<string> CheckUniqueCodeAsync();
         Task<DoctorResponseDTO> UpdateDoctorAsync(int id, DoctorUpdate doctorUpdateDto);
         Task<bool> DeleteDoctorAsync(int id, DoctorDelete doctorDeleteDto);
+        Task<DoctorRegisterResponse> DoctorRegisterAsync(DoctorRegisterRequest request);
+
     }
 }

@@ -15,19 +15,19 @@ public class MedicineService : IMedicineService
         _mapper = mapper;
     }
 
-    public async Task<List<MedicineResponse>> GetAllAsync()
+    public async Task<List<MedicineResponseDTO>> GetAllAsync()
     {
         var list = await _context.Medicines.AsNoTracking().ToListAsync();
         return list.Select(_mapper.MapToDTO).ToList();
     }
 
-    public async Task<MedicineResponse?> GetByIdAsync(int id)
+    public async Task<MedicineResponseDTO?> GetByIdAsync(int id)
     {
         var entity = await _context.Medicines.FindAsync(id);
         return entity == null ? null : _mapper.MapToDTO(entity);
     }
 
-    public async Task<MedicineResponse> CreateAsync(MedicineRequest request)
+    public async Task<MedicineResponseDTO> CreateAsync(MedicineRequest request)
     {
         var entity = _mapper.MapToEntity(request);
         _context.Medicines.Add(entity);
@@ -35,7 +35,7 @@ public class MedicineService : IMedicineService
         return _mapper.MapToDTO(entity);
     }
 
-    public async Task<MedicineResponse?> UpdateAsync(int id, MedicineRequest request)
+    public async Task<MedicineResponseDTO?> UpdateAsync(int id, MedicineRequest request)
     {
         var entity = await _context.Medicines.FindAsync(id);
         if (entity == null) return null;
@@ -55,7 +55,7 @@ public class MedicineService : IMedicineService
         return true;
     }
 
-    public async Task<List<MedicineResponse>> GetByPrescribedAsync(int prescribed)
+    public async Task<List<MedicineResponseDTO>> GetByPrescribedAsync(int prescribed)
     {
         var list = await _context.Medicines
             .Where(m => (int)m.Prescribed == prescribed)
