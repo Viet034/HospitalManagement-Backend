@@ -8,7 +8,7 @@ public interface IAppointmentMapper
 {
     // Request -> Entity
     Appointment CreateToEntity(AppointmentCreate create);
-    Appointment UpdateToEntity(AppointmentUpdate update);
+    void UpdateEntityFromDto(AppointmentUpdate update, Appointment entity);
     Appointment DeleteToEntity(AppointmentDelete delete);
 
     // Entity -> Response

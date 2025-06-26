@@ -92,24 +92,21 @@ public class AppointmentMapper : IAppointmentMapper
         return entities.Select(entity => EntityToResponse(entity));
     }
 
-    public Appointment UpdateToEntity(AppointmentUpdate update)
+    public void UpdateEntityFromDto(AppointmentUpdate update, Appointment entity)
     {
-        return new Appointment
-        {
-            Name = update.Name,
-            Code = update.Code,
-            AppointmentDate = update.AppointmentDate,
-            StartTime = update.StartTime,
-            EndTime = update.EndTime,
-            Status = update.Status,
-            Note = update.Note,
-            PatientId = update.PatientId,
-            ClinicId = update.ClinicId,
-            ReceptionId = update.ReceptionId,
-            CreateDate = update.CreateDate,
-            UpdateDate = update.UpdateDate,
-            CreateBy = update.CreateBy,
-            UpdateBy = update.UpdateBy
-        };
+        entity.Name = update.Name;
+        entity.Code = update.Code;
+        entity.AppointmentDate = update.AppointmentDate;
+        entity.StartTime = update.StartTime;
+        entity.EndTime = update.EndTime;
+        entity.Status = update.Status;
+        entity.Note = update.Note;
+        entity.PatientId = update.PatientId;
+        entity.ClinicId = update.ClinicId;
+        entity.ReceptionId = update.ReceptionId;
+        entity.CreateDate = update.CreateDate;
+        entity.UpdateDate = update.UpdateDate;
+        entity.CreateBy = update.CreateBy;
+        entity.UpdateBy = update.UpdateBy;
     }
 } 

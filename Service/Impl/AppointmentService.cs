@@ -13,6 +13,8 @@ public class AppointmentService : IAppointmentService
 {
     private readonly ApplicationDBContext _context;
     private readonly IAppointmentMapper _mapper;
+    private const string DefaultUser = "System";
+    private const string StringPlaceholder = "string";
 
     public AppointmentService(ApplicationDBContext context, IAppointmentMapper mapper)
     {
@@ -22,12 +24,11 @@ public class AppointmentService : IAppointmentService
 
     public async Task<AppointmentResponseDTO> ChangeAppointmentStatusAsync(int id, AppointmentStatus status)
     {
-        var appointment = await _context.Appointments.FindAsync(id)
-            ?? throw new KeyNotFoundException($"Không tìm thấy cuộc hẹn với ID: {id}");
+        var appointment = await GetAppointmentByIdInternalAsync(id);
 
         appointment.Status = status;
         appointment.UpdateDate = DateTime.Now;
-        appointment.UpdateBy = "System";
+        appointment.UpdateBy = DefaultUser;
 
         await _context.SaveChangesAsync();
 
@@ -36,75 +37,32 @@ public class AppointmentService : IAppointmentService
 
     public async Task<AppointmentResponseDTO> CreateAppointmentAsync(AppointmentCreate create)
     {
-        try
+        await ValidatePatientExistsAsync(create.PatientId);
+        await ValidateClinicExistsAsync(create.ClinicId);
+        await ValidateReceptionExistsAsync(create.ReceptionId);
+
+        if (string.IsNullOrEmpty(create.Code) || create.Code == StringPlaceholder)
         {
-            // Kiểm tra xem bệnh nhân có tồn tại không
-            var patient = await _context.Patients.FindAsync(create.PatientId)
-                ?? throw new KeyNotFoundException($"Không tìm thấy bệnh nhân với ID: {create.PatientId}");
-
-            // Kiểm tra xem phòng khám có tồn tại không
-            var clinic = await _context.Clinics.FindAsync(create.ClinicId)
-                ?? throw new KeyNotFoundException($"Không tìm thấy phòng khám với ID: {create.ClinicId}");
-
-            // Kiểm tra xem lễ tân có tồn tại không
-            var reception = await _context.Receptions.FindAsync(create.ReceptionId)
-                ?? throw new KeyNotFoundException($"Không tìm thấy lễ tân với ID: {create.ReceptionId}");
-
-            // Tạo mã duy nhất nếu không có
-            if (string.IsNullOrEmpty(create.Code) || create.Code == "string")
-            {
-                create.Code = await GenerateUniqueCodeAsync();
-            }
-
-            // Nếu không có các giá trị ngày tạo và người tạo, thiết lập giá trị mặc định
-            if (create.CreateDate == default)
-            {
-                create.CreateDate = DateTime.Now;
-            }
-
-            if (string.IsNullOrEmpty(create.CreateBy))
-            {
-                create.CreateBy = "System";
-            }
-
-            var entity = _mapper.CreateToEntity(create);
-            
-            await _context.Appointments.AddAsync(entity);
-            
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException dbEx)
-            {
-                // Ghi log lỗi chi tiết từ inner exception
-                var innerException = dbEx.InnerException;
-                Console.WriteLine($"Database error: {dbEx.Message}");
-                Console.WriteLine($"Inner exception: {innerException?.Message}");
-                
-                // Ném ngoại lệ với thông tin chi tiết hơn
-                throw new Exception($"Lỗi khi lưu dữ liệu: {dbEx.Message}", dbEx);
-            }
-
-            return _mapper.EntityToResponse(entity);
+            create.Code = await GenerateUniqueCodeAsync();
         }
-        catch (KeyNotFoundException)
-        {
-            throw; // Re-throw the key not found exceptions
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in CreateAppointmentAsync: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            throw new Exception($"Lỗi khi tạo cuộc hẹn: {ex.Message}", ex);
-        }
+
+        var now = DateTime.Now;
+        create.CreateDate = now;
+        create.CreateBy = DefaultUser;
+
+        var entity = _mapper.CreateToEntity(create);
+        entity.UpdateDate = now;
+        entity.UpdateBy = DefaultUser;
+
+        await _context.Appointments.AddAsync(entity);
+        await _context.SaveChangesAsync();
+
+        return _mapper.EntityToResponse(entity);
     }
 
     public async Task<bool> DeleteAppointmentAsync(int id)
     {
-        var appointment = await _context.Appointments.FindAsync(id)
-            ?? throw new KeyNotFoundException($"Không tìm thấy cuộc hẹn với ID: {id}");
-
+        var appointment = await GetAppointmentByIdInternalAsync(id);
         _context.Appointments.Remove(appointment);
         await _context.SaveChangesAsync();
         return true;
@@ -118,7 +76,6 @@ public class AppointmentService : IAppointmentService
         do
         {
             newCode = GenerateCode.GenerateAppointmentCode();
-            _context.ChangeTracker.Clear();
             isExist = await _context.Appointments.AnyAsync(p => p.Code == newCode);
         }
         while (isExist);
@@ -131,6 +88,7 @@ public class AppointmentService : IAppointmentService
         var appointments = await _context.Appointments
             .OrderByDescending(a => a.AppointmentDate)
             .ThenBy(a => a.StartTime)
+            .AsNoTracking()
             .ToListAsync();
 
         return _mapper.ListEntityToResponse(appointments);
@@ -138,21 +96,19 @@ public class AppointmentService : IAppointmentService
 
     public async Task<AppointmentResponseDTO> GetAppointmentByIdAsync(int id)
     {
-        var appointment = await _context.Appointments.FindAsync(id)
-            ?? throw new KeyNotFoundException($"Không tìm thấy cuộc hẹn với ID: {id}");
-
+        var appointment = await GetAppointmentByIdInternalAsync(id);
         return _mapper.EntityToResponse(appointment);
     }
 
     public async Task<IEnumerable<AppointmentResponseDTO>> GetAppointmentsByPatientIdAsync(int patientId)
     {
-        var patient = await _context.Patients.FindAsync(patientId)
-            ?? throw new KeyNotFoundException($"Không tìm thấy bệnh nhân với ID: {patientId}");
+        await ValidatePatientExistsAsync(patientId);
 
         var appointments = await _context.Appointments
             .Where(a => a.PatientId == patientId)
             .OrderByDescending(a => a.AppointmentDate)
             .ThenBy(a => a.StartTime)
+            .AsNoTracking()
             .ToListAsync();
 
         return _mapper.ListEntityToResponse(appointments);
@@ -161,9 +117,10 @@ public class AppointmentService : IAppointmentService
     public async Task<IEnumerable<AppointmentResponseDTO>> SearchAppointmentsByNameAsync(string name)
     {
         var appointments = await _context.Appointments
-            .FromSqlRaw("SELECT * FROM Appointments WHERE Name LIKE {0}", "%" + name + "%")
+            .Where(a => a.Name.Contains(name))
             .OrderByDescending(a => a.AppointmentDate)
             .ThenBy(a => a.StartTime)
+            .AsNoTracking()
             .ToListAsync();
 
         return _mapper.ListEntityToResponse(appointments);
@@ -171,47 +128,49 @@ public class AppointmentService : IAppointmentService
 
     public async Task<AppointmentResponseDTO> UpdateAppointmentAsync(int id, AppointmentUpdate update)
     {
-        var appointment = await _context.Appointments.FindAsync(id)
-            ?? throw new KeyNotFoundException($"Không tìm thấy cuộc hẹn với ID: {id}");
+        var appointment = await GetAppointmentByIdInternalAsync(id);
 
-        // Kiểm tra xem bệnh nhân có tồn tại không
-        if (appointment.PatientId != update.PatientId)
-        {
-            var patient = await _context.Patients.FindAsync(update.PatientId)
-                ?? throw new KeyNotFoundException($"Không tìm thấy bệnh nhân với ID: {update.PatientId}");
-        }
+        await ValidatePatientExistsAsync(update.PatientId);
+        await ValidateClinicExistsAsync(update.ClinicId);
+        await ValidateReceptionExistsAsync(update.ReceptionId);
 
-        // Kiểm tra xem phòng khám có tồn tại không
-        if (appointment.ClinicId != update.ClinicId)
-        {
-            var clinic = await _context.Clinics.FindAsync(update.ClinicId)
-                ?? throw new KeyNotFoundException($"Không tìm thấy phòng khám với ID: {update.ClinicId}");
-        }
-
-        // Kiểm tra xem lễ tân có tồn tại không
-        if (appointment.ReceptionId != update.ReceptionId)
-        {
-            var reception = await _context.Receptions.FindAsync(update.ReceptionId)
-                ?? throw new KeyNotFoundException($"Không tìm thấy lễ tân với ID: {update.ReceptionId}");
-        }
-
-        appointment.Name = update.Name;
-        appointment.Code = update.Code;
-        appointment.AppointmentDate = update.AppointmentDate;
-        appointment.StartTime = update.StartTime;
-        appointment.EndTime = update.EndTime;
-        appointment.Status = update.Status;
-        appointment.Note = update.Note;
-        appointment.PatientId = update.PatientId;
-        appointment.ClinicId = update.ClinicId;
-        appointment.ReceptionId = update.ReceptionId;
-        appointment.CreateDate = update.CreateDate;
-        appointment.UpdateDate = update.UpdateDate;
-        appointment.CreateBy = update.CreateBy;
-        appointment.UpdateBy = update.UpdateBy;
+        _mapper.UpdateEntityFromDto(update, appointment);
+        
+        appointment.UpdateDate = DateTime.Now;
+        appointment.UpdateBy = DefaultUser;
 
         await _context.SaveChangesAsync();
 
         return _mapper.EntityToResponse(appointment);
+    }
+    
+    private async Task<Appointment> GetAppointmentByIdInternalAsync(int id)
+    {
+        return await _context.Appointments.FindAsync(id)
+            ?? throw new KeyNotFoundException($"Không tìm thấy cuộc hẹn với ID: {id}");
+    }
+
+    private async Task ValidatePatientExistsAsync(int patientId)
+    {
+        if (!await _context.Patients.AnyAsync(p => p.Id == patientId))
+        {
+            throw new KeyNotFoundException($"Không tìm thấy bệnh nhân với ID: {patientId}");
+        }
+    }
+
+    private async Task ValidateClinicExistsAsync(int clinicId)
+    {
+        if (!await _context.Clinics.AnyAsync(c => c.Id == clinicId))
+        {
+            throw new KeyNotFoundException($"Không tìm thấy phòng khám với ID: {clinicId}");
+        }
+    }
+
+    private async Task ValidateReceptionExistsAsync(int receptionId)
+    {
+        if (!await _context.Receptions.AnyAsync(r => r.Id == receptionId))
+        {
+            throw new KeyNotFoundException($"Không tìm thấy lễ tân với ID: {receptionId}");
+        }
     }
 } 
