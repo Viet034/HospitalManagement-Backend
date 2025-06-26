@@ -26,13 +26,13 @@ namespace SWP391_SE1914_ManageHospital.Service
             return list.Select(m => _mapper.MapToDTO(m)).ToList();
         }
 
-        public async Task<MedicineCategoryResponse?> GetByIdAsync(int id)
+        public async Task<MedicineCategoryResponseDTO?> GetByIdAsync(int id)
         {
             var entity = await _context.MedicineCategories.FindAsync(id);
             return entity == null ? null : _mapper.MapToDTO(entity);
         }
 
-        public async Task<MedicineCategoryResponse> CreateAsync(MedicineCategoryRequest request)
+        public async Task<MedicineCategoryResponseDTO> CreateAsync(MedicineCategoryRequest request)
         {
             var entity = _mapper.MapToEntity(request);
             _context.MedicineCategories.Add(entity);
@@ -40,7 +40,7 @@ namespace SWP391_SE1914_ManageHospital.Service
             return _mapper.MapToDTO(entity);
         }
 
-        public async Task<MedicineCategoryResponse?> UpdateAsync(int id, MedicineCategoryRequest request)
+        public async Task<MedicineCategoryResponseDTO?> UpdateAsync(int id, MedicineCategoryRequest request)
         {
             var entity = await _context.MedicineCategories.FindAsync(id);
             if (entity == null) return null;
