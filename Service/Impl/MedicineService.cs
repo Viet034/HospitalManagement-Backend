@@ -3,6 +3,7 @@ using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Medicine;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 public class MedicineService : IMedicineService
 {
@@ -64,5 +65,25 @@ public class MedicineService : IMedicineService
 
         return list.Select(_mapper.MapToDTO).ToList();
     }
+
+    public async Task<IEnumerable<MedicineResponseDTO>> GetByCategoryIdAsync(int categoryId)
+    {
+        var medicines = await _context.Medicines
+            .Where(m => m.MedicineCategoryId == categoryId)
+            .Select(m => new MedicineResponseDTO
+            {
+                Id = m.Id,
+                Name = m.Name,
+                Code = m.Code,
+                MedicineCategoryName = m.MedicineCategory.Name,
+                UnitName = m.Unit.Name,
+                Status = MedicineStatus.Active,
+                // thêm các trường khác nếu cần
+            })
+            .ToListAsync();
+
+        return medicines;
+    }
+
 
 }
