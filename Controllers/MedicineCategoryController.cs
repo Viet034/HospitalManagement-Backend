@@ -16,14 +16,14 @@ public class MedicineCategoryController : ControllerBase
         _service = service;
     }
 
-    [HttpGet]
+    [HttpGet("get-all")]
     public async Task<IActionResult> GetAll()
     {
         var result = await _service.GetAllAsync();
         return Ok(result);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("get-by-id/{id}")]
     public async Task<IActionResult> GetById(int id)
     {
         var result = await _service.GetByIdAsync(id);
@@ -32,14 +32,14 @@ public class MedicineCategoryController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost]
+    [HttpPost("add-medicineCategory")]
     public async Task<IActionResult> Create([FromBody] MedicineCategoryRequest request)
     {
         var result = await _service.CreateAsync(request);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("update-medicineCategory/{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] MedicineCategoryRequest request)
     {
         var result = await _service.UpdateAsync(id, request);
@@ -48,7 +48,7 @@ public class MedicineCategoryController : ControllerBase
         return Ok(result);
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("delete-medicineCategory/{id}")]
     public async Task<IActionResult> Delete(int id)
     {
         var success = await _service.DeleteAsync(id);

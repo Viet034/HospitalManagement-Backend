@@ -10,4 +10,6 @@ public interface IMedicineService
     Task<bool> DeleteAsync(int id);
     Task<List<MedicineResponseDTO>> GetByPrescribedAsync(int prescribed);
 
+    Task<IEnumerable<MedicineResponseDTO>> GetByCategoryIdAsync(int categoryId);
+
 }

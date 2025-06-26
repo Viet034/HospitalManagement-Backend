@@ -6,7 +6,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper
 {
     public interface IMedicineCategoryMapper
     {
-        MedicineCategoryResponse MapToDTO(MedicineCategory entity);
+        MedicineCategoryResponseDTO MapToDTO(MedicineCategory entity);
         MedicineCategory MapToEntity(MedicineCategoryRequest request);
         void MapToExistingEntity(MedicineCategoryRequest request, MedicineCategory entity);
     }
