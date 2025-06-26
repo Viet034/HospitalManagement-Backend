@@ -2,12 +2,15 @@
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Doctor;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Ultility;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
 {
@@ -103,6 +106,92 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             _context.Doctors.Remove(doctor);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<DoctorRegisterResponse> DoctorRegisterAsync(DoctorRegisterRequest request)
+        {
+            var department = await _context.Departments.FirstOrDefaultAsync(d => d.Id == request.DepartmentId);
+            if (department == null)
+            {
+                throw new Exception("DepartmentId không tồn tại.");
+            }
+            if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+            {
+                throw new Exception("Email đã tồn tại");
+            }
+            if (await _context.Doctors.AnyAsync(u => u.Phone == request.Phone))
+            {
+                throw new Exception("Số điện thoại đã tồn tại");
+            }
+            if (await _context.Doctors.AnyAsync(u => u.CCCD == request.CCCD))
+            {
+                throw new Exception("CCCD đã tồn tại");
+            }
+            request.FullName = request.FullName.Trim();
+            if (string.IsNullOrEmpty(request.FullName))
+                throw new Exception("Không được để trống tên");
+
+            if (!Regex.IsMatch(request.FullName, @"^[a-zA-ZÀ-ỹ\s]+$"))
+                throw new Exception("Tên không được chứa kí tự đặc biệt");
+            var hashedPassword = _passwordHasher.HashPassword(request.Password);
+            var newUser = new User
+            {
+                Email = request.Email,
+                Password = hashedPassword,
+                Status = UserStatus.Active
+            };
+
+            await _context.Users.AddAsync(newUser);
+            await _context.SaveChangesAsync();
+            var doctor = new Doctor
+            {
+                Code = request.Code,
+                Name = request.FullName,
+                Gender = request.Gender,
+                Dob = request.Dob,
+                CCCD = request.CCCD,
+                Phone = request.Phone,
+                ImageURL = "",
+                Status = DoctorStatus.Available,
+                CreateDate = DateTime.Now.AddHours(7),
+                UpdateDate = DateTime.Now.AddHours(7),
+                CreateBy = request.FullName,
+                UpdateBy = request.FullName,
+                DepartmentId = request.DepartmentId,
+                UserId = newUser.Id,
+            };
+            if (!string.IsNullOrEmpty(request.Code) && request.Code != "string")
+            {
+                doctor.Code = request.Code;
+            }
+            else
+            {
+                doctor.Code = await CheckUniqueCodeAsync();
+            }
+
+            while (await _context.Nurses.AnyAsync(n => n.Code == doctor.Code))
+            {
+                doctor.Code = await CheckUniqueCodeAsync();
+            }
+
+            await _context.Doctors.AddAsync(doctor);
+
+            var doctorRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name.Trim().ToLower() == "doctor");
+            if (doctorRole != null)
+            {
+                await _context.User_Roles.AddAsync(new User_Role
+                {
+                    UserId = newUser.Id,
+                    RoleId = doctorRole.Id
+                });
+            }
+            await _context.SaveChangesAsync();
+            return new DoctorRegisterResponse
+            {
+                NurseId = doctor.Id,
+                FullName = doctor.Name,
+                Email = newUser.Email,
+            };
         }
     }
 }

@@ -17,13 +17,15 @@ public class AuthenticationController : ControllerBase
 {
     private readonly IAuthService _service;
     private readonly INurseService _nurseService;
+    private readonly IDoctorService _doctorService;
     private readonly ILogger<AuthenticationController> _logger;
 
-    public AuthenticationController(IAuthService service, ILogger<AuthenticationController> logger, INurseService nurseService)
+    public AuthenticationController(IAuthService service, ILogger<AuthenticationController> logger, INurseService nurseService, IDoctorService doctorService)
     {
         _service = service;
         _logger = logger;
         _nurseService = nurseService;
+        _doctorService = doctorService;
     }
 
     [HttpPost("login")]
@@ -69,6 +71,22 @@ public class AuthenticationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Tạo tài khoản y tá lỗi!");
+            return BadRequest(ex.ToString());
+        }
+    }
+
+    [HttpPost("register/doctor")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RegisterDoctorAsync([FromBody] DoctorRegisterRequest request)
+    {
+        try
+        {
+            var response = await _doctorService.DoctorRegisterAsync(request);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Tạo tài khoản bac si lỗi!");
             return BadRequest(ex.ToString());
         }
     }
