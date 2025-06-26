@@ -61,4 +61,12 @@ public class MedicineController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("get-by-category/{categoryId}")]
+    public async Task<IActionResult> GetByCategory(int categoryId)
+    {
+        var result = await _service.GetByCategoryIdAsync(categoryId);
+        return Ok(result);
+    }
+
+
 }
