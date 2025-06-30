@@ -32,6 +32,12 @@ public class PaymentService : IPaymentService
             if (invoice == null)
                 throw new Exception($"Hóa đơn có ID {pi.InvoiceId} không tồn tại.");
 
+            // ✅ Gán mã Code nếu chưa có
+            if (string.IsNullOrEmpty(invoice.Code))
+            {
+                invoice.Code = $"INV-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..4].ToUpper()}";
+            }
+
             totalAmount += invoice.TotalAmount;
 
             invoice.Status = InvoiceStatus.Paid;
@@ -76,6 +82,21 @@ public class PaymentService : IPaymentService
         }
 
         await _paymentRepository.DeleteAsync(payment);
+        await _paymentRepository.SaveChangesAsync();
+    }
+
+    public async Task SaveVNPayTransactionAsync(string txnRef, decimal amount, DateTime paidAt)
+    {
+        var payment = new Payment
+        {
+            TransactionId = txnRef,
+            Amount = amount,
+            PaymentDate = paidAt,
+            Status = "Paid",
+            PaymentMethod = "VNPay"
+        };
+
+        await _paymentRepository.AddAsync(payment);
         await _paymentRepository.SaveChangesAsync();
     }
 }
