@@ -92,10 +92,10 @@ builder.Services.AddScoped<IMedicalRecordDetailService, MedicalRecordDetailServi
 
 
 
-/*
+
 var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
 Console.WriteLine(hash);
-*/
+
 
 
 

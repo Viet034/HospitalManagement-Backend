@@ -24,7 +24,7 @@ public class DepartmentController : ControllerBase
     [HttpPost("add-department")]
     [ProducesResponseType(typeof(IEnumerable<Department>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-    [Authorize(Roles = "Admin,Nurse")]
+    //[Authorize(Roles = "Admin,Nurse")]
     public async Task<IActionResult> AddDepartment([FromBody] DepartmentCreate create)
     {
         try

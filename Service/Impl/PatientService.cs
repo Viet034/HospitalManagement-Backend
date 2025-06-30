@@ -5,6 +5,7 @@ using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Patient;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
+using SWP391_SE1914_ManageHospital.Ultility.Validation;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
 {
@@ -56,6 +57,13 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 throw new Exception($"Can not find patient id: {id}");
             }
             return _mapper.EntityToRespone(patient);
+        }
+
+        public async Task<PatientRespone> FindPatientByUserIdAsync(int id)
+        {
+            var coID = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == id)
+                ?? throw new Exception($"Không thể tìm Bệnh nhân có user id: {id}");
+            return _mapper.EntityToRespone(coID);
         }
 
         public async Task<IEnumerable<PatientRespone>> GetAllPatientAsync()
@@ -159,6 +167,43 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             await _context.SaveChangesAsync();
 
             return _mapper.EntityToRespone(patient);
+        }
+
+        public async Task<PatientRespone> UpdatePatientByUserIdAsync(int userId, PatientUpdate update)
+        {
+            var coID = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId)
+                ?? throw new Exception($"Không thể tìm Bệnh nhân có user id: {userId}");
+
+            PatientUpdateValidator.Validate(update);
+
+            coID.Name = update.Name.Trim();
+            coID.Gender = update.Gender;
+            coID.Dob = update.Dob;
+            coID.Code = update.Code;
+            coID.CCCD = update.CCCD;
+            coID.Phone = update.Phone;
+            coID.EmergencyContact = update.EmergencyContact;
+            coID.Address = update.Address;
+            coID.InsuranceNumber = update.InsuranceNumber;
+            coID.Allergies = update.Allergies;
+            coID.BloodType = update.BloodType;
+            coID.ImageURL = update.ImageURL;
+            coID.Status = update.Status;
+            coID.UpdateBy = update.Name;
+            coID.UpdateDate = DateTime.Now;
+            
+            await _context.SaveChangesAsync();
+            return _mapper.EntityToRespone(coID);
+
+        }
+
+        public async Task<PatientRespone> UpdatePatientImageAsync(int userId, PatientImageUpdate imageurl)
+        {
+            var coId = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId)
+                ?? throw new Exception($"Không thể tìm Bệnh nhân có user id: {userId}");
+            coId.ImageURL = imageurl.ImageURL;
+            await _context.SaveChangesAsync();
+            return _mapper.EntityToRespone(coId);
         }
     }
 }

@@ -153,6 +153,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 Phone = request.Phone,
                 ImageURL = "",
                 Status = DoctorStatus.Available,
+                LicenseNumber = request.LicenseNumber,
                 CreateDate = DateTime.Now.AddHours(7),
                 UpdateDate = DateTime.Now.AddHours(7),
                 CreateBy = request.FullName,
@@ -169,7 +170,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 doctor.Code = await CheckUniqueCodeAsync();
             }
 
-            while (await _context.Nurses.AnyAsync(n => n.Code == doctor.Code))
+            while (await _context.Doctors.AnyAsync(n => n.Code == doctor.Code))
             {
                 doctor.Code = await CheckUniqueCodeAsync();
             }

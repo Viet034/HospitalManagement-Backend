@@ -5,7 +5,7 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Patient
 {
     public class PatientUpdate
     {
-        public int Id { get; set; }
+        
         public string Name { get; set; }
         public string Code { get; set; }
 
@@ -24,9 +24,9 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Patient
         public string BloodType { get; set; }
         public string? ImageURL { get; set; }
         public int UserId { get; set; }
-        public DateTime CreateDate { get; set; }
+        
         public DateTime? UpdateDate { get; set; }
-        public string CreateBy { get; set; }
+       
         public string? UpdateBy { get; set; }
 
         public PatientUpdate()
@@ -34,9 +34,9 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Patient
             
         }
 
-        public PatientUpdate(int id, string name, string code, Gender gender, DateTime dob, string cCCD, string phone, string emergencyContact, string address, string insuranceNumber, string? allergies, PatientStatus status, string bloodType, string? imageURL, int userId, DateTime createDate, DateTime? updateDate, string createBy, string? updateBy)
+        public PatientUpdate( string name, string code, Gender gender, DateTime dob, string cCCD, string phone, string emergencyContact, string address, string insuranceNumber, string? allergies, PatientStatus status, string bloodType, string? imageURL, int userId,  DateTime? updateDate, string? updateBy)
         {
-            Id = id;
+            
             Name = name;
             Code = code;
             Gender = gender;
@@ -51,9 +51,9 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Patient
             BloodType = bloodType;
             ImageURL = imageURL;
             UserId = userId;
-            CreateDate = createDate;
+           
             UpdateDate = updateDate;
-            CreateBy = createBy;
+            
             UpdateBy = updateBy;
         }
     }
