@@ -1,16 +1,75 @@
-﻿using SWP391_SE1914_ManageHospital.Models.Entities;
+﻿using SWP391_SE1914_ManageHospital.Data;
+using SWP391_SE1914_ManageHospital.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
-namespace SWP391_SE1914_ManageHospital.Data
+public interface IPaymentRepository
 {
-    public interface IPaymentRepository
+    Task<Payment?> GetByIdAsync(int id);
+    Task<IEnumerable<Payment>> GetAllAsync();
+    Task AddAsync(Payment payment);
+    Task UpdateAsync(Payment payment);
+    Task DeleteAsync(Payment payment);
+    Task SaveChangesAsync();
+    Task<Invoice?> GetInvoiceByIdAsync(int id);
+    Task UpdateInvoiceAsync(Invoice invoice);
+
+}
+
+public class PaymentRepository : IPaymentRepository
+{
+    private readonly ApplicationDBContext _context;
+    public PaymentRepository(ApplicationDBContext context)
     {
-        Task<Payment?> GetByIdAsync(int id);
-        Task<IEnumerable<Payment>> GetAllAsync();
-        Task AddAsync(Payment payment);
-        Task UpdateAsync(Payment payment);
-        Task DeleteAsync(Payment payment);
-        Task SaveChangesAsync();
-        Task<Invoice?> GetInvoiceByIdAsync(int invoiceId);
-        Task UpdateInvoiceAsync(Invoice invoice);
+        _context = context;
     }
+
+    public async Task<Payment?> GetByIdAsync(int id)
+    {
+        return await _context.Payments
+            .Include(p => p.Payment_Invoices)
+            .ThenInclude(pi => pi.Invoice)
+            .FirstOrDefaultAsync(p => p.Id == id);
+    }
+
+    public async Task<IEnumerable<Payment>> GetAllAsync()
+    {
+        return await _context.Payments
+            .Include(p => p.Payment_Invoices)
+            .ThenInclude(pi => pi.Invoice)
+            .ToListAsync();
+    }
+
+    public async Task AddAsync(Payment payment)
+    {
+        await _context.Payments.AddAsync(payment);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateAsync(Payment payment)
+    {
+        _context.Payments.Update(payment);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(Payment payment)
+    {
+        _context.Payments.Remove(payment);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
+    public async Task<Invoice?> GetInvoiceByIdAsync(int id)
+    {
+        return await _context.Invoices.FirstOrDefaultAsync(i => i.Id == id);
+    }
+
+    public async Task UpdateInvoiceAsync(Invoice invoice)
+    {
+        _context.Invoices.Update(invoice);
+        await _context.SaveChangesAsync();
+    }
+
 }
