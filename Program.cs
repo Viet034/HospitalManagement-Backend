@@ -12,6 +12,7 @@ using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Ultility;
 using System.Text;
 using System.Text.Json.Serialization;
+using SWP391_SE1914_ManageHospital.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,9 @@ builder.Services.AddScoped<IMedicineCategoryMapper, MedicineCategoryMapper>();
 // Đăng ký service
 builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
 
+// Đăng ký dịch vụ của IMedicineDetailService
+builder.Services.AddScoped<IMedicineDetailService, MedicineDetailService>();
+builder.Services.AddScoped<IMedicineDetailMapper, MedicineDetailMapper>();
 
 
 //builder.Services.AddScoped<IPaymentService, PaymentService>();
