@@ -6,9 +6,9 @@ using SWP391_SE1914_ManageHospital.Models.Entities;
 
 public class MedicineMapper : IMedicineMapper
 {
-    public MedicineResponse MapToDTO(Medicine entity)
+    public MedicineResponseDTO MapToDTO(Medicine entity)
     {
-        return new MedicineResponse
+        return new MedicineResponseDTO
         {
             Id = entity.Id,
             ImageUrl = entity.ImageUrl,

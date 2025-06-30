@@ -88,6 +88,22 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
         }
 
+        [HttpGet("findUserId/{userId}")]
+        [ProducesResponseType(typeof(IEnumerable<Patient>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> FindByUserId(int userId)
+        {
+            try
+            {
+                var response = await _service.FindPatientByUserIdAsync(userId);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPut("update/{id}")]
         [ProducesResponseType(typeof(IEnumerable<Patient>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
@@ -105,6 +121,40 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
             
 
+        }
+
+        [HttpPut("updateByUserId/{userId}")]
+        [ProducesResponseType(typeof(IEnumerable<Patient>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+
+        public async Task<IActionResult> UpdatePatientbyUserId([FromBody] PatientUpdate update, int userId)
+        {
+            try
+            {
+                var respone = await _service.UpdatePatientByUserIdAsync(userId, update);
+                return Ok(respone);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+        }
+
+        [HttpPut("updatePatientImage/{userId}")]
+        [ProducesResponseType(typeof(IEnumerable<Patient>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+
+        public async Task<IActionResult> UpdatePatientImage(int userId, [FromBody] PatientImageUpdate imageURL)
+        {
+            try
+            {
+                var respone = await _service.UpdatePatientImageAsync(userId, imageURL);
+                return Ok(respone);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
         }
 
         [HttpPut("change-status/{id}")]

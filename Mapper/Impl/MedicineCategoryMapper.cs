@@ -7,9 +7,9 @@ namespace SWP391_SE1914_ManageHospital.Mapper
 {
     public class MedicineCategoryMapper : IMedicineCategoryMapper
     {
-        public MedicineCategoryResponse MapToDTO(MedicineCategory entity)
+        public MedicineCategoryResponseDTO MapToDTO(MedicineCategory entity)
         {
-            return new MedicineCategoryResponse
+            return new MedicineCategoryResponseDTO
             {
                 Id = entity.Id,
                 ImageUrl = entity.ImageUrl,

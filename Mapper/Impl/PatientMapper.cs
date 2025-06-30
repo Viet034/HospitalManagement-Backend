@@ -138,7 +138,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
         public Patient UpdateToEntity(PatientUpdate update)
         {
             Patient patient = new Patient();
-            patient.Id = update.Id;
+            
             patient.Name = update.Name;
             patient.Code = update.Code;
             patient.Gender = update.Gender;
@@ -153,9 +153,9 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             patient.BloodType = update.BloodType;
             patient.ImageURL = update.ImageURL;
             patient.UserId = update.UserId;
-            patient.CreateDate = update.CreateDate;
+            
             patient.UpdateDate = update.UpdateDate;
-            patient.CreateBy = update.CreateBy;
+            
             patient.UpdateBy = update.UpdateBy;
 
             return patient;

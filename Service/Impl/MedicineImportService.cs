@@ -102,5 +102,25 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             await _context.SaveChangesAsync();
             return _mapper.EntityToResponse(ex);
         }
+
+        public async Task<IEnumerable<MedicineResponseDTO>> GetByCategoryIdAsync(int categoryId)
+        {
+            var medicines = await _context.Medicines
+                .Where(m => m.MedicineCategoryId == categoryId)
+                .Select(m => new MedicineResponseDTO
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Code = m.Code,
+                    MedicineCategoryName = m.MedicineCategory.Name,
+                    UnitName = m.Unit.Name,
+                    Status = m.Status
+                    // thêm các trường khác nếu cần
+                })
+                .ToListAsync();
+
+            return medicines;
+        }
+
     }
 }

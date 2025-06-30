@@ -2,7 +2,7 @@
 
 namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
 {
-    public class MedicineResponse
+    public class MedicineResponseDTO
     {
         public int Id { get; set; }
         public string? ImageUrl { get; set; }
@@ -23,6 +23,10 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
         public DateTime? UpdateDate { get; set; }
         public string? CreateBy { get; set; }
         public string? UpdateBy { get; set; }
+
+        public string MedicineCategoryName { get; set; }
+        public string UnitName { get; set; }
+
     }
 
 }

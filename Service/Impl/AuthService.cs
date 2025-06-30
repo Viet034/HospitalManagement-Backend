@@ -132,10 +132,10 @@ public class AuthService : IAuthService
         // Mapping Redirect URL theo role
         string redirectUrl = request.UserType switch
         {
-            UserType.Admin => "/admin/dashboard",
-            UserType.Doctor => "/doctor/dashboard",
-            UserType.Nurse => "/nurse/dashboard",
-            UserType.Patient => "/home",
+            UserType.Admin => "/html/dashboard/index.html",
+            UserType.Doctor => "/html/frontend/doctor-ui.html",
+            UserType.Nurse => "/html/frontend/nurse-ui.html",
+            UserType.Patient => "/html/frontend/index.html",
             _ => "/"
         };
 
@@ -167,11 +167,11 @@ public class AuthService : IAuthService
         // Lấy FullName
         string fullName = userType switch
         {
-            UserType.Doctor => user.Doctors.FirstOrDefault()?.Name,
-            UserType.Patient => user.Patients.FirstOrDefault()?.Name,
-            UserType.Nurse => user.Nurses.FirstOrDefault()?.Name,
-            UserType.Admin => user.Receptions.FirstOrDefault()?.Name,
-            _ => null
+            UserType.Admin => "/html/dashboard/index.html",
+            UserType.Doctor => "/html/frontend/doctor-ui.html",
+            UserType.Nurse => "/html/frontend/nurse-ui.html",
+            UserType.Patient => "/html/frontend/index.html",
+            _ => "/"
         };
 
         if (!string.IsNullOrEmpty(fullName))
@@ -325,10 +325,10 @@ public class AuthService : IAuthService
             UserInfo = CreateUserInfo(user, userType),
             RedirectUrl = userType switch
             {
-                UserType.Admin => "/admin/dashboard",
-                UserType.Doctor => "/doctor/dashboard",
-                UserType.Nurse => "/nurse/dashboard",
-                UserType.Patient => "/home",
+                UserType.Admin => "/html/dashboard/index.html",
+                UserType.Doctor => "/html/frontend/doctor-ui.html",
+                UserType.Nurse => "/html/frontend/nurse-ui.html",
+                UserType.Patient => "/html/frontend/index.html",
                 _ => "/"
             }
         };
