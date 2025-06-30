@@ -62,8 +62,9 @@ builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
 
 
 
-builder.Services.AddScoped<IPaymentService, PaymentService>();
-builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+
+//builder.Services.AddScoped<IPaymentService, PaymentService>();
+//builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 builder.Services.AddScoped<ISupplierMapper, SupplierMapper>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
@@ -75,7 +76,8 @@ builder.Services.AddScoped<IMedicineImportDetailService, MedicineImportDetailSer
 builder.Services.AddScoped<IMedicineManageForAdminService, MedicineManageForAdminService>();
 builder.Services.AddScoped<IMedicineManageForAdminMapper, MedicineManageForAdminMapper>();
 
-
+builder.Services.AddScoped<IMedicineImportExcelMapper, MedicineImportExcelMapper>();
+builder.Services.AddScoped<IMedicineImportExcelService, MedicineImportExcelService>();
 
 
 

@@ -4,7 +4,6 @@
     {
         public int MedicineId { get; set; }
         public string MedicineName { get; set; } = string.Empty;
-
         public string CategoryName { get; set; } = string.Empty;
         public string UnitName { get; set; } = string.Empty;
         public string Ingredients { get; set; }

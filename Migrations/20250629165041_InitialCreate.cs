@@ -99,9 +99,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    ImageUrl = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Description = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ImageUrl = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
@@ -643,6 +643,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     UnitPrice = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     ManufactureDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     ExpiryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    SupplierId = table.Column<int>(type: "int", nullable: false),
                     UnitId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -676,6 +677,12 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         principalTable: "medicine_imports",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_medicine_import_details_suppliers_SupplierId",
+                        column: x => x.SupplierId,
+                        principalTable: "suppliers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -1375,10 +1382,15 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 column: "ImportId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_medicine_import_details_MedicineId_BatchNumber",
+                name: "IX_medicine_import_details_MedicineId_BatchNumber_SupplierId",
                 table: "medicine_import_details",
-                columns: new[] { "MedicineId", "BatchNumber" },
+                columns: new[] { "MedicineId", "BatchNumber", "SupplierId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_medicine_import_details_SupplierId",
+                table: "medicine_import_details",
+                column: "SupplierId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_medicine_import_details_UnitId",

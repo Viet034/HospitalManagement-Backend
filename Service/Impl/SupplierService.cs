@@ -37,11 +37,18 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
         public async Task<IEnumerable<SupplierResponeDTO>> SearchSupplierByKeyAsync(string name)
         {
-            var sid = await _context.Suppliers.FromSqlRaw("Select * from Suppliers where Name like {0}", "%" + name + "%").ToListAsync();
-            if (sid == null)
+            var normalizedName = name.Trim().ToLower();
+
+
+            var sid = await _context.Suppliers
+                                     .Where(s => s.Name.ToLower().Contains(normalizedName)) 
+                                     .ToListAsync();
+
+            if (sid == null || !sid.Any())
             {
                 throw new Exception($"Không có tên {name} nào tồn tại!");
             }
+
             var response = _mapper.ListEntityToResponse(sid);
             return response;
         }

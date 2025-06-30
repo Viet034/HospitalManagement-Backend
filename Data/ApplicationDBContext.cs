@@ -220,7 +220,13 @@ public class ApplicationDBContext : DbContext
                   .WithMany()
                   .HasForeignKey(e => e.UnitId)
                   .OnDelete(DeleteBehavior.Restrict);
-            entity.HasIndex(e => new { e.MedicineId, e.BatchNumber }).IsUnique();
+
+            entity.HasOne(e => e.Supplier)
+                    .WithMany()
+                    .HasForeignKey(e => e.SupplierId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => new { e.MedicineId, e.BatchNumber, e.SupplierId }).IsUnique();
         });
 
         modelBuilder.Entity<Clinic>(entity =>

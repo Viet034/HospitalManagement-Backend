@@ -1044,6 +1044,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
                     b.Property<int>("UnitId")
                         .HasColumnType("int");
 
@@ -1061,9 +1064,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.HasIndex("ImportId");
 
+                    b.HasIndex("SupplierId");
+
                     b.HasIndex("UnitId");
 
-                    b.HasIndex("MedicineId", "BatchNumber")
+                    b.HasIndex("MedicineId", "BatchNumber", "SupplierId")
                         .IsUnique();
 
                     b.ToTable("medicine_import_details", (string)null);
@@ -2154,6 +2159,12 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Unit", "Unit")
                         .WithMany()
                         .HasForeignKey("UnitId")
@@ -2163,6 +2174,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Navigation("Import");
 
                     b.Navigation("Medicine");
+
+                    b.Navigation("Supplier");
 
                     b.Navigation("Unit");
                 });

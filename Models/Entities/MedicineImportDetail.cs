@@ -14,7 +14,8 @@
 
         public DateTime ManufactureDate { get; set; }
         public DateTime ExpiryDate { get; set; }
-
+        public int SupplierId { get; set; }
+        public virtual Supplier Supplier { get; set; }
         public int UnitId { get; set; }
         public virtual Unit Unit { get; set; } = null!;
 

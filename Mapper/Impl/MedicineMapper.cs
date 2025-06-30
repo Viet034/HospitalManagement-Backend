@@ -13,7 +13,7 @@ public class MedicineMapper : IMedicineMapper
             Id = entity.Id,
             ImageUrl = entity.ImageUrl,
             Description = entity.Description,
-            Status = (int)entity.Status,
+            Status = MedicineStatus.Active,
             Name = entity.Name,
             Code = entity.Code,
             Dosage = entity.Dosage,
@@ -33,7 +33,7 @@ public class MedicineMapper : IMedicineMapper
         {
             ImageUrl = request.ImageUrl,
             Description = request.Description,
-            Status = (MedicineStatus)request.Status,
+            Status = MedicineStatus.Active,
             Name = request.Name,
             Code = request.Code,
             Dosage = request.Dosage,
