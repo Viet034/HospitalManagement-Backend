@@ -43,6 +43,8 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            FillDefaultPaymentFields(payment, isUpdate: false);
+
             var created = await _paymentService.CreatePaymentAsync(payment);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
@@ -59,6 +61,8 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             var existing = await _paymentService.GetByIdAsync(id);
             if (existing == null)
                 return NotFound();
+
+            FillDefaultPaymentFields(payment, isUpdate: true);
 
             await _paymentService.UpdatePaymentAsync(payment);
             return NoContent();
@@ -113,42 +117,62 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             var vnp_TransactionStatus = Request.Query["vnp_TransactionStatus"].ToString();
             var vnp_AmountRaw = Request.Query["vnp_Amount"].ToString();
 
-            // Kiểm tra các tham số cần thiết
             if (string.IsNullOrEmpty(vnp_TxnRef) || string.IsNullOrEmpty(vnp_ResponseCode) ||
                 string.IsNullOrEmpty(vnp_TransactionStatus) || string.IsNullOrEmpty(vnp_AmountRaw))
             {
                 return BadRequest("Thiếu tham số từ VNPay callback.");
             }
 
-            // Parse số tiền
             if (!decimal.TryParse(vnp_AmountRaw, out decimal amountVND))
             {
                 return BadRequest("vnp_Amount không hợp lệ.");
             }
 
-            decimal amount = amountVND / 100; // VNPay trả về số tiền x 100
+            decimal amount = amountVND / 100;
 
-            // Kiểm tra kết quả thanh toán thành công
             if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
             {
                 var payment = new Payment
                 {
-                    TransactionId = vnp_TxnRef,
                     Amount = amount,
-                    PaymentDate = DateTime.Now,
-                    Status = "Paid",
+                    TransactionId = vnp_TxnRef,
                     PaymentMethod = "VNPay",
-                    Payer = "VNPayUser" // hoặc đọc từ query nếu có
+                    Status = "Paid",
+                    Payer = "VNPayUser"
                 };
 
-                await _paymentService.CreatePaymentAsync(payment);
+                FillDefaultPaymentFields(payment, isUpdate: false);
 
+                await _paymentService.CreatePaymentAsync(payment);
                 return Ok(new { message = "Thanh toán thành công", txnRef = vnp_TxnRef });
             }
             else
             {
                 return BadRequest("Thanh toán không thành công từ VNPay.");
             }
+        }
+
+        // ------------------ Helper ------------------
+
+        private void FillDefaultPaymentFields(Payment payment, bool isUpdate)
+        {
+            if (!isUpdate)
+            {
+                payment.Code ??= "PMT" + DateTime.Now.ToString("yyyyMMddHHmmss");
+                payment.Name ??= "Thanh toán viện phí";
+                payment.PaymentDate = payment.PaymentDate == default ? DateTime.Now : payment.PaymentDate;
+                payment.PaidAt = payment.PaidAt == default ? DateTime.Now : payment.PaidAt;
+                payment.CreateBy = User?.Identity?.Name ?? "System";
+                payment.CreateDate = DateTime.Now;
+            }
+
+            payment.UpdateBy = User?.Identity?.Name ?? "System";
+            payment.UpdateDate = DateTime.Now;
+            payment.Status ??= "Paid";
+            payment.PaymentMethod ??= "VNPay";
+            payment.Payer ??= "Unknown";
+            payment.TransactionId ??= Guid.NewGuid().ToString();
+            payment.Notes ??= "Không có ghi chú";
         }
     }
 }
