@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Controllers
 {
@@ -52,7 +53,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                         var worksheet = workbook.Worksheet(1);
                         var rowCount = worksheet.LastRowUsed().RowNumber();
                        
-                        string supplierName = worksheet.Cell(2, 10).GetString();
+                        string supplierName = worksheet.Cell(2, 14).GetString();
                         var suppliers = await _supplierService.SearchSupplierByKeyAsync(supplierName);
                         var supplier = suppliers.FirstOrDefault();
                         if (supplier == null)
@@ -65,6 +66,15 @@ namespace SWP391_SE1914_ManageHospital.Controllers
 
                         for (int row = 2; row <= rowCount; row++)
                         {
+                            string prescribedCell = worksheet.Cell(row, 9).GetString().Trim().ToUpper();
+                            PrescribedMedication prescribedEnum;
+
+                            if (prescribedCell == "ETC")
+                                prescribedEnum = PrescribedMedication.Yes;
+                            else if (prescribedCell == "OTC")
+                                prescribedEnum = PrescribedMedication.No;
+                            else
+                                throw new Exception($"Dòng {row}: Giá trị cột Prescribed không hợp lệ (phải là ETC hoặc OTC).");
                             var detail = new MedicineImportDetailRequest
                             {
                                 MedicineCode = worksheet.Cell(row, 1).GetString(),
@@ -75,7 +85,11 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                                 UnitPrice = decimal.TryParse(worksheet.Cell(row, 6).GetString(), out decimal p) ? p : 0,
                                 ManufactureDate = DateTime.TryParse(worksheet.Cell(row, 7).GetString(), out var mfg) ? mfg : DateTime.MinValue,
                                 ExpiryDate = DateTime.TryParse(worksheet.Cell(row, 8).GetString(), out var exp) ? exp : DateTime.MinValue,
-                                CategoryName = worksheet.Cell(row, 9).GetString()  
+                                Prescribed = prescribedEnum,
+                                Dosage = worksheet.Cell(row,10).GetString(),
+                                Ingredients = worksheet.Cell(row,11).GetString(),
+                                CategoryName = worksheet.Cell(row, 12).GetString(),
+                                StorageInstructions = worksheet.Cell(row, 13).GetString()
                             };
 
                             importRequest.Details.Add(detail);

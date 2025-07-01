@@ -832,6 +832,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<int>("UnitId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(65,30)");
+
                     b.Property<string>("UpdateBy")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -922,9 +925,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<string>("Ingredients")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Manufacturer")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                    b.Property<DateTime?>("Manufacturer")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("MedicineId")
                         .HasColumnType("int");

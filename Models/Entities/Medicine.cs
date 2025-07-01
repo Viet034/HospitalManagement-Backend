@@ -11,6 +11,7 @@ public class Medicine : BaseEntity
     public string Description { get; set; }
     public int UnitId { get; set; }
     public virtual Unit Unit { get; set; }
+    public decimal UnitPrice { get; set; }
     public PrescribedMedication Prescribed { get; set; }
     public string Dosage { get; set; }
     public int MedicineCategoryId { get; set; }

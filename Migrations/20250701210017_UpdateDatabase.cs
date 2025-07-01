@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class UpdateDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -321,6 +321,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     Description = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     UnitId = table.Column<int>(type: "int", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     Prescribed = table.Column<int>(type: "int", nullable: false),
                     Dosage = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -601,8 +602,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     Ingredients = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ExpiryDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    Manufacturer = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Manufacturer = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     Warning = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     StorageInstructions = table.Column<string>(type: "longtext", nullable: true)

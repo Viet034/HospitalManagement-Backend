@@ -122,20 +122,22 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                             return false;
                         }
 
+
                         medicine = new Medicine
                         {
                             ImageUrl = "Chua co anh",
                             Name = detail.MedicineName,
                             Code = detail.MedicineCode,
                             UnitId = unit.Id, 
+                            UnitPrice = detail.UnitPrice,
                             CreateDate = DateTime.UtcNow,
                             UpdateDate = DateTime.UtcNow,
                             CreateBy = "system",
                             UpdateBy = "system",
                             Status = MedicineStatus.Active,
                             Description = "Chua them",
-                            Dosage = "Chua them",
-                            Prescribed = PrescribedMedication.Yes,
+                            Dosage = detail.Dosage,
+                            Prescribed =detail.Prescribed,
                             MedicineCategoryId = category.Id,
                         };
                         _context.Medicines.Add(medicine);
@@ -144,11 +146,11 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                         var medicineDetail = new MedicineDetail
                         {
                             MedicineId = medicine.Id,
-                            Ingredients = "chua co",
+                            Ingredients = detail.Ingredients,
                             ExpiryDate = detail.ExpiryDate,
-                            Manufacturer = "chua co",
+                            Manufacturer =detail.ManufactureDate,
                             Warning = "chuwa co",
-                            StorageInstructions = "chua co",
+                            StorageInstructions = detail.StorageInstructions,
                             Status = 1,
                             CreateDate = DateTime.UtcNow,
                             UpdateDate = DateTime.UtcNow,
