@@ -136,6 +136,7 @@ public class AuthenticationController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO request)
     {
@@ -147,7 +148,7 @@ public class AuthenticationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Lỗi khi đặt lại mật khẩu");
-            return BadRequest(ex.Message);
+            return BadRequest(new { message = "Đặt lại mật khẩu không thành công" });
         }
     }
 }
