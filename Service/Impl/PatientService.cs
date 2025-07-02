@@ -31,14 +31,22 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
         public async Task<PatientRespone> CreatePatientAsync(PatientCreate create)
         {
-            if (create.UserId > 0)
+            if (create == null)
             {
-                var userExists = await _context.Users.AnyAsync(u => u.Id == create.UserId);
-                if (!userExists)
-                {
-                    throw new Exception($"User with Id {create.UserId} does not exist.");
-                }
+                throw new ArgumentNullException(nameof(create), "PatientCreate data is required.");
             }
+
+            if (create.UserId <= 0)
+            {
+                throw new Exception("UserId is required and must be greater than 0.");
+            }
+
+            var userExists = await _context.Users.AnyAsync(u => u.Id == create.UserId);
+            if (!userExists)
+            {
+                throw new Exception($"User with Id {create.UserId} does not exist in users table.");
+            }
+
             Patient entity = _mapper.CreateToEntity(create);
 
             await _context.Patients.AddAsync(entity);
@@ -46,6 +54,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
             return _mapper.EntityToRespone(entity);
         }
+
 
 
         public async Task<PatientRespone> FindPatientByIdAsync(int id)

@@ -27,6 +27,10 @@ namespace SWP391_SE1914_ManageHospital.Controllers
 
         public async Task<IActionResult> AddPatient([FromBody] PatientCreate create)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 var respone = await _service.CreatePatientAsync(create);
@@ -34,7 +38,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.ToString());
+                 return BadRequest(new { message = ex.Message });
             }
 
         }
