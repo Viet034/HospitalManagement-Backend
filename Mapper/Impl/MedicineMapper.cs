@@ -33,7 +33,7 @@ public class MedicineMapper : IMedicineMapper
         {
             ImageUrl = request.ImageUrl,
             Description = request.Description,
-            Status = (MedicineStatus)request.Status,
+            Status = MedicineStatus.Active,
             Name = request.Name,
             Code = request.Code,
             Dosage = request.Dosage,

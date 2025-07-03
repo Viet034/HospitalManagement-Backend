@@ -6,6 +6,7 @@ using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Supplier;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
+using System.Text.RegularExpressions;
 using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
@@ -37,11 +38,18 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
         public async Task<IEnumerable<SupplierResponeDTO>> SearchSupplierByKeyAsync(string name)
         {
-            var sid = await _context.Suppliers.FromSqlRaw("Select * from Suppliers where Name like {0}", "%" + name + "%").ToListAsync();
-            if (sid == null)
+            var normalizedName = name.Trim().ToLower();
+
+
+            var sid = await _context.Suppliers
+                                     .Where(s => s.Name.ToLower().Contains(normalizedName)) 
+                                     .ToListAsync();
+
+            if (sid == null || !sid.Any())
             {
                 throw new Exception($"Không có tên {name} nào tồn tại!");
             }
+
             var response = _mapper.ListEntityToResponse(sid);
             return response;
         }
@@ -58,6 +66,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             existing.Phone = update.Phone;
             existing.Email = update.Email;
             existing.Address = update.Address;
+            existing.Code = update.Code;
             existing.UpdateDate = DateTime.Now;
             existing.UpdateBy = GetCurrentUserId();
 
@@ -67,8 +76,37 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return _mapper.EntityToResponse(existing);
         }
 
+        private void ValidatePhone(string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone) || !Regex.IsMatch(phone, @"^0\d{9}$"))
+            {
+                throw new Exception("Số điện thoại phải có đúng 10 chữ số và bắt đầu bằng số 0.");
+            }
+        }
+
+        private void ValidateEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email) || !email.Trim().ToLower().EndsWith("@gmail.com"))
+            {
+                throw new Exception("Email phải kết thúc bằng @gmail.com.");
+            }
+        }
+
+        private void ValidateCode(string code)
+        {
+            if (!string.IsNullOrWhiteSpace(code) && !Regex.IsMatch(code, @"^NCC\d+$"))
+            {
+                throw new Exception("Code phải bắt đầu bằng NCC theo định dạng NCC + số.");
+            }
+        }
+
+
         public async Task<SupplierResponeDTO> CreateSupplerAsync(SupplierCreate create)
         {
+            ValidateCode(create.Code);
+            ValidatePhone(create.Phone);
+            ValidateEmail(create.Email);
+
             if (await _context.Suppliers.AnyAsync(x => x.Name.Trim().ToLower() == create.Name.Trim().ToLower() && x.Phone == create.Phone && x.Email.Trim().ToLower() == create.Email.Trim().ToLower()))
             {
                 throw new Exception("Nhà cung cấp đã tồn tại !");

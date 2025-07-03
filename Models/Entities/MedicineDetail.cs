@@ -6,7 +6,7 @@
         public int MedicineId { get; set; }
         public string? Ingredients { get; set; }
         public DateTime? ExpiryDate { get; set; }
-        public string? Manufacturer { get; set; }
+        public DateTime? Manufacturer { get; set; }
         public string? Warning { get; set; }
         public string? StorageInstructions { get; set; }
         public int Status { get; set; }
