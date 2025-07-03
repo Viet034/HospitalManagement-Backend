@@ -8,7 +8,7 @@ public class ResetPasswordRequestDTO
     public string Token { get; set; }
 
     [Required]
-    [MinLength(6)]
+    [MinLength(8)]
     public string NewPassword { get; set; }
 
     [Required]

@@ -75,14 +75,14 @@ public class AuthService : IAuthService
                 throw new Exception("Email không đúng!");
             var resetToken = Guid.NewGuid().ToString(); // Tạo token mới
             var resetTokenExpiryTime = DateTime.Now.AddHours(1); // Token có hiệu lực trong 1 giờ
-            user.ResetPasswordToken = Guid.NewGuid().ToString();
-            user.ResetPasswordTokenExpiryTime = DateTime.Now.AddHours(1); // Token 1h
+            user.ResetPasswordToken = resetToken;
+            user.ResetPasswordTokenExpiryTime = resetTokenExpiryTime; // Token 1h
 
             await _context.SaveChangesAsync();
             await _emailService.SendResetPasswordEmailAsync(email, resetToken, userType.ToString());
 
             return true;
-        }
+        } 
         catch (Exception ex)
         {
             // Xử lý lỗi nếu cần
@@ -132,10 +132,10 @@ public class AuthService : IAuthService
         // Mapping Redirect URL theo role
         string redirectUrl = request.UserType switch
         {
-            UserType.Admin => "/html/dashboard/index.html",
-            UserType.Doctor => "/html/frontend/doctor-ui.html",
-            UserType.Nurse => "/html/frontend/nurse-ui.html",
-            UserType.Patient => "/html/frontend/index.html",
+            UserType.Admin => "/frontend/dashboard/index.html",
+            UserType.Doctor => "/frontend/dashboard/doctor-page.html",
+            UserType.Nurse => "/frontend/frontend/nurse-ui.html",
+            UserType.Patient => "/frontend/index.html",
             _ => "/"
         };
 
@@ -444,23 +444,27 @@ public class AuthService : IAuthService
     {
         try
         {
+            // Tìm user có token hợp lệ
             var user = await _context.Users
-                .Include(u => u.Patients)
-                .Include(u => u.Doctors)
-                .Include(u => u.Nurses)
-                .FirstOrDefaultAsync(u => u.ResetPasswordToken == token && u.ResetPasswordTokenExpiryTime > DateTime.Now.AddHours(7));
-            if (user == null) throw new Exception("Token không hợp lệ hoặc đã hết hạn!");
-            var hasshedPassword = _passwordHasher.HashPassword(newPassword);
+                .Include(u => u.User_Roles).ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u =>
+                    u.ResetPasswordToken == token &&
+                    u.ResetPasswordTokenExpiryTime > DateTime.Now &&
+                    u.User_Roles.Any(ur => ur.Role.Name.ToLower() == userType.ToString().ToLower())
+                );
 
-            user.Password = hasshedPassword;
-            user.ResetPasswordToken = null; // Xóa token sau khi reset
-            user.ResetPasswordTokenExpiryTime = null; // Xóa thời gian hết hạn token
+            if (user == null)
+                throw new Exception("Token không hợp lệ hoặc đã hết hạn!");
+
+            user.Password = _passwordHasher.HashPassword(newPassword);
+            user.ResetPasswordToken = null;
+            user.ResetPasswordTokenExpiryTime = null;
+
             await _context.SaveChangesAsync();
             return true;
         }
         catch (Exception ex)
         {
-            // Xử lý lỗi nếu cần
             throw new Exception("Đặt lại mật khẩu không thành công", ex);
         }
     }
