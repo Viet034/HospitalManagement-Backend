@@ -72,8 +72,8 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                         }
                         category = new MedicineCategory
                         {
-                            ImageUrl = "Chua co anh",
-                            Description = "Chuua khoi tao",
+                            ImageUrl = "Chưa có ảnh",
+                            Description = "Chưa thêm",
                             Status = MedicineCategoryStatus.Active,
                             Code = "Unknown",
                             Name = detail.CategoryName,
@@ -125,7 +125,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
                         medicine = new Medicine
                         {
-                            ImageUrl = "Chua co anh",
+                            ImageUrl = "Chưa có ảnh",
                             Name = detail.MedicineName,
                             Code = detail.MedicineCode,
                             UnitId = unit.Id, 
@@ -135,7 +135,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                             CreateBy = "system",
                             UpdateBy = "system",
                             Status = MedicineStatus.Active,
-                            Description = "Chua them",
+                            Description = "Chưa thêm",
                             Dosage = detail.Dosage,
                             Prescribed =detail.Prescribed,
                             MedicineCategoryId = category.Id,
@@ -149,14 +149,14 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                             Ingredients = detail.Ingredients,
                             ExpiryDate = detail.ExpiryDate,
                             Manufacturer =detail.ManufactureDate,
-                            Warning = "chuwa co",
+                            Warning = "Chưa thêm",
                             StorageInstructions = detail.StorageInstructions,
                             Status = 1,
                             CreateDate = DateTime.UtcNow,
                             UpdateDate = DateTime.UtcNow,
                             CreateBy = "system",
                             UpdateBy = "system",
-                            Description = "chua co"
+                            Description = "Chưa thêm"
                         };
                         _context.MedicineDetails.Add(medicineDetail);
                     }
