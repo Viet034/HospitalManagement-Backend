@@ -12,8 +12,8 @@ using SWP391_SE1914_ManageHospital.Data;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250701210017_UpdateDatabase")]
-    partial class UpdateDatabase
+    [Migration("20250704090351_RecreateMigrations")]
+    partial class RecreateMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,6 +86,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .IsRequired()
                         .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("isSend")
+                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id");
 

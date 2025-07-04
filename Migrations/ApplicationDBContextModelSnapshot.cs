@@ -84,6 +84,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .IsRequired()
                         .HasColumnType("datetime(6)");
 
+                    b.Property<bool>("isSend")
+                        .HasColumnType("tinyint(1)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClinicId");

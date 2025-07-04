@@ -3,4 +3,5 @@
 public interface IEmailService
 {
     Task SendResetPasswordEmailAsync(string toEmail, string resetToken, string userType);
+    Task SendAppointmentReminderEmailAsync(string toEmail, string Name, DateTime startTime);
 }
