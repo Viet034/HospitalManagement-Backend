@@ -66,6 +66,16 @@ namespace SWP391_SE1914_ManageHospital.Controllers
 
                         for (int row = 2; row <= rowCount; row++)
                         {
+                            bool isRowEmpty = true;
+                            for (int col = 1; col <= 13; col++)
+                            {
+                                if (!string.IsNullOrWhiteSpace(worksheet.Cell(row, col).GetString()))
+                                {
+                                    isRowEmpty = false;
+                                    break;
+                                }
+                            }
+                            if (isRowEmpty) continue;
                             string prescribedCell = worksheet.Cell(row, 9).GetString().Trim().ToUpper();
                             PrescribedMedication prescribedEnum;
 

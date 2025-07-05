@@ -13,7 +13,11 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Medicine
         public string Dosage { get; set; } = string.Empty;
         public int Prescribed { get; set; }
         public int UnitId { get; set; }
+
+        public decimal UnitPrice { get; set; }
         public int MedicineCategoryId { get; set; }
+
+        
     }
 
 }
