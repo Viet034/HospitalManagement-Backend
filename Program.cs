@@ -57,8 +57,9 @@ builder.Services.AddScoped<IMedicineMapper, MedicineMapper>();
 builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
 builder.Services.AddScoped<IMedicineCategoryMapper, MedicineCategoryMapper>();
 
-// Đăng ký service
-builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
+builder.Services.AddScoped<IMedicineDetailService, MedicineDetailService>(); // Đăng ký service
+builder.Services.AddScoped<IMedicineDetailMapper, MedicineDetailMapper>(); // Đăng ký mapper
+
 
 
 
