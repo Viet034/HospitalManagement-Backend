@@ -10,7 +10,7 @@ namespace SWP391_SE1914_ManageHospital.Models.Helps
         public DateTime ExaminationTime { get; set; }
         public string AppointmentStatus { get; set; }
 
-        public PatientAppointmentData()
+        public PatientAppointmentData() 
         {
             this.Patient = null;
             this.ExaminationTime = DateTime.MinValue;

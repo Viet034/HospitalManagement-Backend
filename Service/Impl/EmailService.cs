@@ -61,4 +61,47 @@ public class EmailService : IEmailService
             throw new Exception($"Lỗi gửi email: {ex.Message}");
         }
     }
+
+    public async Task SendAppointmentReminderEmailAsync(string toEmail, string Name, DateTime startTime)
+    {
+        var smtpSettings = _configuration.GetSection("SmtpSettings");
+        var fromEmail = smtpSettings["FromEmail"];
+        var host = smtpSettings["Host"];
+        var port = int.Parse(smtpSettings["Port"]);
+        var username = smtpSettings["Username"];
+        var password = smtpSettings["Password"];
+
+        using var client = new SmtpClient
+        {
+            Host = host,
+            Port = port,
+            EnableSsl = true,
+            DeliveryMethod = SmtpDeliveryMethod.Network,
+            UseDefaultCredentials = false,
+            Credentials = new NetworkCredential(username, password)
+        };
+
+        var mailMessage = new MailMessage
+        {
+            From = new MailAddress(fromEmail, "Bệnh viện Kivicare"),
+            Subject = "Nhắc lịch khám bệnh",
+            IsBodyHtml = true,
+            Body = $@"
+            <h2>Xin chào {Name},</h2>
+            <p>Đây là email nhắc nhở bạn có lịch hẹn khám lúc <b>{startTime:HH:mm dd/MM/yyyy}</b>.</p>
+            <p>Vui lòng đến đúng giờ. Hãy xem lại lịch của bạn trong trang</p>
+            <p>Trân trọng,</p><p>Bệnh viện Kivicare</p>"
+        };
+
+        mailMessage.To.Add(toEmail);
+        try
+        {
+            await client.SendMailAsync(mailMessage);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Lỗi gửi email: {ex.Message}");
+        }
+        
+    }
 }

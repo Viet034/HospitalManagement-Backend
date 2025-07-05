@@ -13,6 +13,7 @@ public class Appointment : BaseEntity
     [EnumDataType(typeof(AppointmentStatus))]
     public AppointmentStatus Status { get; set; }
     public string? Note { get; set; }
+    public bool isSend { get; set; }
     public int PatientId { get; set; }
     public int ClinicId { get; set; }
     public int ReceptionId { get; set; }

@@ -73,7 +73,7 @@ public class AuthService : IAuthService
 
             if (!roles.Contains(userType.ToString().ToLower()))
                 throw new Exception("Email không đúng!");
-            var resetToken = Guid.NewGuid().ToString(); // Tạo token mới
+            var resetToken = Guid.NewGuid().ToString(); 
             var resetTokenExpiryTime = DateTime.Now.AddHours(1); // Token có hiệu lực trong 1 giờ
             user.ResetPasswordToken = resetToken;
             user.ResetPasswordTokenExpiryTime = resetTokenExpiryTime; // Token 1h
@@ -350,18 +350,18 @@ public class AuthService : IAuthService
     }
     public async Task<PatientRegisterResponse> RegisterPatientAsync(PatientRegisterRequest request)
     {
-        // 1. Kiểm tra Email tồn tại chưa
+        //  Kiểm tra Email tồn tại chưa
         if (await _context.Users.AnyAsync(x => x.Email == request.Email))
             throw new Exception("Email đã tồn tại!");
 
-        // 2. Kiểm tra Phone và CCCD
+        //  Kiểm tra Phone và CCCD
         if (await _context.Patients.AnyAsync(x => x.Phone == request.Phone))
             throw new Exception("Số điện thoại đã tồn tại");
 
         if (await _context.Patients.AnyAsync(x => x.CCCD == request.CCCD))
             throw new Exception("CCCD đã tồn tại");
 
-        // 3. Kiểm tra và chuẩn hóa tên
+        //  Kiểm tra và chuẩn hóa tên
         request.FullName = request.FullName.Trim();
         if (string.IsNullOrEmpty(request.FullName))
             throw new Exception("Không được để trống tên");
@@ -369,7 +369,7 @@ public class AuthService : IAuthService
         if (!Regex.IsMatch(request.FullName, @"^[a-zA-ZÀ-ỹ\s]+$"))
             throw new Exception("Tên không được chứa kí tự đặc biệt");
         
-        // 4. Tạo User mới
+        //  Tạo User mới
         var hashedPassword = _passwordHasher.HashPassword(request.Password);
         var newUser = new User
         {
@@ -381,7 +381,7 @@ public class AuthService : IAuthService
         await _context.Users.AddAsync(newUser);
         await _context.SaveChangesAsync(); // Phải save để lấy được newUser.Id
 
-        // 5. Gán thông tin Patient
+        //  Gán thông tin Patient
         var patient = new Patient
         {
             Code = request.Code,
@@ -418,7 +418,7 @@ public class AuthService : IAuthService
         }
         await _context.Patients.AddAsync(patient);
 
-        // 6. Gán role PATIENT (nếu dùng User_Role)
+        //  Gán role PATIENT (nếu dùng User_Role)
         var patientRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name.Trim().ToLower() == "patient");
         if (patientRole != null)
         {
@@ -431,7 +431,7 @@ public class AuthService : IAuthService
 
         await _context.SaveChangesAsync();
 
-        // 7. Trả về response
+        //  Trả về response
         return new PatientRegisterResponse
         {
             PatientId = patient.Id,
