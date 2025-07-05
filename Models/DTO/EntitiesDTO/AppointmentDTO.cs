@@ -16,6 +16,7 @@ public class AppointmentDTO
     [EnumDataType(typeof(AppointmentStatus))]
     public AppointmentStatus Status { get; set; }
     public string? Note { get; set; }
+    public bool isSend { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime? UpdateDate { get; set; }
     public string CreateBy { get; set; }
