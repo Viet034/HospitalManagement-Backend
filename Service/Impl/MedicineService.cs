@@ -103,6 +103,7 @@ public class MedicineService : IMedicineService
                 Id = m.Id,
                 Name = m.Name, // Lấy trực tiếp từ bảng Medicines
                 Code = m.Code,
+                ImageUrl = m.ImageUrl,
                 UnitPrice = m.UnitPrice,
                 Description =m.Description,
                 MedicineCategoryName = m.MedicineCategory.Name, // Lấy tên từ bảng MedicineCategory
