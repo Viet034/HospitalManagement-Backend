@@ -88,6 +88,9 @@ builder.Services.AddScoped<IMedicalRecordListService, MedicalRecordListService>(
 builder.Services.AddScoped<IMedicalRecordDetailMapper, MedicalRecordDetailMapper>();
 builder.Services.AddScoped<IMedicalRecordDetailService, MedicalRecordDetailService>();
 
+builder.Services.AddScoped<IDiseaseMapper, DiseaseMapper>();
+builder.Services.AddScoped<IDiseaseService, DiseaseService>();
+
 
 
 
@@ -217,10 +220,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
 
+app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
