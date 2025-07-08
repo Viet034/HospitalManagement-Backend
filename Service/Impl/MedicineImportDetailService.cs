@@ -35,7 +35,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
             do
             {
-                newCode = GenerateCode.GenerateClinicCode();
+                newCode = GenerateCode.GenerateMedicineImportDetailCode();
                 _context.ChangeTracker.Clear();
                 isExist = await _context.MedicineImportDetails.AnyAsync(p => p.Code == newCode);
             }
@@ -72,13 +72,6 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return _mapper.EntityToResponse(MID);
         }
 
-        public async Task<IEnumerable<MedicineImportDetailResponseDTO>> GetAllMedicineImportDetailAsync()
-        {
-            
-            var MID = await _context.MedicineImportDetails.ToListAsync();
-            return _mapper.ListEntityToResponse(MID);
-        }
-
         public async Task<IEnumerable<MedicineImportDetailResponseDTO>> SearchMedicineImportDetailAsync(string batchnumber)
         {
             var batch = await _context.MedicineImportDetails.FromSqlRaw("Select * from medicine_import_details where BatchNumber like {0}", "%" + batchnumber + "%").ToListAsync();
@@ -109,6 +102,51 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             await _context.SaveChangesAsync();
             return _mapper.EntityToResponse(up);
 
+        }
+
+        public async Task<MedicineImportDetailPageDTO> GetMedicineImportDetailPageAsync(int pageNumber, int pageSize = 10)
+        {
+            
+            var totalItems = await _context.MedicineImportDetails.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize); 
+
+            
+            var data = await _context.MedicineImportDetails
+                .Include(d => d.Medicine)
+                .Include(d => d.Supplier)
+                .Include(d => d.Unit)
+                .Include(d => d.Medicine.MedicineCategory)
+                .OrderBy(d => d.Id)
+                .Skip((pageNumber - 1) * pageSize)  
+                .Take(pageSize)                     
+                .ToListAsync();
+
+            var items = data.Select(d => new MedicineImportDetailResponseDTO
+            {
+                Id = d.Id,
+                ImportId = d.ImportId,
+                MedicineId = d.MedicineId,
+                UnitId = d.UnitId,
+                MedicineName = d.Medicine?.Name ?? "N/A",
+                BatchNumber = d.BatchNumber,
+                Quantity = d.Quantity,
+                UnitPrice = d.UnitPrice,
+                CategoryName = d.Medicine?.MedicineCategory?.Name ?? "N/A",
+                ManufactureDate = d.ManufactureDate,
+                ExpiryDate = d.ExpiryDate,
+                SupplierName = d.Supplier?.Name ?? "N/A",
+                UnitName = d.Unit?.Name ?? "N/A",
+                CreateDate = d.CreateDate,
+                CreateBy = d.CreateBy,
+                UpdateBy = d.UpdateBy,
+                UpdateDate = d.UpdateDate,
+            }).ToList();
+
+            return new MedicineImportDetailPageDTO
+            {
+                Items = items,
+                TotalPages = totalPages
+            };
         }
     }
 }
