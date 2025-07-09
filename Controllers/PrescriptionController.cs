@@ -43,6 +43,13 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             return role != null && role.Name == "Doctor";
         }
 
+        private string GetUserNameFromClaims()
+        {
+            // Lấy ClaimTypes.Name (hoặc ClaimTypes.NameIdentifier) tuỳ bạn đã ghi vào token như thế nào
+            return User?.Claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
+                   ?? "system";
+        }
+
         [HttpGet("get-all")]
         public async Task<IActionResult> GetAll()
         {
@@ -67,20 +74,30 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             return Ok(list);
         }
 
-        // Lấy đơn thuốc của bác sĩ hiện tại (dựa trên UserId từ JWT token)
+        // Lấy đơn thuốc của bệnh nhân theo PatientId
+        [HttpGet("get-by-patient/{patientId}")]
+        [Authorize(Roles = "Doctor, Admin")]
+        public async Task<IActionResult> GetByPatient(int patientId)
+        {
+            var list = await _prescriptionService.GetByPatientIdAsync(patientId);
+            return Ok(list);
+        }
+
+        // Lấy đơn thuốc của bác sĩ hiện tại hoặc bệnh nhân dựa trên UserId từ JWT token
         [HttpGet("my-prescriptions")]
-        [Authorize(Roles = "Doctor")]
+        [Authorize]
         public async Task<IActionResult> GetMine()
         {
             // Lấy UserId từ JWT token
             var userId = GetUserIdFromClaims();
             if (userId == 0) return Unauthorized("User chưa đăng nhập.");
 
-            // Lấy DoctorId từ UserId
-            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
-            if (doctor == null) return NotFound("Không tìm thấy bác sĩ.");
+            // Lấy role của người dùng
+            var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
 
-            var list = await _prescriptionService.GetByDoctorIdAsync(doctor.Id);
+            if (string.IsNullOrEmpty(role)) return Unauthorized("Role không hợp lệ.");
+
+            var list = await _prescriptionService.GetMineAsync(userId, role);
             return Ok(list);
         }
 
@@ -133,6 +150,19 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             if (!ok)
                 return NotFound();
             return NoContent();
+        }
+
+        [HttpPut("update-status/{id}")]
+        [Authorize(Roles = "Doctor,Admin")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] PrescriptionUpdateStatusResquest req)
+        {
+            // xác thực token, lấy tên user ra để ghi vào UpdateBy
+            var userName = GetUserNameFromClaims();
+
+            var updated = await _prescriptionService.UpdateStatusAsync(id, req.Status, userName);
+            if (updated == null)
+                return NotFound($"Không tìm thấy Prescription với ID = {id}");
+            return Ok(updated);
         }
     }
 }

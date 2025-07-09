@@ -36,6 +36,36 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return prescriptions.Select(p => _mapper.MapToResponse(p));
         }
 
+        // Lấy đơn thuốc của một bệnh nhân theo PatientId
+        public async Task<IEnumerable<PrescriptionResponseDTO>> GetByPatientIdAsync(int patientId)
+        {
+            var prescriptions = await _context.Prescriptions
+                .Where(p => p.PatientId == patientId)
+                .ToListAsync();  // Query đơn thuốc của bệnh nhân
+
+            return prescriptions.Select(p => _mapper.MapToResponse(p)); // Ánh xạ sang DTO
+        }
+
+
+        // Sửa lại phương thức GetMine để trả về đơn thuốc cho cả Doctor và Patient
+        public async Task<IEnumerable<PrescriptionResponseDTO>> GetMineAsync(int userId, string role)
+        {
+            if (role == "Doctor")
+            {
+                var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
+                if (doctor == null) throw new Exception("Không tìm thấy bác sĩ.");
+                return await GetByDoctorIdAsync(doctor.Id);
+            }
+            else if (role == "Patient")
+            {
+                var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+                if (patient == null) throw new Exception("Không tìm thấy bệnh nhân.");
+                return await GetByPatientIdAsync(patient.Id);
+            }
+
+            throw new Exception("Role không hợp lệ");
+        }
+
         // Lấy đơn thuốc của bác sĩ hiện tại từ UserId
         public async Task<IEnumerable<PrescriptionResponseDTO>> GetByUserIdAsync(int userId)
         {
@@ -114,6 +144,39 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return true;
         }
 
-        
+
+        public async Task<PrescriptionResponseDTO> UpdateStatusAsync(int prescriptionId, PrescriptionStatus newStatus, string updatedBy)
+        {
+            // 1) Tìm Prescription
+            var prescription = await _context.Prescriptions
+                .FirstOrDefaultAsync(p => p.Id == prescriptionId);
+            if (prescription == null)
+                return null;
+
+            // 2) Cập nhật Prescription
+            prescription.Status = newStatus;
+            prescription.UpdateDate = DateTime.UtcNow;
+            prescription.UpdateBy = updatedBy;
+
+            // 3) Lấy tất cả chi tiết và đồng bộ trạng thái
+            var details = await _context.PrescriptionDetails
+                .Where(d => d.PrescriptionId == prescriptionId)
+                .ToListAsync();
+
+            foreach (var d in details)
+            {
+                // Giả sử PrescriptionDetailStatus có cùng giá trị enum với PrescriptionStatus
+                d.Status = (PrescriptionDetailStatus)newStatus;
+                d.UpdateDate = DateTime.UtcNow;
+                d.UpdateBy = updatedBy;
+            }
+
+            // 4) Lưu thay đổi
+            await _context.SaveChangesAsync();
+
+            // 5) Trả về DTO
+            return _mapper.MapToResponse(prescription);
+        }
+
     }
 }

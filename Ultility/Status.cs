@@ -93,7 +93,7 @@ public static class Status
     }
     public enum PrescriptionDetailStatus
     {
-        Active = 0, Modified = 1, Removed = 2
+        New = 0, Dispensed = 1, Cancelled = 2
     }
     public enum ReceptionStatus
     {

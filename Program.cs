@@ -63,6 +63,9 @@ builder.Services.AddScoped<IMedicineDetailMapper, MedicineDetailMapper>(); // Đ
 builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();  // Đăng ký PrescriptionService
 builder.Services.AddScoped<IPrescriptionMapper, PrescriptionMapper>();
 
+builder.Services.AddScoped<IPrescriptionDetailMapper, PrescriptionDetailMapper>();
+builder.Services.AddScoped<IPrescriptionDetailService, PrescriptionDetailService>();
+
 
 
 //builder.Services.AddScoped<IPaymentService, PaymentService>();
