@@ -64,6 +64,12 @@ public class GenerateCode
         int medcatRand = random.Next(100000, 999999);
         return "MEDC" + medcatRand;
     }
+    public static string GenerateMedicineImportDetailCode()
+    {
+
+        int medcatRand = random.Next(100000, 999999);
+        return "MID" + medcatRand;
+    }
     public static string GenerateNurseCode()
     {
 

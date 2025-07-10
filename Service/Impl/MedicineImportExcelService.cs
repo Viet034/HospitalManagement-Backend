@@ -5,6 +5,7 @@ using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.ImportMedicineEX;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Medicine;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
+using SWP391_SE1914_ManageHospital.Ultility;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
@@ -23,6 +24,20 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
         public Task<string> AskUserForConfirmation(string message)
         {
             return Task.FromResult(message);
+        }
+        private async Task<string> GenerateUniqueMedicineImportDetailCodeAsync()
+        {
+            string newCode;
+            bool isExist;
+
+            do
+            {
+                newCode = GenerateCode.GenerateMedicineImportDetailCode();
+                isExist = await _context.MedicineImportDetails.AnyAsync(p => p.Code == newCode);
+            }
+            while (isExist);
+
+            return newCode;
         }
 
         public async Task<bool> ImportMedicinesAsync(MedicineImportRequest request, bool continueImport)
@@ -167,6 +182,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                     var importDetail = _mapper.MapToImportDetailEntity(detail, medicine.Id, import.Id);
                     importDetail.UnitId = unit.Id;
                     importDetail.SupplierId = supplier.Id;
+                    importDetail.Code = await GenerateUniqueMedicineImportDetailCodeAsync();
                     _context.MedicineImportDetails.Add(importDetail);
                     await _context.SaveChangesAsync();
 
