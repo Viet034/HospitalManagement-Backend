@@ -44,6 +44,8 @@ builder.Services.AddScoped<IDoctorService, DoctorService>();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddScoped<IMedicineInventoryMapper, MedicineInventoryMapper>();
+builder.Services.AddScoped<IMedicineInventoryService, MedicineInventoryService>();
 
 
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();

@@ -72,15 +72,75 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return _mapper.EntityToResponse(MID);
         }
 
-        public async Task<IEnumerable<MedicineImportDetailResponseDTO>> SearchMedicineImportDetailAsync(string batchnumber)
+        public async Task<MedicineImportDetailPageDTO> SearchMedicineImportDetailAsync(string keyword, DateTime? startDate, DateTime? endDate, int pageNumber, int pageSize = 10)
         {
-            var batch = await _context.MedicineImportDetails.FromSqlRaw("Select * from medicine_import_details where BatchNumber like {0}", "%" + batchnumber + "%").ToListAsync();
-            if(batchnumber == null)
+            if (string.IsNullOrEmpty(keyword) && !startDate.HasValue && !endDate.HasValue)
             {
-                throw new Exception($"Không tìm thấy lô {batchnumber}");
+                return new MedicineImportDetailPageDTO { Items = new List<MedicineImportDetailResponseDTO>(), TotalPages = 0 };
             }
-            var res = _mapper.ListEntityToResponse(batch);
-            return res;
+
+            keyword = keyword.Trim().ToLower();
+
+            var query = _context.MedicineImportDetails
+                .Include(d => d.Medicine)
+                .Include(d => d.Supplier)
+                .Include(d => d.Unit)
+                .Include(d => d.Medicine.MedicineCategory)
+                .OrderByDescending(d => d.CreateDate)
+                .AsQueryable();
+
+            query = query.Where(d => 
+            (d.Medicine.Code != null && d.Medicine.Code.ToLower().Contains(keyword)) ||
+            (d.Medicine.Name != null && d.Medicine.Name.ToLower().Contains(keyword)) ||
+            (d.Medicine.MedicineCategory.Name != null && d.Medicine.MedicineCategory.Name.ToLower().Contains(keyword)) ||
+            (d.Supplier.Name != null && d.Supplier.Name.ToLower().Contains((keyword)))
+            );
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(d => d.CreateDate >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(d => d.CreateDate <= endDate.Value);
+            }
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var data = await query.Skip((pageNumber - 1) * pageSize)
+                          .Take(pageSize)
+                          .ToListAsync();
+
+            var items = data.Select(d => new MedicineImportDetailResponseDTO
+            {
+                Id = d.Id,
+                MedicineCode = d.Medicine?.Code ?? string.Empty,
+                ImportId = d.ImportId,
+                MedicineId = d.MedicineId,
+                UnitId = d.UnitId,
+                MedicineName = d.Medicine?.Name ?? "N/A",
+                BatchNumber = d.BatchNumber,
+                Quantity = d.Quantity,
+                UnitPrice = d.UnitPrice,
+                CategoryName = d.Medicine?.MedicineCategory?.Name ?? "N/A",
+                ManufactureDate = d.ManufactureDate,
+                ExpiryDate = d.ExpiryDate,
+                SupplierName = d.Supplier?.Name ?? "N/A",
+                UnitName = d.Unit?.Name ?? "N/A",
+                CreateDate = d.CreateDate,
+                CreateBy = d.CreateBy,
+                UpdateBy = d.UpdateBy,
+                UpdateDate = d.UpdateDate,
+            }).ToList();
+
+            // Trả về kết quả tìm kiếm cùng với thông tin phân trang
+            return new MedicineImportDetailPageDTO
+            {
+                Items = items,
+                TotalPages = totalPages
+            };
         }
 
         public async Task<MedicineImportDetailResponseDTO> UpdateMedicineImportDetail(MedicineImportDetailUpdate update, int id)
@@ -116,7 +176,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 .Include(d => d.Supplier)
                 .Include(d => d.Unit)
                 .Include(d => d.Medicine.MedicineCategory)
-                .OrderBy(d => d.Id)
+                .OrderByDescending(d => d.CreateDate)
                 .Skip((pageNumber - 1) * pageSize)  
                 .Take(pageSize)                     
                 .ToListAsync();
@@ -124,6 +184,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             var items = data.Select(d => new MedicineImportDetailResponseDTO
             {
                 Id = d.Id,
+                MedicineCode = d.Medicine?.Code ?? string.Empty,
                 ImportId = d.ImportId,
                 MedicineId = d.MedicineId,
                 UnitId = d.UnitId,
