@@ -194,5 +194,23 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 Email = newUser.Email,
             };
         }
+
+        public async Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByClinicIdAsync(int clinicId)
+        {
+            var doctors = await _context.Doctors
+                .Include(d => d.User)
+                .Include(d => d.Department)
+                .Include(d => d.Clinic)
+                .Where(d => d.ClinicId == clinicId && d.Status == DoctorStatus.Available)
+                .ToListAsync();
+            
+            return _mapper.MapToDtoList(doctors);
+        }
+
+        public async Task<int?> GetDepartmentIdByDoctorIdAsync(int doctorId)
+        {
+            var doctor = await _context.Doctors.FindAsync(doctorId);
+            return doctor?.DepartmentId;
+        }
     }
 }
