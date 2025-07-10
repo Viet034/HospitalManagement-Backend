@@ -62,6 +62,7 @@ builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
 
 
 
+
 //builder.Services.AddScoped<IPaymentService, PaymentService>();
 //builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
@@ -75,7 +76,8 @@ builder.Services.AddScoped<IMedicineImportDetailService, MedicineImportDetailSer
 builder.Services.AddScoped<IMedicineManageForAdminService, MedicineManageForAdminService>();
 builder.Services.AddScoped<IMedicineManageForAdminMapper, MedicineManageForAdminMapper>();
 
-
+builder.Services.AddScoped<IMedicineImportExcelMapper, MedicineImportExcelMapper>();
+builder.Services.AddScoped<IMedicineImportExcelService, MedicineImportExcelService>();
 
 
 
@@ -87,6 +89,9 @@ builder.Services.AddScoped<IMedicalRecordListService, MedicalRecordListService>(
 
 builder.Services.AddScoped<IMedicalRecordDetailMapper, MedicalRecordDetailMapper>();
 builder.Services.AddScoped<IMedicalRecordDetailService, MedicalRecordDetailService>();
+builder.Services.AddScoped<IAppointmentReminderService, AppointmentReminderService>();
+builder.Services.AddScoped<IFeedbackMapper, FeedbackMapper>();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 
 builder.Services.AddScoped<IDiseaseMapper, DiseaseMapper>();
 builder.Services.AddScoped<IDiseaseService, DiseaseService>();
@@ -94,11 +99,9 @@ builder.Services.AddScoped<IDiseaseService, DiseaseService>();
 
 
 
-
-/*
 var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
 Console.WriteLine(hash);
-*/
+
 
 
 

@@ -6,6 +6,7 @@ namespace SWP391_SE1914_ManageHospital.Service
 {
     public interface IMedicineImportExcelService
     {
-        Task<bool> ImportMedicinesAsync(MedicineImportRequest request);
+        Task<bool> ImportMedicinesAsync(MedicineImportRequest request, bool continueImport);
+        Task<string> AskUserForConfirmation(string message);
     }
 }

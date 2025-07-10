@@ -139,7 +139,7 @@ public class ApplicationDBContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Ingredients);
             entity.Property(e => e.ExpiryDate);
-            entity.Property(e => e.Manufacturer).HasMaxLength(100);
+            entity.Property(e => e.Manufacturer);
             entity.Property(e => e.Warning);
             entity.Property(e => e.StorageInstructions);
             entity.Property(e => e.Status);
@@ -220,7 +220,13 @@ public class ApplicationDBContext : DbContext
                   .WithMany()
                   .HasForeignKey(e => e.UnitId)
                   .OnDelete(DeleteBehavior.Restrict);
-            entity.HasIndex(e => new { e.MedicineId, e.BatchNumber }).IsUnique();
+
+            entity.HasOne(e => e.Supplier)
+                    .WithMany()
+                    .HasForeignKey(e => e.SupplierId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => new { e.MedicineId, e.BatchNumber, e.SupplierId }).IsUnique();
         });
 
         modelBuilder.Entity<Clinic>(entity =>
@@ -602,6 +608,9 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.CreateDate).IsRequired();
             entity.Property(a => a.UpdateDate).IsRequired();
             entity.Property(a => a.Dosage).IsRequired().HasMaxLength(100);
+            entity.Property(a => a.UnitPrice)
+           .IsRequired()
+           .HasColumnType("decimal(65,30)");
             entity.Property(a => a.CreateBy).IsRequired().HasMaxLength(100);
             entity.Property(a => a.UpdateBy).IsRequired().HasMaxLength(100);
             entity.Property(a => a.ImageUrl)

@@ -13,7 +13,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             supplier.Phone = create.Phone;
             supplier.Email = create.Email;
             supplier.Address = create.Address;
-          
+            supplier.Code = create.Code;
             return supplier;
         }
 
@@ -25,7 +25,9 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             respone.Phone = entity.Phone;
             respone.Email = entity.Email;
             respone.Address = entity.Address;
-           
+            respone.Code = entity.Code;
+            respone.CreateDate = entity.CreateDate;
+            respone.CreateBy = entity.CreateBy;
             return respone;
         }
 
