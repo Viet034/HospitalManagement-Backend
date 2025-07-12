@@ -2,7 +2,7 @@
 
 namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Prescription
 {
-    public class PrescriptionUpdateStatusResquest
+    public class PrescriptionUpdateStatusRequest
     {
         public PrescriptionStatus Status { get; set; }
     }
