@@ -48,7 +48,7 @@ public class ApplicationDBContext : DbContext
     public DbSet<MedicineImport> MedicineImports { get; set; }
     public DbSet<MedicineImportDetail> MedicineImportDetails { get; set; }
     public DbSet<Doctor_Shift> Doctor_Shifts { get; set; }
-
+    public IEnumerable<object> UserRoles { get; internal set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -57,9 +57,14 @@ builder.Services.AddScoped<IMedicineMapper, MedicineMapper>();
 builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
 builder.Services.AddScoped<IMedicineCategoryMapper, MedicineCategoryMapper>();
 
-// Đăng ký service
-builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
+builder.Services.AddScoped<IMedicineDetailService, MedicineDetailService>(); // Đăng ký service
+builder.Services.AddScoped<IMedicineDetailMapper, MedicineDetailMapper>(); // Đăng ký mapper
 
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();  // Đăng ký PrescriptionService
+builder.Services.AddScoped<IPrescriptionMapper, PrescriptionMapper>();
+
+builder.Services.AddScoped<IPrescriptionDetailMapper, PrescriptionDetailMapper>();
+builder.Services.AddScoped<IPrescriptionDetailService, PrescriptionDetailService>();
 
 
 
@@ -96,8 +101,8 @@ builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 
 
 
-var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
-Console.WriteLine(hash);
+//var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
+//Console.WriteLine(hash);
 
 
 
