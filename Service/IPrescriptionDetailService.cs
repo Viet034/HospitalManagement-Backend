@@ -13,7 +13,7 @@ namespace SWP391_SE1914_ManageHospital.Service
         Task<PrescriptionDetailResponseDTO> CreateAsync(PrescriptionDetailRequest request);
 
         // Cập nhật chỉ cần id + request
-        Task<PrescriptionDetailResponseDTO?> UpdateAsync(int id, PrescriptionDetailRequest request);
+        
 
         Task<IEnumerable<PrescriptionDetailResponseDTO>> GetByUserAsync(int userId, string role);
         Task<bool> DeleteAsync(int id);

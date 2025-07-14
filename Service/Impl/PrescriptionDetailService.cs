@@ -1,4 +1,5 @@
 ﻿// Service/Impl/PrescriptionDetailService.cs
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
@@ -9,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
 {
@@ -37,41 +39,61 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return entity == null ? null : _mapper.MapToResponse(entity);
         }
 
+       
+
         public async Task<List<PrescriptionDetailResponseDTO>> GetByPrescriptionIdAsync(int prescriptionId)
         {
             var list = await _context.PrescriptionDetails
                 .Where(d => d.PrescriptionId == prescriptionId)
                 .AsNoTracking()
+                .Include(d => d.Medicine)  // Kết hợp thông tin thuốc từ bảng Medicines
                 .ToListAsync();
-            return list.Select(_mapper.MapToResponse).ToList();
+
+            // Ánh xạ kết quả sang DTO và thêm MedicineName
+            return list.Select(d => new PrescriptionDetailResponseDTO
+            {
+                Id = d.Id,
+                PrescriptionId = d.PrescriptionId,
+                MedicineId = d.MedicineId,
+                MedicineName = d.Medicine.Name,  // Lấy tên thuốc từ bảng Medicines
+                Quantity = d.Quantity,
+                Usage = d.Usage,
+                Status = d.Status.ToString(),
+                CreateDate = d.CreateDate,
+                UpdateDate = (DateTime)d.UpdateDate,
+                CreateBy = d.CreateBy,
+                UpdateBy = d.UpdateBy
+            }).ToList();
         }
+
 
         public async Task<PrescriptionDetailResponseDTO> CreateAsync(PrescriptionDetailRequest req)
         {
-            // 1) Lấy thông tin bác sĩ từ UserId
+            // Lấy thuốc từ tên thuốc
+            var medicine = await _context.Medicines
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Name == req.MedicineName);  // Tìm thuốc theo tên
+
+            if (medicine == null)
+                throw new Exception("Không tìm thấy thuốc.");
+
+            // Lấy bác sĩ từ UserId
             var doctor = await _context.Doctors
                 .AsNoTracking()
                 .FirstOrDefaultAsync(d => d.UserId == req.UserId);
             if (doctor == null)
                 throw new Exception("Không tìm thấy bác sĩ.");
 
-            // 2) Lấy thuốc gốc để copy Name/Code
-            var med = await _context.Medicines
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.Id == req.MedicineId);
-            if (med == null)
-                throw new Exception("Không tìm thấy thuốc.");
-
-            // 3) Khởi tạo entity
+            // Tạo PrescriptionDetail
             var detail = new PrescriptionDetail
             {
                 PrescriptionId = req.PrescriptionId,
-                MedicineId = req.MedicineId,
+                MedicineId = medicine.Id,  // Gán ID thuốc từ tên thuốc
                 Quantity = req.Quantity,
                 Usage = req.Usage,
-                Status = (SWP391_SE1914_ManageHospital.Ultility.Status.PrescriptionDetailStatus)req.Status,
-                Name = med.Name,
-                Code = med.Code,
+                Status = (PrescriptionDetailStatus)req.Status,
+                Name = medicine.Name,
+                Code = medicine.Code,
                 CreateDate = DateTime.UtcNow,
                 UpdateDate = DateTime.UtcNow,
                 CreateBy = doctor.Name!,
@@ -83,42 +105,10 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return _mapper.MapToResponse(detail);
         }
 
-        public async Task<PrescriptionDetailResponseDTO?> UpdateAsync(int id, PrescriptionDetailRequest req)
-        {
-            var detail = await _context.PrescriptionDetails.FindAsync(id);
-            if (detail == null) return null;
 
-            // Lấy bác sĩ từ UserId
-            var doctor = await _context.Doctors
-                .AsNoTracking()
-                .FirstOrDefaultAsync(d => d.UserId == req.UserId);
-            if (doctor == null)
-                throw new Exception("Không tìm thấy bác sĩ.");
 
-            // Ánh xạ các trường có thể thay đổi
-            detail.Quantity = req.Quantity;
-            detail.Usage = req.Usage;
-            detail.Status = (SWP391_SE1914_ManageHospital.Ultility.Status.PrescriptionDetailStatus)req.Status;
-            detail.UpdateDate = DateTime.UtcNow;
-            detail.UpdateBy = doctor.Name!;
 
-            // Cập nhật Name/Code nếu đổi MedicineId
-            if (detail.MedicineId != req.MedicineId)
-            {
-                var med = await _context.Medicines
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(m => m.Id == req.MedicineId);
-                if (med != null)
-                {
-                    detail.MedicineId = req.MedicineId;
-                    detail.Name = med.Name;
-                    detail.Code = med.Code;
-                }
-            }
 
-            await _context.SaveChangesAsync();
-            return _mapper.MapToResponse(detail);
-        }
 
         public async Task<bool> DeleteAsync(int id)
         {

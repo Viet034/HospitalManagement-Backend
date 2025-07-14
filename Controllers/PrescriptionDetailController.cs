@@ -5,6 +5,9 @@ using System.Security.Claims;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.PrescriptionDetail;
 using SWP391_SE1914_ManageHospital.Service;
 using System.Threading.Tasks;
+using SWP391_SE1914_ManageHospital.Data;
+using Microsoft.EntityFrameworkCore;
+using DocumentFormat.OpenXml.InkML;
 
 namespace SWP391_SE1914_ManageHospital.Controllers
 {
@@ -14,9 +17,11 @@ namespace SWP391_SE1914_ManageHospital.Controllers
     public class PrescriptionDetailController : ControllerBase
     {
         private readonly IPrescriptionDetailService _service;
-        public PrescriptionDetailController(IPrescriptionDetailService service)
+        private readonly ApplicationDBContext _context; // Khai báo _context
+        public PrescriptionDetailController(IPrescriptionDetailService service, ApplicationDBContext context)
         {
             _service = service;
+            _context = context;  // Khởi tạo _context từ constructor
         }
 
         private int GetUserIdFromClaims()
@@ -30,6 +35,22 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             return User?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value
                    ?? string.Empty;
         }
+
+        private async Task<int> GetMedicineIdFromNameAsync(string medicineName)
+        {
+            if (string.IsNullOrEmpty(medicineName))
+                return 0;  // Hoặc ném lỗi nếu tên thuốc không hợp lệ
+
+            var medicine = await _context.Medicines
+                .AsNoTracking()  // Không theo dõi thay đổi (chỉ để đọc)
+                .FirstOrDefaultAsync(m => m.Name == medicineName);  // Tìm thuốc theo tên
+
+            if (medicine == null)
+                return 0;  // Hoặc ném một ngoại lệ nếu không tìm thấy thuốc
+
+            return medicine.Id;  // Trả về ID thuốc
+        }
+
 
         [HttpGet("get-all")]
         public async Task<IActionResult> GetAll()
@@ -45,6 +66,10 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             if (dto == null) return NotFound();
             return Ok(dto);
         }
+
+        // API để lấy MedicineId từ MedicineName
+        [HttpGet("get-id-by-name/{medicineName}")]
+        
 
         /// <summary>
         /// Lấy PrescriptionDetail của chính bác sĩ hoặc bệnh nhân đang login
@@ -69,6 +94,8 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             return Ok(list);
         }
 
+
+        // Phương thức Create để thêm chi tiết thuốc
         [HttpPost("add-detail")]
         [Authorize(Roles = "Doctor,Admin")]
         public async Task<IActionResult> Create([FromBody] PrescriptionDetailRequest req)
@@ -76,23 +103,27 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             var userId = GetUserIdFromClaims();
             if (userId == 0) return Unauthorized("User chưa đăng nhập.");
 
+            // Lấy thuốc từ tên thuốc (thay vì ID thuốc)
+            var medicine = await _context.Medicines
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Name == req.MedicineName);  // Sử dụng MedicineName thay vì MedicineId
+
+            if (medicine == null)
+                return BadRequest("Không tìm thấy thuốc với tên " + req.MedicineName);
+
+            req.MedicineId = medicine.Id; // Lấy ID thuốc từ tên thuốc
+
             req.UserId = userId;
             var dto = await _service.CreateAsync(req);
             return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
         }
 
-        [HttpPut("update-detail/{id}")]
-        [Authorize(Roles = "Doctor,Admin")]
-        public async Task<IActionResult> Update(int id, [FromBody] PrescriptionDetailRequest req)
-        {
-            var userId = GetUserIdFromClaims();
-            if (userId == 0) return Unauthorized("User chưa đăng nhập.");
 
-            req.UserId = userId;
-            var dto = await _service.UpdateAsync(id, req);
-            if (dto == null) return NotFound();
-            return Ok(dto);
-        }
+
+
+
+
+
 
         [HttpDelete("delete-detail/{id}")]
         [Authorize(Roles = "Doctor,Admin")]
