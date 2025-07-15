@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
@@ -61,6 +63,22 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             {
                 throw new Exception("Không tìm thấy nhà cung cấp!");
             }
+            if (await _context.Suppliers.AnyAsync(x => x.Id != id && x.Code.Trim().ToLower() == update.Code.Trim().ToLower()))
+            {
+                throw new Exception("Mã nhà cung cấp đã tồn tại!");
+            }
+            if (await _context.Suppliers.AnyAsync(x => x.Id != id && x.Phone == update.Phone))
+            {
+                throw new Exception("Số điện thoại nhà cung cấp đã tồn tại!");
+            }
+            if (await _context.Suppliers.AnyAsync(x => x.Id != id && x.Email.Trim().ToLower() == update.Email.Trim().ToLower()))
+            {
+                throw new Exception("Email nhà cung cấp đã tồn tại!");
+            }
+
+            ValidateCode(update.Code);
+            ValidatePhone(update.Phone);
+            ValidateEmail(update.Email);
 
             existing.Name = update.Name;
             existing.Phone = update.Phone;
@@ -68,7 +86,8 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             existing.Address = update.Address;
             existing.Code = update.Code;
             existing.UpdateDate = DateTime.Now;
-            existing.UpdateBy = GetCurrentUserId();
+            existing.UpdateBy = "system";
+            
 
             _context.Suppliers.Update(existing);
             await _context.SaveChangesAsync();
@@ -107,9 +126,17 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             ValidatePhone(create.Phone);
             ValidateEmail(create.Email);
 
-            if (await _context.Suppliers.AnyAsync(x => x.Name.Trim().ToLower() == create.Name.Trim().ToLower() && x.Phone == create.Phone && x.Email.Trim().ToLower() == create.Email.Trim().ToLower()))
+            if (await _context.Suppliers.AnyAsync(x => x.Code.Trim().ToLower() == create.Code.Trim().ToLower()))
             {
-                throw new Exception("Nhà cung cấp đã tồn tại !");
+                throw new Exception("Mã nhà cung cấp đã tồn tại!");
+            }
+            if (await _context.Suppliers.AnyAsync(x => x.Phone == create.Phone))
+            {
+                throw new Exception("Số điện thoại nhà cung cấp đã tồn tại!");
+            }
+            if (await _context.Suppliers.AnyAsync(x => x.Email.Trim().ToLower() == create.Email.Trim().ToLower()))
+            {
+                throw new Exception("Email nhà cung cấp đã tồn tại!");
             }
             var supplier = _mapper.CreateToEntity(create);
             if (!string.IsNullOrEmpty(create.Code) && create.Code != "string")

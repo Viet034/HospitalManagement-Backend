@@ -1,9 +1,10 @@
-﻿using System.Net;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicineImport;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicineImportDetail;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Service;
+using System.Net;
 
 namespace SWP391_SE1914_ManageHospital.Controllers
 {
@@ -37,11 +38,11 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpGet("get-all")]
         [ProducesResponseType(typeof(IEnumerable<MedicineImportDetail>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        public async Task<ActionResult<IEnumerable<MedicineImportDetail>>> GetAllMID()
+        public async Task<ActionResult<IEnumerable<MedicineImportDetail>>> GetAllMID(int pageNumber = 1, int pageSize = 10)
         {
             try
             {
-                var res = await _service.GetAllMedicineImportDetailAsync();
+                var res = await _service.GetMedicineImportDetailPageAsync(pageNumber, pageSize);
                 return Ok(res);
             }
             catch (Exception ex)

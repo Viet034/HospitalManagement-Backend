@@ -28,7 +28,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.ToString());
+                return BadRequest(ex.Message);
             }
         }
 
@@ -79,7 +79,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.ToString());
+                return BadRequest(ex.Message);
             }
         }
     }

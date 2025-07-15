@@ -13,6 +13,7 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
 
         public int UnitId { get; set; }
 
+        public decimal UnitPrice { get; set; }
         public MedicineStatus Status { get; set; }
 
         public int MedicineCategoryId { get; set; }

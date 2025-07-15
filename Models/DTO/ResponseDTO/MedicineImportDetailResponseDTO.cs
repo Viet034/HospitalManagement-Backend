@@ -13,9 +13,13 @@
         public int UnitId { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
-
+        public string CategoryName { get; set; } = string.Empty;
         public string CreateBy { get; set; } = string.Empty;
         public string? UpdateBy { get; set; }
+
+        public string MedicineName { get; set; } = string.Empty;
+        public string SupplierName { get; set; } = string.Empty;
+        public string UnitName { get; set; } = string.Empty;
 
         public MedicineImportDetailResponseDTO() { }
 

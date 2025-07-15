@@ -43,8 +43,6 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             supplier.Phone = update.Phone;
             supplier.Email = update.Email;
             supplier.Address = update.Address;
-            supplier.CreateDate = update.CreateDate;
-            supplier.CreateBy = update.CreateBy;
             supplier.UpdateDate = update.UpdateDate;
             supplier.UpdateBy = update.UpdateBy;
             return supplier;

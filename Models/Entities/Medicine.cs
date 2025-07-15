@@ -13,7 +13,7 @@ public class Medicine : BaseEntity
     public virtual Unit Unit { get; set; }
     public decimal UnitPrice { get; set; }
     public PrescribedMedication Prescribed { get; set; }
-    public string Dosage { get; set; }
+    public string Dosage { get; set; } = string.Empty;
     public int MedicineCategoryId { get; set; }
     public virtual MedicineCategory MedicineCategory { get; set; }
     public virtual ICollection<PrescriptionDetail> PrescriptionDetails { get; set; } = new List<PrescriptionDetail>();

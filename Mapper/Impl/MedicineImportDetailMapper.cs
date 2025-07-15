@@ -26,21 +26,25 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
 
         public MedicineImportDetailResponseDTO EntityToResponse(MedicineImportDetail entity)
         {
-            MedicineImportDetailResponseDTO response = new MedicineImportDetailResponseDTO();
-            response.Id = entity.Id;
-            response.ImportId = entity.ImportId;
-            response.MedicineId = entity.MedicineId;
-            response.BatchNumber = entity.BatchNumber;
-            response.Quantity = entity.Quantity;
-            response.UnitPrice = entity.UnitPrice;
-            response.ManufactureDate = entity.ManufactureDate;
-            response.ExpiryDate = entity.ExpiryDate;
-            response.UnitId = entity.UnitId;
-
-            return response;
+            return new MedicineImportDetailResponseDTO
+            {
+                Id = entity.Id,
+                MedicineName = entity.Medicine?.Name ?? "N/A",
+                Quantity = entity.Quantity,
+                UnitName = entity.Unit?.Name ?? "N/A",              
+                UnitPrice = entity.UnitPrice,
+                CategoryName = entity.Medicine?.MedicineCategory?.Name ?? "N/A",
+                ExpiryDate = entity.ExpiryDate,
+                ManufactureDate = entity.ManufactureDate,
+                BatchNumber = entity.BatchNumber,              
+                SupplierName = entity.Supplier?.Name ?? "N/A",              
+                CreateDate = entity.CreateDate,
+                CreateBy = entity.CreateBy
+            };
 
 
         }
+ 
 
         public IEnumerable<MedicineImportDetailResponseDTO> ListEntityToResponse(IEnumerable<MedicineImportDetail> entities)
         {
