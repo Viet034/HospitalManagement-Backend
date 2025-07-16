@@ -98,6 +98,9 @@ builder.Services.AddScoped<IAppointmentReminderService, AppointmentReminderServi
 builder.Services.AddScoped<IFeedbackMapper, FeedbackMapper>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 
+builder.Services.AddScoped<IDiseaseMapper, DiseaseMapper>();
+builder.Services.AddScoped<IDiseaseService, DiseaseService>();
+
 
 
 
@@ -225,10 +228,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
 
+app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

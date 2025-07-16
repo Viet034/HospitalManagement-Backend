@@ -9,7 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SWP391_SE1914_ManageHospital.Service;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
+using Microsoft.Extensions.Logging;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
 {
@@ -17,125 +19,134 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
     {
         private readonly ApplicationDBContext _context;
         private readonly IPatientFilterMapper _patientMapper;
+        private readonly ILogger<PatientFilterService> _logger;
 
-        public PatientFilterService(ApplicationDBContext context, IPatientFilterMapper patientMapper)
+        public PatientFilterService(ApplicationDBContext context, IPatientFilterMapper patientMapper, ILogger<PatientFilterService> logger)
         {
             _context = context;
             _patientMapper = patientMapper;
+            _logger = logger;
         }
 
         public async Task<List<PatientFilterResponse>> GetPatientsByDoctorAsync(PatientFilter filter)
         {
             if (filter == null)
-            {
                 throw new ArgumentNullException(nameof(filter), "Bộ lọc không được để trống.");
-            }
 
             if (filter.DoctorId <= 0)
-            {
                 throw new ArgumentException("Thiếu thông tin DoctorId hoặc DoctorId không hợp lệ.", nameof(filter));
-            }
 
-            // Kiểm tra bác sĩ có tồn tại
-            bool doctorExists = await _context.Doctors.AnyAsync(d => d.Id == filter.DoctorId);
-            if (!doctorExists)
+            _logger.LogInformation($"=== PatientFilterService.GetPatientsByDoctorAsync ===");
+            _logger.LogInformation($"DoctorId: {filter.DoctorId}");
+            _logger.LogInformation($"FromDate: {filter.FromDate}");
+            _logger.LogInformation($"ToDate: {filter.ToDate}");
+            _logger.LogInformation($"PatientName: {filter.PatientName}");
+
+            // ✅ KIỂM TRA DOCTOR TỒN TẠI
+            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == filter.DoctorId);
+            if (doctor == null)
             {
+                _logger.LogWarning($"Doctor with ID {filter.DoctorId} not found");
                 throw new ArgumentException($"Không tìm thấy bác sĩ có ID: {filter.DoctorId}", nameof(filter));
             }
+            _logger.LogInformation($"Doctor found: {doctor.Name}");
 
-            // Lấy danh sách cuộc hẹn của bác sĩ
-            List<Doctor_Appointment> doctorAppointments = await _context.Doctor_Appointments
+            // ✅ KIỂM TRA DOCTOR_APPOINTMENTS
+            var doctorAppointments = await _context.Doctor_Appointments
                 .Where(da => da.DoctorId == filter.DoctorId)
                 .ToListAsync();
 
-            // Tạo danh sách ID cuộc hẹn
-            List<int> appointmentIds = new List<int>();
-            foreach (Doctor_Appointment da in doctorAppointments)
+            _logger.LogInformation($"Doctor_Appointments count: {doctorAppointments.Count}");
+
+            if (doctorAppointments.Count == 0)
             {
-                appointmentIds.Add(da.AppointmentId);
+                _logger.LogWarning("No Doctor_Appointments found for this doctor");
+                return new List<PatientFilterResponse>();
             }
 
-            // Lấy thông tin chi tiết cuộc hẹn
-            var query = _context.Appointments
-                .Where(a => appointmentIds.Contains(a.Id));
+            // ✅ KIỂM TRA APPOINTMENTS
+            var appointmentIds = doctorAppointments.Select(da => da.AppointmentId).ToList();
+            _logger.LogInformation($"Appointment IDs: {string.Join(", ", appointmentIds)}");
 
-            // Áp dụng các bộ lọc ngày tháng
+            var appointments = await _context.Appointments
+                .Include(a => a.Patient)
+                .Where(a => appointmentIds.Contains(a.Id))
+                .ToListAsync();
+
+            _logger.LogInformation($"Appointments found: {appointments.Count}");
+
+            foreach (var appointment in appointments)
+            {
+                _logger.LogInformation($"Appointment: ID={appointment.Id}, Patient={appointment.Patient?.Name ?? "null"}, Date={appointment.AppointmentDate:yyyy-MM-dd HH:mm}, Status={appointment.Status}");
+            }
+
+            // ✅ FILTER BY DATE
             if (filter.FromDate.HasValue)
             {
-                query = query.Where(a => a.AppointmentDate >= filter.FromDate.Value);
+                var fromDate = filter.FromDate.Value.Date;
+                _logger.LogInformation($"Filtering from date: {fromDate:yyyy-MM-dd}");
+
+                var beforeFilter = appointments.Count;
+                appointments = appointments.Where(a => a.AppointmentDate.Date >= fromDate).ToList();
+                _logger.LogInformation($"After FromDate filter: {beforeFilter} -> {appointments.Count}");
             }
 
             if (filter.ToDate.HasValue)
             {
-                query = query.Where(a => a.AppointmentDate <= filter.ToDate.Value);
+                var toDate = filter.ToDate.Value.Date;
+                _logger.LogInformation($"Filtering to date: {toDate:yyyy-MM-dd}");
+
+                var beforeFilter = appointments.Count;
+                appointments = appointments.Where(a => a.AppointmentDate.Date <= toDate).ToList();
+                _logger.LogInformation($"After ToDate filter: {beforeFilter} -> {appointments.Count}");
             }
 
-            // Áp dụng bộ lọc trạng thái nếu có
-            if (!string.IsNullOrEmpty(filter.AppointmentStatus))
-            {
-                // Cần chuyển đổi string thành enum để so sánh
-                if (Enum.TryParse<AppointmentStatus>(filter.AppointmentStatus, out AppointmentStatus status))
-                {
-                    query = query.Where(a => a.Status == status);
-                }
-            }
-
-            // Lấy ra kết quả cuộc hẹn và include bệnh nhân
-            List<Appointment> appointments = await query
-                .Include(a => a.Patient)
-                .OrderBy(a => a.AppointmentDate)
-                .ToListAsync();
-
-            // Lọc theo tên bệnh nhân nếu có
+            // ✅ FILTER BY PATIENT NAME
             if (!string.IsNullOrEmpty(filter.PatientName))
             {
-                List<Appointment> filteredAppointments = new List<Appointment>();
-                foreach (Appointment appointment in appointments)
-                {
-                    if (appointment.Patient != null &&
-                        appointment.Patient.Name.Contains(filter.PatientName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        filteredAppointments.Add(appointment);
-                    }
-                }
-                appointments = filteredAppointments;
+                var beforeFilter = appointments.Count;
+                appointments = appointments.Where(a => a.Patient != null && a.Patient.Name.Contains(filter.PatientName)).ToList();
+                _logger.LogInformation($"After PatientName filter: {beforeFilter} -> {appointments.Count}");
             }
 
-            // Chuyển đổi dữ liệu sang định dạng cho mapper
-            List<PatientAppointmentData> patientDataList = new List<PatientAppointmentData>();
+            _logger.LogInformation($"Final appointments after all filters: {appointments.Count}");
 
-            foreach (Appointment appointment in appointments)
+            if (appointments.Count == 0)
             {
-                if (appointment.Patient != null)
-                {
-                    PatientAppointmentData patientData = new PatientAppointmentData();
-                    patientData.Patient = appointment.Patient;
-                    patientData.ExaminationTime = appointment.AppointmentDate;
-                    patientData.AppointmentStatus = appointment.Status.ToString();
-
-                    patientDataList.Add(patientData);
-                }
+                _logger.LogWarning("No appointments found after filtering, returning empty list");
+                return new List<PatientFilterResponse>();
             }
 
-            // Chuyển đổi sang response
-            List<PatientFilterResponse> result = _patientMapper.ListEntityToResponse(patientDataList);
+            // ✅ CONVERT TO PATIENTAPPOINTMENTDATA
+            var patientDataList = appointments.Select(a => new PatientAppointmentData
+            {
+                Patient = a.Patient,
+                ExaminationTime = a.AppointmentDate,
+                AppointmentStatus = a.Status.ToString()
+            }).ToList();
+
+            _logger.LogInformation($"PatientDataList count: {patientDataList.Count}");
+
+            // ✅ MAP TO RESPONSE
+            var result = _patientMapper.ListEntityToResponse(patientDataList);
+            _logger.LogInformation($"Mapped result count: {result.Count}");
+
             return result;
         }
 
         public async Task<List<PatientFilterResponse>> GetTodayPatientsByDoctorAsync(int doctorId)
         {
-            // Validation
             if (doctorId <= 0)
             {
                 throw new ArgumentException("ID bác sĩ không hợp lệ", nameof(doctorId));
             }
 
-            PatientFilter filter = new PatientFilter();
-            filter.DoctorId = doctorId;
-
-            DateTime today = DateTime.Today;
-            filter.FromDate = today;
-            filter.ToDate = today.AddDays(1).AddTicks(-1); // Cuối ngày hôm nay
+            var filter = new PatientFilter
+            {
+                DoctorId = doctorId,
+                FromDate = DateTime.Today,
+                ToDate = DateTime.Today.AddDays(1).AddTicks(-1)
+            };
 
             return await GetPatientsByDoctorAsync(filter);
         }
