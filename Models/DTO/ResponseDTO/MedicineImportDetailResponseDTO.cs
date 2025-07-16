@@ -11,6 +11,7 @@
         public DateTime ManufactureDate { get; set; }
         public DateTime ExpiryDate { get; set; }
         public int UnitId { get; set; }
+        public string MedicineCode { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
         public string CategoryName { get; set; } = string.Empty;
