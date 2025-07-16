@@ -63,6 +63,5 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                 return BadRequest(ex.ToString());
             }
         }
-
     }
 }

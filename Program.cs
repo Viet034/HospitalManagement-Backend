@@ -47,6 +47,14 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IMedicineInventoryMapper, MedicineInventoryMapper>();
 builder.Services.AddScoped<IMedicineInventoryService, MedicineInventoryService>();
 
+builder.Services.AddScoped<IMedicineAdminMapper, MedicineAdminMapper>();
+builder.Services.AddScoped<IMedicineAdminService, MedicineAdminService>();
+
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
+builder.Services.AddScoped<IUnitMapper, UnitMapper>();
+builder.Services.AddScoped<IUnitService, UnitService>();
+
 
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();

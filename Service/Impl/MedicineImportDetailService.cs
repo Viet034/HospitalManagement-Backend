@@ -93,7 +93,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             (d.Medicine.Code != null && d.Medicine.Code.ToLower().Contains(keyword)) ||
             (d.Medicine.Name != null && d.Medicine.Name.ToLower().Contains(keyword)) ||
             (d.Medicine.MedicineCategory.Name != null && d.Medicine.MedicineCategory.Name.ToLower().Contains(keyword)) ||
-            (d.Supplier.Name != null && d.Supplier.Name.ToLower().Contains((keyword)))
+            (d.Supplier.Name != null && d.Supplier.Name.ToLower().Contains(keyword))
             );
 
             if (startDate.HasValue)
