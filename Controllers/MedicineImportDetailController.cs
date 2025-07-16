@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicineImport;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicineImportDetail;
 using SWP391_SE1914_ManageHospital.Models.Entities;
@@ -42,6 +43,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         {
             try
             {
+                
                 var res = await _service.GetMedicineImportDetailPageAsync(pageNumber, pageSize);
                 return Ok(res);
             }
@@ -51,14 +53,19 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
         }
 
-        [HttpGet("find-batch-number/{batchnumber}")]
+        [HttpGet("search")]
         [ProducesResponseType(typeof(IEnumerable<MedicineImportDetail>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> FindByBatchNumber(string batchnumber)
+        public async Task<IActionResult> Search([FromQuery] string keyword = "",
+                                                [FromQuery] DateTime? startDate = null,
+                                                [FromQuery] DateTime? endDate = null,
+                                                [FromQuery] int pageNumber = 1, 
+                                                [FromQuery] int pageSize = 10)
         {
             try
             {
-                var res = await _service.SearchMedicineImportDetailAsync(batchnumber);
+               
+                var res = await _service.SearchMedicineImportDetailAsync(keyword, startDate, endDate, pageNumber, pageSize);
                 return Ok(res);
             }
             catch (Exception ex)
