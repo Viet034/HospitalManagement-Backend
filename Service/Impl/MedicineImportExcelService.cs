@@ -89,7 +89,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                         {
                             ImageUrl = "Chưa có ảnh",
                             Description = "Chưa thêm",
-                            Status = MedicineCategoryStatus.Active,
+                            Status = MedicineCategoryStatus.InStock,
                             Code = "Unknown",
                             Name = detail.CategoryName,
                             CreateDate = DateTime.UtcNow,
@@ -149,7 +149,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                             UpdateDate = DateTime.UtcNow,
                             CreateBy = "system",
                             UpdateBy = "system",
-                            Status = MedicineStatus.Active,
+                            Status = MedicineStatus.InStock,
                             Description = "Chưa thêm",
                             Dosage = detail.Dosage,
                             Prescribed =detail.Prescribed,

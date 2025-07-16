@@ -67,9 +67,14 @@ builder.Services.AddScoped<IMedicineMapper, MedicineMapper>();
 builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
 builder.Services.AddScoped<IMedicineCategoryMapper, MedicineCategoryMapper>();
 
-// Đăng ký service
-builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
+builder.Services.AddScoped<IMedicineDetailService, MedicineDetailService>(); // Đăng ký service
+builder.Services.AddScoped<IMedicineDetailMapper, MedicineDetailMapper>(); // Đăng ký mapper
 
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();  // Đăng ký PrescriptionService
+builder.Services.AddScoped<IPrescriptionMapper, PrescriptionMapper>();
+
+builder.Services.AddScoped<IPrescriptionDetailMapper, PrescriptionDetailMapper>();
+builder.Services.AddScoped<IPrescriptionDetailService, PrescriptionDetailService>();
 
 
 
@@ -103,11 +108,14 @@ builder.Services.AddScoped<IAppointmentReminderService, AppointmentReminderServi
 builder.Services.AddScoped<IFeedbackMapper, FeedbackMapper>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 
+builder.Services.AddScoped<IDiseaseMapper, DiseaseMapper>();
+builder.Services.AddScoped<IDiseaseService, DiseaseService>();
 
 
 
-var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
-Console.WriteLine(hash);
+
+//var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
+//Console.WriteLine(hash);
 
 
 
@@ -230,10 +238,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
 
+app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

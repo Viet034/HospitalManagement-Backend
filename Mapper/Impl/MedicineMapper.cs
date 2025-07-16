@@ -3,6 +3,7 @@ using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Medicine;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
+using DocumentFormat.OpenXml.Vml.Office;
 
 public class MedicineMapper : IMedicineMapper
 {
@@ -13,11 +14,12 @@ public class MedicineMapper : IMedicineMapper
             Id = entity.Id,
             ImageUrl = entity.ImageUrl,
             Description = entity.Description,
-            Status = MedicineStatus.Active,
+            Status = (MedicineStatus)entity.Status,
             Name = entity.Name,
             Code = entity.Code,
             Dosage = entity.Dosage,
             UnitId = entity.UnitId,
+            UnitPrice = entity.UnitPrice,
             MedicineCategoryId = entity.MedicineCategoryId,
             Prescribed = entity.Prescribed.ToString(),
             CreateDate = entity.CreateDate,
@@ -33,11 +35,12 @@ public class MedicineMapper : IMedicineMapper
         {
             ImageUrl = request.ImageUrl,
             Description = request.Description,
-            Status = MedicineStatus.Active,
+            Status = (MedicineStatus)request.Status,
             Name = request.Name,
             Code = request.Code,
             Dosage = request.Dosage,
             UnitId = request.UnitId,
+            UnitPrice = request.UnitPrice,
             MedicineCategoryId = request.MedicineCategoryId,
             CreateDate = DateTime.UtcNow,
             CreateBy = "system",         // ✅ bắt buộc
@@ -55,6 +58,7 @@ public class MedicineMapper : IMedicineMapper
         entity.Code = request.Code;
         entity.Dosage = request.Dosage;
         entity.UnitId = request.UnitId;
+        entity.UnitPrice = request.UnitPrice;
         entity.MedicineCategoryId = request.MedicineCategoryId;
         entity.UpdateDate = DateTime.UtcNow;
         entity.UpdateBy = "system";
