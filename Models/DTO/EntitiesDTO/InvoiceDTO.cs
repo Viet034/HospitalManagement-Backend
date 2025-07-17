@@ -13,7 +13,7 @@ public class InvoiceDTO
     public string? Notes { get; set; }
     public InvoiceStatus Status { get; set; }
     public int AppointmentId { get; set; }
-    public int InsuranceId { get; set; }
+    public int? InsuranceId { get; set; }
     public int PatientId { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime? UpdateDate { get; set; }

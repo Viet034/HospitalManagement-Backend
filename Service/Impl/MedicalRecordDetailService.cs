@@ -169,7 +169,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             }
         }
 
-        private void ValidateRelatedEntities(int doctorId, int patientId, int diseaseId)
+        private void ValidateRelatedEntities(int doctorId, int patientId, int? diseaseId)
         {
             // Kiểm tra bác sĩ tồn tại
             bool doctorExists = _context.Doctors.Any(d => d.Id == doctorId);
@@ -185,11 +185,14 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 throw new ArgumentException($"Không tìm thấy bệnh nhân với ID: {patientId}", nameof(patientId));
             }
 
-            // Kiểm tra bệnh tồn tại
-            bool diseaseExists = _context.Diseases.Any(d => d.Id == diseaseId);
-            if (!diseaseExists)
+            // Kiểm tra bệnh tồn tại nếu có truyền vào
+            if (diseaseId.HasValue)
             {
-                throw new ArgumentException($"Không tìm thấy bệnh với ID: {diseaseId}", nameof(diseaseId));
+                bool diseaseExists = _context.Diseases.Any(d => d.Id == diseaseId.Value);
+                if (!diseaseExists)
+                {
+                    throw new ArgumentException($"Không tìm thấy bệnh với ID: {diseaseId}", nameof(diseaseId));
+                }
             }
         }
     }

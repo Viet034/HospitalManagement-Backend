@@ -255,11 +255,11 @@ public class AuthService : IAuthService
                 break;
 
             case UserType.Patient:
-                var patient = user.Patients.FirstOrDefault();
-                if (patient != null)
+                var patientPatient = user.Patients.OrderBy(p => p.Id).FirstOrDefault();
+                if (patientPatient != null)
                 {
-                    userInfo.FullName = patient.Name;
-                    userInfo.Code = patient.Code;
+                    userInfo.FullName = patientPatient.Name;
+                    userInfo.Code = patientPatient.Code;
                 }
                 break;
 
