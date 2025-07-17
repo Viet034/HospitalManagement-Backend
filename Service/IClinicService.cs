@@ -15,5 +15,5 @@ public interface IClinicService
     public Task<bool> HardDeleteClinicAsync(int id);
     public Task<ClinicResponseDTO> FindClinicByIdAsync(int id);
     public Task<string> CheckUniqueCodeAsync();
-    public Task<IEnumerable<ClinicResponseDTO>> GetActiveClinicsForAppointmentAsync();
+    public Task<IEnumerable<ClinicResponseDTO>> GetActiveClinicsForAppointmentAsync(DateTime date);
 }

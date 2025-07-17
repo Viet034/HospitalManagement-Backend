@@ -57,7 +57,7 @@ public class ApplicationDBContext : DbContext
         {
             entity.ToTable("Appointments");
             entity.HasKey(a => a.Id);
-            entity.Property(a => a.Id).ValueGeneratedOnAdd();
+            entity.Property(a => a.Id).ValueGeneratedNever();
             entity.Property(a => a.Name).IsRequired().HasMaxLength(100);
             entity.Property(a => a.Code).IsRequired().HasMaxLength(100);
             entity.Property(a => a.CreateDate).IsRequired();
@@ -66,7 +66,7 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.UpdateBy).IsRequired().HasMaxLength(100);
             entity.Property(a => a.AppointmentDate).IsRequired();
             entity.Property(a => a.StartTime).IsRequired();
-            entity.Property(a => a.EndTime).IsRequired();
+            entity.Property(a => a.EndTime).IsRequired(false);
             entity.Property(a => a.Note).IsRequired().HasMaxLength(100);
 
 
@@ -855,7 +855,7 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.Allergies).IsRequired().HasMaxLength(100);
             entity.Property(a => a.InsuranceNumber).IsRequired().HasMaxLength(100);
             entity.Property(a => a.Address).IsRequired().HasMaxLength(100);
-            entity.Property(a => a.EmergencyContact).IsRequired().HasMaxLength(100);
+            entity.Property(p => p.EmergencyContact).IsRequired(false);
             entity.Property(a => a.BloodType).IsRequired().HasMaxLength(100);
 
             entity.Property(dr => dr.Gender).IsRequired().HasMaxLength(100)

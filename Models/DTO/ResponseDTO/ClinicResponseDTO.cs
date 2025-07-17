@@ -18,6 +18,9 @@ public class ClinicResponseDTO
     public string? Email { get; set; }
     public string? ImageUrl { get; set; }
 
+    // Thêm trường để biết phòng khám đã kín lịch chưa
+    public bool isFull { get; set; } = false;
+
     public ClinicResponseDTO()
     {
     }
