@@ -480,6 +480,66 @@ public class AppointmentController : ControllerBase
             // --- Thay đổi logic kiểm tra và thêm người thân ---
             string cccd = request.PatientInfo?.CCCD?.Trim();
             string phone = request.PatientInfo?.Phone?.Trim();
+            // Parse ngày sinh từ string với nhiều format
+            DateTime dob = DateTime.MinValue;
+            string dobStr = null;
+            bool dobParseSuccess = false;
+            
+            // Debug logging
+            Console.WriteLine($"=== DEBUG DOB PARSING ===");
+            Console.WriteLine($"PatientInfo.Dob type: {(request.PatientInfo?.Dob != null ? request.PatientInfo.Dob.GetType().Name : "null")}");
+            Console.WriteLine($"PatientInfo.Dob value: {request.PatientInfo?.Dob}");
+            
+            if (request.PatientInfo != null)
+            {
+                object dobObj = request.PatientInfo.Dob;
+                Console.WriteLine($"dobObj type: {dobObj?.GetType().Name}");
+                Console.WriteLine($"dobObj value: {dobObj}");
+                
+                if (dobObj is DateTime dt)
+                {
+                    dobStr = dt.ToString("yyyy-MM-dd");
+                    Console.WriteLine($"Converted DateTime to string: {dobStr}");
+                }
+                else if (dobObj is string dobString)
+                {
+                    dobStr = dobString;
+                    Console.WriteLine($"Using string directly: {dobStr}");
+                }
+                else
+                {
+                    dobStr = null;
+                    Console.WriteLine($"dobObj is null or unknown type");
+                }
+                
+                if (!string.IsNullOrEmpty(dobStr))
+                {
+                    string[] formats = { "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy" };
+                    Console.WriteLine($"Trying to parse: '{dobStr}' with formats: {string.Join(", ", formats)}");
+                    dobParseSuccess = DateTime.TryParseExact(dobStr, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out dob);
+                    Console.WriteLine($"Parse success: {dobParseSuccess}, Result: {dob:yyyy-MM-dd}");
+                }
+                else
+                {
+                    Console.WriteLine("dobStr is null or empty");
+                }
+            }
+            else
+            {
+                Console.WriteLine("PatientInfo is null");
+            }
+            
+            if (!dobParseSuccess || dob == DateTime.MinValue)
+            {
+                Console.WriteLine($"=== DOB PARSING FAILED ===");
+                Console.WriteLine($"dobParseSuccess: {dobParseSuccess}");
+                Console.WriteLine($"dob: {dob:yyyy-MM-dd}");
+                Console.WriteLine($"dob == DateTime.MinValue: {dob == DateTime.MinValue}");
+                return BadRequest(new { success = false, message = "Ngày sinh không hợp lệ! Vui lòng nhập đúng định dạng yyyy-MM-dd hoặc dd/MM/yyyy." });
+            }
+            
+            Console.WriteLine($"=== DOB PARSING SUCCESS ===");
+            Console.WriteLine($"Final dob: {dob:yyyy-MM-dd}");
             var existingPatient = await _context.Patients.FirstOrDefaultAsync(p => p.CCCD == cccd || p.Phone == phone);
             if (existingPatient != null)
             {
@@ -493,7 +553,7 @@ public class AppointmentController : ControllerBase
                     Name = request.PatientInfo.Name,
                     Phone = phone,
                     Gender = Enum.TryParse<Gender>(request.PatientInfo.Gender, out var g) ? g : Gender.Male,
-                    Dob = request.PatientInfo.Dob,
+                    Dob = dob,
                     CCCD = cccd,
                     Address = string.IsNullOrEmpty(request.PatientInfo.Address) ? string.Empty : request.PatientInfo.Address,
                     InsuranceNumber = string.IsNullOrEmpty(request.PatientInfo.InsuranceNumber) ? null : request.PatientInfo.InsuranceNumber,
@@ -590,7 +650,7 @@ public class AppointmentController : ControllerBase
             {
                 AppointmentId = 0, // tạm thời, sẽ cập nhật sau
                 PatientId = patient.Id,
-                InsuranceId = 1, // hoặc giá trị mặc định phù hợp
+                InsuranceId = null, // Không gán mặc định 1, để null
                 InitialAmount = 0,
                 DiscountAmount = 0,
                 TotalAmount = 0,
@@ -636,8 +696,8 @@ public class AppointmentController : ControllerBase
                 AppointmentId = appointment.Id,
                 PatientId = appointment.PatientId,
                 DoctorId = request.DoctorId,
-                PrescriptionId = 1, // hoặc giá trị mặc định phù hợp
-                DiseaseId = 1, // hoặc giá trị mặc định phù hợp
+                PrescriptionId = null, // Cho phép null
+                DiseaseId = null, // Cho phép null
                 Status = SWP391_SE1914_ManageHospital.Ultility.Status.MedicalRecordStatus.Open,
                 Diagnosis = "",
                 TestResults = "",
@@ -667,21 +727,22 @@ public class AppointmentController : ControllerBase
             _context.Doctor_Appointments.Add(doctorAppointment);
             await _context.SaveChangesAsync();
 
-            // Trả về thông tin lịch hẹn đã tạo
+            // Trả về thông tin lịch hẹn đã tạo (fix triệt để null và lỗi format)
             var responseData = new
             {
-                appointmentId = appointment.Id,
-                appointmentCode = appointment.Code,
-                appointmentDate = appointment.AppointmentDate.ToString("yyyy-MM-dd"),
-                startTime = appointment.StartTime.ToString("hh:mm"),
-                endTime = appointment.EndTime.HasValue ? appointment.EndTime.Value.ToString("hh:mm") : null,
+                appointmentId = appointment?.Id ?? 0,
+                appointmentCode = appointment?.Code ?? string.Empty,
+                appointmentDate = appointment?.AppointmentDate != null && appointment.AppointmentDate != DateTime.MinValue
+                    ? appointment.AppointmentDate.ToString("yyyy-MM-dd") : string.Empty,
+                startTime = appointment?.StartTime != null ? SafeTimeSpanToString(appointment.StartTime) : string.Empty,
+                endTime = appointment?.EndTime.HasValue == true ? SafeTimeSpanToString(appointment.EndTime.Value) : null,
                 shift = request.StartTime >= new TimeSpan(7, 0, 0) && request.StartTime < new TimeSpan(12, 0, 0) ? "morning" : "afternoon",
-                clinic = new { id = clinic.Id, name = clinic.Name, address = clinic.Address },
-                doctor = new { id = doctor.Id, name = doctor.Name },
-                service = new { id = service.Id, name = service.Name },
-                patient = new { id = patient.Id, name = patient.Name, phone = patient.Phone },
-                status = appointment.Status.ToString(),
-                note = appointment.Note
+                clinic = clinic != null ? new { id = clinic.Id, name = clinic.Name ?? "", address = clinic.Address ?? "" } : new { id = 0, name = "", address = "" },
+                doctor = doctor != null ? new { id = doctor.Id, name = doctor.Name ?? "" } : new { id = 0, name = "" },
+                service = service != null ? new { id = service.Id, name = service.Name ?? "" } : new { id = 0, name = "" },
+                patient = patient != null ? new { id = patient.Id, name = patient.Name ?? "", phone = patient.Phone ?? "" } : new { id = 0, name = "", phone = "" },
+                status = appointment?.Status.ToString() ?? string.Empty,
+                note = appointment?.Note ?? string.Empty
             };
 
             return Ok(new 
@@ -851,6 +912,35 @@ public class AppointmentController : ControllerBase
             // Thêm logic tạo mới bệnh nhân cho người thân (giống API chính)
             string cccd = request.PatientInfo?.CCCD?.Trim();
             string phone = request.PatientInfo?.Phone?.Trim();
+            // Parse ngày sinh từ string với nhiều format
+            DateTime dob = DateTime.MinValue;
+            string dobStr = null;
+            bool dobParseSuccess = false;
+            if (request.PatientInfo != null)
+            {
+                object dobObj = request.PatientInfo.Dob;
+                if (dobObj is DateTime dt)
+                {
+                    dobStr = dt.ToString("yyyy-MM-dd");
+                }
+                else if (dobObj is string dobString)
+                {
+                    dobStr = dobString;
+                }
+                else
+                {
+                    dobStr = null;
+                }
+                if (!string.IsNullOrEmpty(dobStr))
+                {
+                    string[] formats = { "yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd", "dd/MM/yyyy", "MM/dd/yyyy" };
+                    dobParseSuccess = DateTime.TryParseExact(dobStr, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out dob);
+                }
+            }
+            if (!dobParseSuccess || dob == DateTime.MinValue)
+            {
+                return BadRequest(new { success = false, message = "Ngày sinh không hợp lệ! Vui lòng nhập đúng định dạng yyyy-MM-dd hoặc dd/MM/yyyy." });
+            }
             var existingPatient = await _context.Patients.FirstOrDefaultAsync(p => p.CCCD == cccd || p.Phone == phone);
             if (existingPatient != null)
             {
@@ -867,7 +957,7 @@ public class AppointmentController : ControllerBase
                 if (existingPatient.Name != request.PatientInfo.Name) isSame = false;
                 if (existingPatient.Phone != phone) isSame = false;
                 if (existingPatient.Gender.ToString() != request.PatientInfo.Gender) isSame = false;
-                if (existingPatient.Dob != request.PatientInfo.Dob) isSame = false;
+                if (existingPatient.Dob != dob) isSame = false;
                 if (existingPatient.CCCD != cccd) isSame = false;
                 if (existingPatient.Address != (request.PatientInfo.Address ?? string.Empty)) isSame = false;
                 if (existingPatient.InsuranceNumber != (request.PatientInfo.InsuranceNumber ?? null)) isSame = false;
@@ -888,12 +978,12 @@ public class AppointmentController : ControllerBase
                     Name = request.PatientInfo.Name,
                     Phone = phone,
                     Gender = Enum.TryParse<Gender>(request.PatientInfo.Gender, out var g) ? g : Gender.Male,
-                    Dob = request.PatientInfo.Dob,
+                    Dob = dob,
                     CCCD = cccd,
-                    Address = request.PatientInfo.Address ?? string.Empty,
-                    InsuranceNumber = request.PatientInfo.InsuranceNumber ?? null,
-                    Allergies = request.PatientInfo.Allergies ?? null,
-                    BloodType = request.PatientInfo.BloodType ?? null,
+                    Address = string.IsNullOrEmpty(request.PatientInfo.Address) ? string.Empty : request.PatientInfo.Address,
+                    InsuranceNumber = string.IsNullOrEmpty(request.PatientInfo.InsuranceNumber) ? null : request.PatientInfo.InsuranceNumber,
+                    Allergies = string.IsNullOrEmpty(request.PatientInfo.Allergies) ? null : request.PatientInfo.Allergies,
+                    BloodType = string.IsNullOrEmpty(request.PatientInfo.BloodType) ? null : request.PatientInfo.BloodType,
                     ImageURL = request.PatientInfo.ImageURL ?? null,
                     Status = PatientStatus.Active,
                     UserId = userId ?? 0,
@@ -988,10 +1078,9 @@ public class AppointmentController : ControllerBase
             // 1. Tạo invoice trước
             var invoice = new SWP391_SE1914_ManageHospital.Models.Entities.Invoice
             {
-                // KHÔNG gán Id, để auto-increment
                 AppointmentId = 0, // tạm thời, sẽ cập nhật sau
                 PatientId = patient.Id,
-                InsuranceId = 1, // hoặc giá trị mặc định phù hợp
+                InsuranceId = null, // Không gán mặc định 1, để null
                 InitialAmount = 0,
                 DiscountAmount = 0,
                 TotalAmount = 0,
@@ -1037,8 +1126,8 @@ public class AppointmentController : ControllerBase
                 AppointmentId = appointment.Id,
                 PatientId = appointment.PatientId,
                 DoctorId = request.DoctorId,
-                PrescriptionId = 1, // hoặc giá trị mặc định phù hợp
-                DiseaseId = 1, // hoặc giá trị mặc định phù hợp
+                PrescriptionId = null, // Cho phép null
+                DiseaseId = null, // Cho phép null
                 Status = SWP391_SE1914_ManageHospital.Ultility.Status.MedicalRecordStatus.Open,
                 Diagnosis = "",
                 TestResults = "",
@@ -1068,21 +1157,22 @@ public class AppointmentController : ControllerBase
             _context.Doctor_Appointments.Add(doctorAppointment);
             await _context.SaveChangesAsync();
 
-            // Trả về thông tin lịch hẹn đã tạo
+            // Trả về thông tin lịch hẹn đã tạo (fix triệt để null và lỗi format)
             var responseData = new
             {
-                appointmentId = appointment.Id,
-                appointmentCode = appointment.Code,
-                appointmentDate = appointment.AppointmentDate.ToString("yyyy-MM-dd"),
-                startTime = appointment.StartTime.ToString(@"hh\:mm"),
-                endTime = appointment.EndTime.HasValue ? appointment.EndTime.Value.ToString(@"hh\:mm") : null,
+                appointmentId = appointment?.Id ?? 0,
+                appointmentCode = appointment?.Code ?? string.Empty,
+                appointmentDate = appointment?.AppointmentDate != null && appointment.AppointmentDate != DateTime.MinValue
+                    ? appointment.AppointmentDate.ToString("yyyy-MM-dd") : string.Empty,
+                startTime = appointment?.StartTime != null ? SafeTimeSpanToString(appointment.StartTime) : string.Empty,
+                endTime = appointment?.EndTime.HasValue == true ? SafeTimeSpanToString(appointment.EndTime.Value) : null,
                 shift = request.StartTime >= new TimeSpan(7, 0, 0) && request.StartTime < new TimeSpan(12, 0, 0) ? "morning" : "afternoon",
-                clinic = new { id = clinic.Id, name = clinic.Name, address = clinic.Address },
-                doctor = new { id = doctor.Id, name = doctor.Name },
-                service = new { id = service.Id, name = service.Name },
-                patient = new { id = patient.Id, name = patient.Name, phone = patient.Phone },
-                status = appointment.Status.ToString(),
-                note = appointment.Note,
+                clinic = clinic != null ? new { id = clinic.Id, name = clinic.Name ?? "", address = clinic.Address ?? "" } : new { id = 0, name = "", address = "" },
+                doctor = doctor != null ? new { id = doctor.Id, name = doctor.Name ?? "" } : new { id = 0, name = "" },
+                service = service != null ? new { id = service.Id, name = service.Name ?? "" } : new { id = 0, name = "" },
+                patient = patient != null ? new { id = patient.Id, name = patient.Name ?? "", phone = patient.Phone ?? "" } : new { id = 0, name = "", phone = "" },
+                status = appointment?.Status.ToString() ?? string.Empty,
+                note = appointment?.Note ?? string.Empty,
                 testMode = true
             };
 
@@ -1317,5 +1407,16 @@ public class AppointmentController : ControllerBase
                 error = ex.Message
             });
         }
+    }
+
+    // Thêm hàm helper an toàn cho TimeSpan
+    private string SafeTimeSpanToString(TimeSpan? time)
+    {
+        if (time == null) return string.Empty;
+        try { return time.Value.ToString(@"hh\:mm"); } catch { return string.Empty; }
+    }
+    private string SafeTimeSpanToString(TimeSpan time)
+    {
+        try { return time.ToString(@"hh\:mm"); } catch { return string.Empty; }
     }
 } 
