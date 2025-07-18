@@ -149,7 +149,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                             UpdateDate = DateTime.UtcNow,
                             CreateBy = "system",
                             UpdateBy = "system",
-                            Status = MedicineStatus.InStock,
+                            Status = MedicineStatus.Active,
                             Description = "Chưa thêm",
                             Dosage = detail.Dosage,
                             Prescribed =detail.Prescribed,

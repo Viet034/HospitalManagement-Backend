@@ -101,8 +101,8 @@ builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 
 
 
-//var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
-//Console.WriteLine(hash);
+var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
+Console.WriteLine(hash);
 
 
 
