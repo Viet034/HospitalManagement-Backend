@@ -114,8 +114,8 @@ builder.Services.AddScoped<IDiseaseService, DiseaseService>();
 
 
 
-//var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
-//Console.WriteLine(hash);
+var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
+Console.WriteLine(hash);
 
 
 
