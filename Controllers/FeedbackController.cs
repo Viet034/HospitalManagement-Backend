@@ -52,14 +52,14 @@ public class FeedbackController : ControllerBase
         }
     }
 
-    [HttpGet("find-by-name/{name}")]
+    [HttpGet("find-by-name")]
     [ProducesResponseType(typeof(IEnumerable<Feedback>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-    public async Task<IActionResult> FindByPatientName(string name)
+    public async Task<IActionResult> FindByPatientName(string? name, DateTime? appointmentDate, DateTime? startTime)
     {
         try
         {
-            var response = await _service.SearchFeedbackByPatientNameAsync(name);
+            var response = await _service.SearchFeedbackByFilterAsync(name, appointmentDate, startTime);
             return Ok(response);
         }
         catch (Exception ex)

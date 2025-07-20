@@ -8,7 +8,7 @@ namespace SWP391_SE1914_ManageHospital.Service;
 public interface IFeedbackService
 {
      Task<IEnumerable<FeedbackResponseDTO>> GetAllFeedbackAsync();
-     Task<IEnumerable<FeedbackResponseDTO>> SearchFeedbackByPatientNameAsync(string name);
+     Task<IEnumerable<FeedbackResponseDTO>> SearchFeedbackByFilterAsync(string? name, DateTime? appointmentDate, DateTime? startTime);
      Task<FeedbackResponseDTO> CreateFeedbackAsync(FeedbackCreate create);
      
      Task<bool> HardDeleteFeedbackAsync(int id);

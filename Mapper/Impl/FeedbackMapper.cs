@@ -28,9 +28,10 @@ public class FeedbackMapper : IFeedbackMapper
         FeedbackResponseDTO response = new FeedbackResponseDTO();
         response.Id = entity.Id;
         response.Content = entity.Content;
-        response.AppointmentId = entity.AppointmentId;
-        response.DoctorId = entity.DoctorId;
-        response.PatientId = entity.PatientId;
+        //response.AppointmentId = entity.AppointmentId;
+        //response.DoctorId = entity.DoctorId;
+        //response.PatientId = entity.PatientId;
+        response.CreateDate = entity.CreateDate;
         return response;
     }
 
