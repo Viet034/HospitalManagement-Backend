@@ -48,8 +48,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Shift_Requests_doctor_shifts_Doctor_ShiftId",
-                        column: x => x.Doctor_ShiftId,
+                        name: "FK_Shift_Requests_doctor_shifts_ShiftId",
+                        column: x => x.ShiftId,
                         principalTable: "doctor_shifts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -57,9 +57,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Shift_Requests_Doctor_ShiftId",
+                name: "IX_Shift_Requests_ShiftId",
                 table: "Shift_Requests",
-                column: "Doctor_ShiftId");
+                column: "ShiftId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Shift_Requests_DoctorId",
