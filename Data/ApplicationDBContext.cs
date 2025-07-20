@@ -49,6 +49,7 @@ public class ApplicationDBContext : DbContext
     public DbSet<MedicineImportDetail> MedicineImportDetails { get; set; }
     public DbSet<Doctor_Shift> Doctor_Shifts { get; set; }
     public IEnumerable<object> UserRoles { get; internal set; }
+    public DbSet<Shift_Request> Shift_Requests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -121,10 +122,10 @@ public class ApplicationDBContext : DbContext
             entity.Property(e => e.Notes).HasMaxLength(255);
 
 
-            entity.Property(e => e.CreateDate).IsRequired();
-            entity.Property(e => e.UpdateDate).IsRequired();
-            entity.Property(e => e.CreateBy).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.UpdateBy).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.CreateDate);
+            entity.Property(e => e.UpdateDate);
+            entity.Property(e => e.CreateBy).HasMaxLength(100);
+            entity.Property(e => e.UpdateBy).HasMaxLength(100);
 
             entity.HasOne(e => e.Doctor)
                   .WithMany(d => d.Doctor_Shifts)
@@ -1077,7 +1078,44 @@ public class ApplicationDBContext : DbContext
                  .WithMany(cv => cv.User_Roles)
                  .HasForeignKey(cus => cus.RoleId).OnDelete(DeleteBehavior.Cascade);
 
+        });
 
+        modelBuilder.Entity<Shift_Request>(entity =>
+        {
+            entity.ToTable("shift_request");
+
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+            entity.Property(e => e.DoctorId).IsRequired();
+            entity.Property(e => e.ShiftId).IsRequired();
+
+            entity.Property(e => e.RequestType)
+                 .IsRequired()
+                 .HasConversion<string>()
+                 .HasMaxLength(50);
+
+            entity.Property(e => e.Reason)
+                .IsRequired()
+                .HasColumnType("text");
+
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            entity.Property(e => e.CreatedDate).IsRequired();
+            entity.Property(e => e.ApprovedDate);
+
+            entity.HasOne(e => e.Doctor)
+                .WithMany()
+                .HasForeignKey(e => e.DoctorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Doctor_Shift)
+                .WithMany()
+                .HasForeignKey(e => e.ShiftId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

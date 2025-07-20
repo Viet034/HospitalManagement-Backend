@@ -62,21 +62,21 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         {
             try
             {
-                // Cập nhật thông tin thuốc vào cơ sở dữ liệu
+                
                 var res = await _service.UpdateMedicineAsync(id, up);
 
                 if (!res)
                 {
-                    // Trả về lỗi nếu không tìm thấy thuốc
+                   
                     return BadRequest("Không thể cập nhật thuốc. Vui lòng kiểm tra lại thông tin.");
                 }
 
-                // Trả về kết quả
+               
                 return Ok(res);
             }
             catch (Exception ex)
             {
-                // Trả về lỗi chi tiết nếu xảy ra vấn đề
+                
                 return BadRequest($"Lỗi: {ex.Message}");
             }
         }

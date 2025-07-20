@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicineAdmin;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
+using System.Text.RegularExpressions;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
 {
@@ -129,11 +131,12 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
         {
             try
             {
-                
+
                 var medicine = await _context.Medicines
                     .Include(m => m.MedicineDetail)  
                     .Include(m => m.Unit)            
                     .Include(m => m.MedicineCategory) 
+                    .Include(m => m.Medicine_Inventories)
                     .FirstOrDefaultAsync(m => m.Id == id);
 
                
@@ -157,7 +160,24 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                     medicine.MedicineDetail.StorageInstructions = update.StorageInstructions;
                 }
 
-                
+                if (medicine.Medicine_Inventories != null && medicine.Medicine_Inventories.Any())
+                {
+                    foreach (var inventory in medicine.Medicine_Inventories)
+                    {
+                        if (medicine.Status == Ultility.Status.MedicineStatus.Discontinued)
+                        {
+                            inventory.Status = Ultility.Status.MedicineInventoryStatus.Discontinued;
+                        }
+                        else if (medicine.Status == Ultility.Status.MedicineStatus.Active)
+                        {
+                            inventory.Status = inventory.Quantity > 0
+                                ? Ultility.Status.MedicineInventoryStatus.InStock
+                                : Ultility.Status.MedicineInventoryStatus.OutOfStock;
+                        }
+                    }
+                }
+
+
                 medicine.UnitId = update.UnitId;
                 medicine.MedicineCategoryId = update.MedicineCategoryId;
 

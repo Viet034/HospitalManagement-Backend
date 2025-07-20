@@ -8,10 +8,12 @@ using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Mapper.Impl;
 using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Service.Impl;
-using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Ultility;
 using System.Text;
 using System.Text.Json.Serialization;
+using SWP391_SE1914_ManageHospital.Models.Mappers;
+using SWP391_SE1914_ManageHospital.Models.Services;
+using SWP391_SE1914_ManageHospital.Models.Services.Impl;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -111,11 +113,20 @@ builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IDiseaseMapper, DiseaseMapper>();
 builder.Services.AddScoped<IDiseaseService, DiseaseService>();
 
+builder.Services.AddScoped<IShiftRequestMapper, ShiftRequestMapper>();
+builder.Services.AddScoped<IShiftRequestService, ShiftRequestService>();
+
+builder.Services.AddScoped<IDoctorShiftFillerMapper, DoctorShiftFillerMapper>();
+builder.Services.AddScoped<IDoctorShiftFillerService, DoctorShiftFillerService>();
+
+builder.Services.AddScoped<IDoctorScheduleMapper, DoctorScheduleMapper>();
+builder.Services.AddScoped<IDoctorScheduleService, DoctorScheduleService>();
 
 
 
-//var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
-//Console.WriteLine(hash);
+
+var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
+Console.WriteLine(hash);
 
 
 

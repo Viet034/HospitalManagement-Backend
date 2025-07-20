@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ClosedXML.Excel;
+using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.ImportMedicineEX;
-using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Medicine;
-using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
+using SWP391_SE1914_ManageHospital.Ultility.Validation;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
@@ -21,77 +21,105 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             _mapper = mapper;
         }
 
-        public Task<string> AskUserForConfirmation(string message)
+        public async Task<MedicineImportRequest> ParseImportExcelToRequest(IFormFile file, int supplierId)
         {
-            return Task.FromResult(message);
-        }
-        private async Task<string> GenerateUniqueMedicineImportDetailCodeAsync()
-        {
-            string newCode;
-            bool isExist;
-
-            do
+            var request = new MedicineImportRequest
             {
-                newCode = GenerateCode.GenerateMedicineImportDetailCode();
-                isExist = await _context.MedicineImportDetails.AnyAsync(p => p.Code == newCode);
-            }
-            while (isExist);
+                ImportCode = GenerateCode.GenerateMedicineImportCode(),
+                ImportName = "Import từ Excel",
+                SupplierId = supplierId,
+                Details = new List<MedicineImportDetailRequest>()
+            };
 
-            return newCode;
-        }
+            using var stream = new MemoryStream();
+            await file.CopyToAsync(stream);
+            using var workbook = new XLWorkbook(stream);
+            var worksheet = workbook.Worksheet(1);
+            var rowCount = worksheet.LastRowUsed().RowNumber();
 
-        public async Task<bool> ImportMedicinesAsync(MedicineImportRequest request, bool continueImport)
-        {
-            
-            using var transaction = await _context.Database.BeginTransactionAsync(); 
-
-            try
+            for (int row = 2; row <= rowCount; row++)
             {
-                foreach (var detail in request.Details)
+                bool isEmptyRow = true;
+                for (int col = 1; col <= 13; col++)
                 {
-                    var existingBatch = await _context.MedicineImportDetails
-                        .FirstOrDefaultAsync(m => m.MedicineId == detail.MedicineId &&
-                                                   m.BatchNumber == detail.BatchNumber &&
-                                                   m.SupplierId == request.SupplierId);  
-
-                    if (existingBatch != null)
+                    if (!string.IsNullOrWhiteSpace(worksheet.Cell(row, col).GetString()))
                     {
-                        throw new Exception($"Lỗi: Số lô {detail.BatchNumber} của thuốc {detail.MedicineName} đã tồn tại trong lần nhập trước của nhà cung cấp này. Vui lòng kiểm tra lại số lô.");
+                        isEmptyRow = false;
+                        break;
                     }
                 }
 
+                if (isEmptyRow)
+                    continue;
+                string prescribedCell = worksheet.Cell(row, 9).GetString().Trim().ToUpper();
+                PrescribedMedication prescribedEnum;
 
-                var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => s.Id == request.SupplierId);
-
-                if (supplier == null)
+                if (prescribedCell == "ETC")
                 {
-                    return false; 
+                    prescribedEnum = PrescribedMedication.Yes;
                 }
-                await _context.SaveChangesAsync();
+                else if (prescribedCell == "OTC")
+                {
+                    prescribedEnum = PrescribedMedication.No;
+                }
+                else
+                {
+                    throw new Exception($"Dòng {row}: Cột Prescribed không hợp lệ.");
+                }
 
-                
+
+                var detail = new MedicineImportDetailRequest
+                {
+                    MedicineCode = worksheet.Cell(row, 1).GetString(),
+                    MedicineName = worksheet.Cell(row, 2).GetString(),
+                    UnitName = worksheet.Cell(row, 3).GetString(),
+                    BatchNumber = worksheet.Cell(row, 4).GetString(),
+                    Quantity = int.TryParse(worksheet.Cell(row, 5).GetString(), out int q) ? q : 0,
+                    UnitPrice = decimal.TryParse(worksheet.Cell(row, 6).GetString(), out decimal p) ? p : 0,
+                    ManufactureDate = DateTime.TryParse(worksheet.Cell(row, 7).GetString(), out var mfg) ? mfg : DateTime.MinValue,
+                    ExpiryDate = DateTime.TryParse(worksheet.Cell(row, 8).GetString(), out var exp) ? exp : DateTime.MinValue,
+                    Prescribed = prescribedEnum,
+                    Dosage = worksheet.Cell(row, 10).GetString(),
+                    Ingredients = worksheet.Cell(row, 11).GetString(),
+                    CategoryName = worksheet.Cell(row, 12).GetString(),
+                    StorageInstructions = worksheet.Cell(row, 13).GetString(),
+                    MedicineDescription = worksheet.Cell(row, 14).GetString(),
+                    MedicineDetailDescription = worksheet.Cell(row, 15).GetString(),
+                    Waring = worksheet.Cell(row, 16).GetString(),
+                };
+                MedicineImportExcelValidation.ValidateRow(detail, row);
+                request.Details.Add(detail);
+            }
+
+            return request;
+        }
+
+        public async Task<bool> ConfirmImportAsync(MedicineImportRequest request)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => s.Id == request.SupplierId);
+                if (supplier == null) return false;
+
+                var import = _mapper.MapToImportEntity(request, supplier.Id);
+                _context.MedicineImports.Add(import);
+                await _context.SaveChangesAsync();
 
                 foreach (var detail in request.Details)
                 {
-
-                    var category = await _context.MedicineCategories.FirstOrDefaultAsync(u => u.Name.Trim().ToLower() == detail.CategoryName.Trim().ToLower());
+                    var category = await _context.MedicineCategories
+                        .FirstOrDefaultAsync(c => c.Name.ToLower().Trim() == detail.CategoryName.ToLower().Trim());
 
                     if (category == null)
                     {
-                        var confirmMessage = "Phát hiện danh mục thuốc không tồn tại, bạn có muốn tạo mới danh mục thuốc với dữ liệu mặc định hay không?";
-                        string message = await AskUserForConfirmation(confirmMessage);
-
-                        if (!continueImport || message == null || !message.Contains("không tồn tại"))
-                        {
-                            return false;
-                        }
                         category = new MedicineCategory
                         {
+                            Name = detail.CategoryName,
+                            Code = GenerateCode.GenerateMedicineCategoryCode(),
                             ImageUrl = "Chưa có ảnh",
                             Description = "Chưa thêm",
                             Status = MedicineCategoryStatus.InStock,
-                            Code = "Unknown",
-                            Name = detail.CategoryName,
                             CreateDate = DateTime.UtcNow,
                             UpdateDate = DateTime.UtcNow,
                             CreateBy = "system",
@@ -99,60 +127,41 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                         };
                         _context.MedicineCategories.Add(category);
                         await _context.SaveChangesAsync();
-
                     }
-
-                    var import = _mapper.MapToImportEntity(request, supplier.Id);
-                    _context.MedicineImports.Add(import);
-                    await _context.SaveChangesAsync();
 
                     var unit = await _context.Units.FirstOrDefaultAsync(u => u.Name == detail.UnitName);
                     if (unit == null)
                     {
-                        var confirmMessage = $"Phát hiện đơn vị {detail.UnitName} không tồn tại, bạn có muốn tạo mới đơn vị này hay không?";
-                        string message = await AskUserForConfirmation(confirmMessage);
-
-                        if (!continueImport || message == null || !message.Contains("không tồn tại"))
-                        {
-                            return false;
-                        }
-
                         unit = new Unit
                         {
                             Name = detail.UnitName,
                             Status = 1
                         };
                         _context.Units.Add(unit);
-                        await _context.SaveChangesAsync(); 
+                        await _context.SaveChangesAsync();
                     }
 
                     var medicine = await _context.Medicines.FirstOrDefaultAsync(m => m.Code == detail.MedicineCode);
+
+                   
+
                     if (medicine == null)
                     {
-                        var confirmMessage = $"Phát hiện thuốc {detail.MedicineName} không tồn tại, bạn có muốn tạo mới thuốc này hay không?";
-                        string message = await AskUserForConfirmation(confirmMessage);
-
-                        if (!continueImport || message == null || !message.Contains("không tồn tại"))
-                        {
-                            return false;
-                        }
-
-
                         medicine = new Medicine
                         {
-                            ImageUrl = "Chưa có ảnh",
                             Name = detail.MedicineName,
                             Code = detail.MedicineCode,
-                            UnitId = unit.Id, 
+                            ImageUrl = "Chưa có ảnh",
+                            UnitId = unit.Id,
                             UnitPrice = detail.UnitPrice,
                             CreateDate = DateTime.UtcNow,
                             UpdateDate = DateTime.UtcNow,
                             CreateBy = "system",
                             UpdateBy = "system",
-                            Status = MedicineStatus.InStock,
-                            Description = "Chưa thêm",
+                            Status = MedicineStatus.Active,
+                            Description = detail.MedicineDescription,
                             Dosage = detail.Dosage,
-                            Prescribed =detail.Prescribed,
+                            Prescribed = detail.Prescribed,
                             MedicineCategoryId = category.Id,
                         };
                         _context.Medicines.Add(medicine);
@@ -163,26 +172,34 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                             MedicineId = medicine.Id,
                             Ingredients = detail.Ingredients,
                             ExpiryDate = detail.ExpiryDate,
-                            Manufacturer =detail.ManufactureDate,
-                            Warning = "Chưa thêm",
+                            Manufacturer = detail.ManufactureDate,
                             StorageInstructions = detail.StorageInstructions,
+                            Warning = detail.Waring,
+                            Description = detail.MedicineDetailDescription,
                             Status = 1,
                             CreateDate = DateTime.UtcNow,
                             UpdateDate = DateTime.UtcNow,
                             CreateBy = "system",
-                            UpdateBy = "system",
-                            Description = "Chưa thêm"
+                            UpdateBy = "system"
                         };
                         _context.MedicineDetails.Add(medicineDetail);
+                        await _context.SaveChangesAsync();
                     }
+                    var existingBatch = await _context.MedicineImportDetails
+                               .FirstOrDefaultAsync(m => m.MedicineId == medicine.Id &&
+                               m.BatchNumber == detail.BatchNumber &&
+                               m.SupplierId == request.SupplierId);
 
-                    
+                    if (existingBatch != null)
+                    {
+                        throw new Exception($"Lỗi: Số lô {detail.BatchNumber} của thuốc {detail.MedicineName} đã tồn tại trong lần nhập trước của nhà cung cấp này.");
+                    }
 
 
                     var importDetail = _mapper.MapToImportDetailEntity(detail, medicine.Id, import.Id);
                     importDetail.UnitId = unit.Id;
                     importDetail.SupplierId = supplier.Id;
-                    importDetail.Code = await GenerateUniqueMedicineImportDetailCodeAsync();
+                    importDetail.Code = GenerateCode.GenerateMedicineImportDetailCode();
                     _context.MedicineImportDetails.Add(importDetail);
                     await _context.SaveChangesAsync();
 
@@ -190,25 +207,15 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                     _context.Medicine_Inventories.Add(inventory);
                 }
 
-
-
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync(); 
-
+                await transaction.CommitAsync();
                 return true;
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                Console.WriteLine("Lỗi khi import:");
-                Console.WriteLine($"Message: {ex.Message}");
-                if (ex.InnerException != null)
-                {
-                    Console.WriteLine($"Inner: {ex.InnerException.Message}");
-                }
-                return false;
+                throw new Exception($"Xác nhận nhập kho thất bại: {ex.Message}", ex);
             }
         }
-
     }
 }
