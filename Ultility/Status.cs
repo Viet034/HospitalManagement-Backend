@@ -56,12 +56,12 @@ public static class Status
     }
     public enum MedicineStatus
     {
-        InStock = 0, OutOfStock = 1
+        Active = 0, Discontinued = 1
     }
     
     public enum MedicineInventoryStatus
     {
-        InStock = 0, OutOfStock = 1
+        InStock = 0, OutOfStock = 1, Discontinued = 2
     }
     public enum MedicineCategoryStatus
     {

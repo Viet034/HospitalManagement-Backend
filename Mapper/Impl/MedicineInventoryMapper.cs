@@ -27,6 +27,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
                 CategoryName = category?.Name ?? string.Empty,
                 UnitName = unit?.Name ?? string.Empty,
                 Quantity = entity.Quantity,
+                Status = entity.Status,
                 ManufactureDate = detail.ManufactureDate,
                 ExpiryDate = detail.ExpiryDate,
                 SupplierName = supplier?.Name ?? string.Empty,

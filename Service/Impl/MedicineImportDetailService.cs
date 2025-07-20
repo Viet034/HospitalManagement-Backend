@@ -1,11 +1,8 @@
-﻿using System.Xml.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
-using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicineImport;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicineImportDetail;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
-using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
@@ -72,9 +69,9 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return _mapper.EntityToResponse(MID);
         }
 
-        public async Task<MedicineImportDetailPageDTO> SearchMedicineImportDetailAsync(string keyword, DateTime? startDate, DateTime? endDate, int pageNumber, int pageSize = 10)
+        public async Task<MedicineImportDetailPageDTO> SearchMedicineImportDetailAsync(string keyword, DateTime? startDate, DateTime? endDate, string sortBy, bool ascending, int pageNumber, int pageSize = 10)
         {
-            if (string.IsNullOrEmpty(keyword) && !startDate.HasValue && !endDate.HasValue)
+            if (string.IsNullOrEmpty(keyword) && !startDate.HasValue && !endDate.HasValue && string.IsNullOrEmpty(sortBy))
             {
                 return new MedicineImportDetailPageDTO { Items = new List<MedicineImportDetailResponseDTO>(), TotalPages = 0 };
             }
@@ -86,7 +83,6 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 .Include(d => d.Supplier)
                 .Include(d => d.Unit)
                 .Include(d => d.Medicine.MedicineCategory)
-                .OrderByDescending(d => d.CreateDate)
                 .AsQueryable();
 
             query = query.Where(d => 
@@ -104,6 +100,41 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             if (endDate.HasValue)
             {
                 query = query.Where(d => d.CreateDate <= endDate.Value);
+            }
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                query = sortBy switch
+                {
+                    "medicineName" => ascending
+                        ? query.OrderBy(d => d.Medicine.Name)
+                        : query.OrderByDescending(d => d.Medicine.Name),
+
+                    "categoryName" => ascending
+                        ? query.OrderBy(d => d.Medicine.MedicineCategory.Name)
+                        : query.OrderByDescending(d => d.Medicine.MedicineCategory.Name),
+
+                    "unitName" => ascending
+                        ? query.OrderBy(d => d.Unit.Name)
+                        : query.OrderByDescending(d => d.Unit.Name),
+
+                    "quantity" => ascending
+                        ? query.OrderBy(d => d.Quantity)
+                        : query.OrderByDescending(d => d.Quantity),
+
+                    "expiryDate" => ascending
+                        ? query.OrderBy(d => d.ExpiryDate)
+                        : query.OrderByDescending(d => d.ExpiryDate),
+
+                    "supplierName" => ascending
+                        ? query.OrderBy(d => d.Supplier.Name)
+                        : query.OrderByDescending(d => d.Supplier.Name),
+
+                    _ => query.OrderByDescending(d => d.CreateDate) 
+                };
+            }
+            else
+            {
+                query = query.OrderByDescending(d => d.CreateDate); 
             }
 
             var totalItems = await query.CountAsync();
@@ -135,7 +166,6 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 UpdateDate = d.UpdateDate,
             }).ToList();
 
-            // Trả về kết quả tìm kiếm cùng với thông tin phân trang
             return new MedicineImportDetailPageDTO
             {
                 Items = items,
