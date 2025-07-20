@@ -1,8 +1,8 @@
-﻿using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
 {
@@ -44,6 +44,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 MedicineName = d.ImportDetail?.Medicine?.Name ?? string.Empty,
                 CategoryName = d.ImportDetail?.Medicine?.MedicineCategory?.Name ?? string.Empty,
                 UnitName = d.ImportDetail?.Unit?.Name ?? string.Empty,
+                Status = d.Status,
                 ManufactureDate = d.ImportDetail?.ManufactureDate,
                 ExpiryDate = d.ImportDetail?.ExpiryDate,
                 SupplierName = d.ImportDetail?.Supplier?.Name ?? string.Empty,
@@ -57,10 +58,16 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             };
         }
 
-        public async Task<MedicineInventoryPageDTO> SearchAsync(string keyword, int pageNumber, int pageSize)
+        public async Task<MedicineInventoryPageDTO> SearchAsync(string keyword, string sortBy, bool ascending = true, int pageNumber = 1, int pageSize = 10)
         {
-            if (string.IsNullOrWhiteSpace(keyword))
-                return new MedicineInventoryPageDTO { Items = new List<MedicineInventoryResponseDTO>(), TotalPages = 0 };
+            if (string.IsNullOrWhiteSpace(keyword) && string.IsNullOrWhiteSpace(sortBy))
+            {
+                return new MedicineInventoryPageDTO
+                {
+                    Items = new List<MedicineInventoryResponseDTO>(),
+                    TotalPages = 0
+                };
+            }
 
             keyword = keyword.Trim().ToLower();
 
@@ -80,12 +87,55 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                  || d.ImportDetail != null && d.ImportDetail.Supplier != null && d.ImportDetail.Supplier.Name.ToLower().Contains(keyword))
                  );
 
+            switch (sortBy)
+            {
+                case "medicineName":
+                    query = ascending
+                        ? query.OrderBy(d => d.ImportDetail != null && d.ImportDetail.Medicine != null ? d.ImportDetail.Medicine.Name : string.Empty)
+                        : query.OrderByDescending(d => d.ImportDetail != null && d.ImportDetail.Medicine != null ? d.ImportDetail.Medicine.Name : string.Empty);
+                    break;
+
+                case "categoryName":
+                    query = ascending
+                        ? query.OrderBy(d => d.ImportDetail != null && d.ImportDetail.Medicine != null && d.ImportDetail.Medicine.MedicineCategory != null
+                            ? d.ImportDetail.Medicine.MedicineCategory.Name : string.Empty)
+                        : query.OrderByDescending(d => d.ImportDetail != null && d.ImportDetail.Medicine != null && d.ImportDetail.Medicine.MedicineCategory != null
+                            ? d.ImportDetail.Medicine.MedicineCategory.Name : string.Empty);
+                    break;
+
+                case "unitName":
+                    query = ascending
+                        ? query.OrderBy(d => d.ImportDetail != null && d.ImportDetail.Unit != null ? d.ImportDetail.Unit.Name : string.Empty)
+                        : query.OrderByDescending(d => d.ImportDetail != null && d.ImportDetail.Unit != null ? d.ImportDetail.Unit.Name : string.Empty);
+                    break;
+
+                case "quantity":
+                    query = ascending
+                        ? query.OrderBy(d => d.Quantity)
+                        : query.OrderByDescending(d => d.Quantity);
+                    break;
+
+                case "expiryDate":
+                    query = ascending
+                        ? query.OrderBy(d => d.ImportDetail != null ? d.ImportDetail.ExpiryDate : DateTime.MinValue)
+                        : query.OrderByDescending(d => d.ImportDetail != null ? d.ImportDetail.ExpiryDate : DateTime.MinValue);
+                    break;
+
+                case "supplierName":
+                    query = ascending
+                        ? query.OrderBy(d => d.ImportDetail != null && d.ImportDetail.Supplier != null ? d.ImportDetail.Supplier.Name : string.Empty)
+                        : query.OrderByDescending(d => d.ImportDetail != null && d.ImportDetail.Supplier != null ? d.ImportDetail.Supplier.Name : string.Empty);
+                    break;
+
+                default:
+                    break;
+            }
+
             var totalItems = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
 
             var data = await query
-                .OrderBy(d => d.ExpiryDate)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -99,6 +149,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 MedicineName = d.ImportDetail?.Medicine?.Name ?? string.Empty,
                 CategoryName = d.ImportDetail?.Medicine?.MedicineCategory?.Name ?? string.Empty,
                 UnitName = d.ImportDetail?.Unit?.Name ?? string.Empty,
+                Status = d.Status,
                 ManufactureDate = d.ImportDetail?.ManufactureDate,
                 ExpiryDate = d.ImportDetail?.ExpiryDate,
                 SupplierName = d.ImportDetail?.Supplier?.Name ?? string.Empty,

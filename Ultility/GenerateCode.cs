@@ -70,6 +70,12 @@ public class GenerateCode
         int medcatRand = random.Next(100000, 999999);
         return "MID" + medcatRand;
     }
+    public static string GenerateMedicineImportCode()
+    {
+
+        int medcatRand = random.Next(100000, 999999);
+        return "MEI" + medcatRand;
+    }
     public static string GenerateNurseCode()
     {
 

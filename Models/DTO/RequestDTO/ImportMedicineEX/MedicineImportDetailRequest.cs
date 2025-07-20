@@ -14,6 +14,9 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.ImportMedicineEX
         public string BatchNumber { get; set; } = string.Empty;
         public string StorageInstructions { get; set; } = string.Empty;
         public PrescribedMedication Prescribed { get; set; }
+        public string MedicineDescription { get; set; } = string.Empty;
+        public string MedicineDetailDescription {  get; set; } = string.Empty;
+        public string Waring { get; set; } = string.Empty;
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public DateTime ManufactureDate { get; set; }

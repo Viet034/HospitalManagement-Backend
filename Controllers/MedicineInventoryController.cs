@@ -41,21 +41,11 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpGet("search")]
         [ProducesResponseType(typeof(IEnumerable<MedicineInventoryResponseDTO>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Search([FromQuery] string keyword, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> Search([FromQuery] string keyword = "", [FromQuery] string sortBy = "", [FromQuery] bool ascending = true, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
-            if (string.IsNullOrWhiteSpace(keyword))
-            {
-                return BadRequest("Keyword không được để trống.");
-            }
-
-            if (pageNumber <= 0 || pageSize <= 0)
-            {
-                return BadRequest("PageNumber và PageSize phải lớn hơn 0.");
-            }
-
             try
             {
-                var result = await _service.SearchAsync(keyword, pageNumber, pageSize);
+                var result = await _service.SearchAsync(keyword, sortBy, ascending,pageNumber, pageSize);
                 return Ok(result);
             }
             catch (Exception ex)
