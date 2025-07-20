@@ -84,23 +84,34 @@ public class FeedbackService : IFeedbackService
         return response;
     }
 
-    public Task<bool> HardDeleteFeedbackAsync(int id)
+    public async Task<bool> HardDeleteFeedbackAsync(int id)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<IEnumerable<FeedbackResponseDTO>> SearchFeedbackByPatientNameAsync(string name)
+    public async Task<IEnumerable<FeedbackResponseDTO>> SearchFeedbackByFilterAsync(string? name, DateTime? appointmentDate, DateTime? startTime)
     {
-        var coId = await _context.Feedbacks
-            .Include(a => a.Patient)
-            .Where(a=> a.Patient.Name.Contains(name)).ToListAsync();
+        var query = _context.Feedbacks.Include(a => a.Patient).Include(a => a.Appointment).AsQueryable();
 
-        if (coId == null)
-            throw new Exception("không có bản ghi nào");
+        if (!string.IsNullOrEmpty(name))
+        {
+            query = query.Where(a => a.Patient.Name.Contains(name));
+        }
+        if (appointmentDate.HasValue)
+        {
+            query = query.Where(a => a.Appointment.AppointmentDate.Date == appointmentDate.Value.Date);
+        }
+        if (startTime.HasValue)
+        {
+            query = query.Where(a => a.Appointment.StartTime.TimeOfDay == startTime.Value.TimeOfDay);
+        }
 
-        var response = _mapper.ListEntityToResponse(coId);
+        var feedbackList = await query.ToListAsync();
+
+        if (feedbackList == null || feedbackList.Count == 0)
+            throw new Exception("Không có bản ghi feedback nào");
+
+        var response = _mapper.ListEntityToResponse(feedbackList);
         return response;
     }
-
-    
 }

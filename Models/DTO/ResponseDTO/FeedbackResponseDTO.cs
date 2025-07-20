@@ -5,9 +5,9 @@ public class FeedbackResponseDTO
     public int Id { get; set; }
     public string Content { get; set; }
     public DateTime CreateDate { get; set; }
-    public int PatientId { get; set; }
-    public int? DoctorId { get; set; }
-    public int? AppointmentId { get; set; }
+    //public int PatientId { get; set; }
+    //public int? DoctorId { get; set; }
+    //public int? AppointmentId { get; set; }
 
     public FeedbackResponseDTO()
     {
@@ -18,8 +18,8 @@ public class FeedbackResponseDTO
         Id = id;
         Content = content;
         CreateDate = createDate;
-        PatientId = patientId;
-        DoctorId = doctorId;
-        AppointmentId = appointmentId;
+        //PatientId = patientId;
+        //DoctorId = doctorId;
+        //AppointmentId = appointmentId;
     }
 }
