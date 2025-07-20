@@ -133,5 +133,22 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [HttpGet("FindByUserId/{userId}")]
+        public async Task<ActionResult<DoctorResponseDTO>> GetDoctorByUserId(int userId)
+        {
+            try
+            {
+                var doctor = await _doctorService.GetDoctorByUserIdAsync(userId);
+                if (doctor == null)
+                {
+                    return NotFound($"Doctor with UserId {userId} not found.");
+                }
+                return Ok(doctor);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

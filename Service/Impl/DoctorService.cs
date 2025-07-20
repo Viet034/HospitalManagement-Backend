@@ -194,5 +194,20 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 Email = newUser.Email,
             };
         }
+        public async Task<DoctorResponseDTO> GetDoctorByUserIdAsync(int userId)
+        {
+            if (userId <= 0)
+                throw new ArgumentException("UserId must be greater than 0.");
+
+            var doctor = await _context.Doctors
+                .Include(d => d.User)
+                .Include(d => d.Department)
+                .FirstOrDefaultAsync(d => d.UserId == userId);
+
+            if (doctor == null)
+                throw new KeyNotFoundException($"No doctor found with UserId {userId}.");
+
+            return _mapper.MapToDto(doctor);
+        }
     }
 }
