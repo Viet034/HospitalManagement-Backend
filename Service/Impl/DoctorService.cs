@@ -230,5 +230,14 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             var doctor = await _context.Doctors.FindAsync(doctorId);
             return doctor?.DepartmentId;
         }
+
+        public async Task<DoctorResponseDTO> GetDoctorByUserIdAsync(int userId)
+        {
+            var doctor = await _context.Doctors
+                .Include(d => d.User)
+                .Include(d => d.Department)
+                .FirstOrDefaultAsync(d => d.UserId == userId);
+            return _mapper.MapToDto(doctor);
+        }
     }
 }

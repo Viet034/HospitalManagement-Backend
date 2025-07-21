@@ -592,7 +592,7 @@ public class AppointmentController : ControllerBase
                 return BadRequest(new { success = false, message = "Bác sĩ không làm việc tại phòng khám này!" });
 
             // Kiểm tra service có tồn tại
-            var service = await _context.Services.FirstOrDefaultAsync(s => s.Id == request.ServiceId);
+            var service = await _context.Set<SWP391_SE1914_ManageHospital.Models.Entities.Service>().FirstOrDefaultAsync(s => s.Id == request.ServiceId);
             if (service == null)
                 return BadRequest(new { success = false, message = "Dịch vụ không tồn tại!" });
 
@@ -1034,7 +1034,7 @@ public class AppointmentController : ControllerBase
                 return BadRequest(new { success = false, message = "Bác sĩ không làm việc tại phòng khám này!" });
 
             // Kiểm tra service có tồn tại
-            var service = await _context.Services.FirstOrDefaultAsync(s => s.Id == request.ServiceId);
+            var service = await _context.Set<SWP391_SE1914_ManageHospital.Models.Entities.Service>().FirstOrDefaultAsync(s => s.Id == request.ServiceId);
             if (service == null)
                 return BadRequest(new { success = false, message = "Dịch vụ không tồn tại!" });
 
