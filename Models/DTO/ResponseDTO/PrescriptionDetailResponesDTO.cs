@@ -14,6 +14,9 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
         public DateTime UpdateDate { get; set; }
         public string CreateBy { get; set; }
         public string UpdateBy { get; set; }
+        // MỚI: giá đơn vị và tổng tiền
+        public decimal UnitPrice { get; set; }
+        public decimal Total { get; set; }
     }
 
 }

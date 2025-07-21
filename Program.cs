@@ -122,9 +122,6 @@ builder.Services.AddScoped<IDoctorShiftFillerService, DoctorShiftFillerService>(
 builder.Services.AddScoped<IDoctorScheduleMapper, DoctorScheduleMapper>();
 builder.Services.AddScoped<IDoctorScheduleService, DoctorScheduleService>();
 
-
-
-
 var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
 Console.WriteLine(hash);
 

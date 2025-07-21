@@ -69,7 +69,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
 
         // API để lấy MedicineId từ MedicineName
         [HttpGet("get-id-by-name/{medicineName}")]
-        
+
 
         /// <summary>
         /// Lấy PrescriptionDetail của chính bác sĩ hoặc bệnh nhân đang login
@@ -78,7 +78,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         public async Task<IActionResult> GetMyDetails()
         {
             var userId = GetUserIdFromClaims();
-            if (userId == 0) return Unauthorized("User chưa đăng nhập.");
+            if (userId == 0) return Unauthorized();
 
             var role = GetRoleFromClaims();
             if (string.IsNullOrEmpty(role)) return Forbid();
@@ -95,27 +95,25 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         }
 
 
-        // Phương thức Create để thêm chi tiết thuốc
+
+        // PrescriptionDetailController.cs
         [HttpPost("add-detail")]
         [Authorize(Roles = "Doctor,Admin")]
         public async Task<IActionResult> Create([FromBody] PrescriptionDetailRequest req)
         {
             var userId = GetUserIdFromClaims();
-            if (userId == 0) return Unauthorized("User chưa đăng nhập.");
+            if (userId == 0)
+                return Unauthorized("User chưa đăng nhập.");
 
-            // Lấy thuốc từ tên thuốc (thay vì ID thuốc)
-            var medicine = await _context.Medicines
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.Name == req.MedicineName);  // Sử dụng MedicineName thay vì MedicineId
-
-            if (medicine == null)
-                return BadRequest("Không tìm thấy thuốc với tên " + req.MedicineName);
-
-            req.MedicineId = medicine.Id; // Lấy ID thuốc từ tên thuốc
-
-            req.UserId = userId;
-            var dto = await _service.CreateAsync(req);
-            return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
+            try
+            {
+                var dto = await _service.CreateAsync(req, userId);
+                return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
