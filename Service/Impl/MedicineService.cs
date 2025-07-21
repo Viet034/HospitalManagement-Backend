@@ -49,9 +49,65 @@ public class MedicineService : IMedicineService
 
     public async Task<MedicineResponseDTO?> GetByIdAsync(int id)
     {
-        var entity = await _context.Medicines.FindAsync(id);
-        return entity == null ? null : _mapper.MapToDTO(entity);
+        // 1) Fetch thuốc kèm Category, Unit, Inventories → ImportDetail → Supplier
+        var medicine = await _context.Medicines
+            .Include(m => m.MedicineCategory)
+            .Include(m => m.Unit)
+            .Include(m => m.Medicine_Inventories)
+                .ThenInclude(inv => inv.ImportDetail)
+                    .ThenInclude(det => det.Supplier)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.Id == id);
+
+        if (medicine == null)
+            return null;
+
+        // 2) Lấy danh sách tên nhà cung cấp, sắp theo ImportDate tăng dần, loại bỏ trùng lặp
+        var supplierNames = medicine.Medicine_Inventories
+            .OrderBy(inv => inv.ImportDate)
+            .Select(inv => inv.ImportDetail.Supplier.Name)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Distinct()
+            .ToList();
+
+        // 3) Gom thành chuỗi (nếu muốn) hoặc truyền thẳng list xuống DTO
+        var supplierNamesString = supplierNames.Any()
+            ? string.Join(", ", supplierNames)
+            : null;
+
+        // 4) Trả về DTO
+        return new MedicineResponseDTO
+        {
+            Id = medicine.Id,
+            Name = medicine.Name,
+            Code = medicine.Code,
+            Dosage = medicine.Dosage,
+            ImageUrl = medicine.ImageUrl,
+            UnitId = medicine.UnitId,
+            MedicineCategoryName = medicine.MedicineCategory.Name,
+            UnitName = medicine.Unit.Name,
+            Status = medicine.Status,
+            UnitPrice = medicine.UnitPrice,
+            MedicineCategoryId = medicine.MedicineCategoryId,
+            Prescribed = medicine.Prescribed.ToString(),
+            CreateDate = medicine.CreateDate,
+            UpdateDate = medicine.UpdateDate,
+            CreateBy = medicine.CreateBy,
+            UpdateBy = medicine.UpdateBy,
+            Description = medicine.Description,
+
+            // Nếu DTO chỉ có 1 string, bạn dùng trường này:
+            SupplierName = supplierNamesString
+
+            // Nếu bạn muốn DTO chứa list, đổi DTO thành:
+            // public List<string> SupplierNames { get; set; }
+            // rồi map:
+            // SupplierNames = supplierNames
+        };
     }
+
+
+
 
     public async Task<MedicineResponseDTO> CreateAsync(MedicineRequest request)
     {

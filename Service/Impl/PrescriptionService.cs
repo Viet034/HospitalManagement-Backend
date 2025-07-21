@@ -196,7 +196,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                     PatientCCCD = pt.CCCD, // Lấy CCCD từ pt
                     PatientId = pd.p.PatientId,
                     DoctorId = pd.p.DoctorId,
-                    DoctorName = pt.Name,  // Lấy tên bác sĩ từ d
+                    DoctorName = pd.d.Name,  // Lấy tên bác sĩ từ d
                     Name = pd.p.Name,
                     Code = pd.p.Code,
                     CreateDate = pd.p.CreateDate,
@@ -214,31 +214,140 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
 
 
-        public async Task<PrescriptionResponseDTO> UpdateStatusAsync(int prescriptionId, PrescriptionStatus newStatus, string updatedBy)
+        public async Task UpdateStatusAsync(int prescriptionId, PrescriptionStatus newStatus, int userId)
         {
+            // 1. Lấy đơn thuốc
             var prescription = await _context.Prescriptions
+                .Include(p => p.PrescriptionDetails)
                 .FirstOrDefaultAsync(p => p.Id == prescriptionId);
             if (prescription == null)
-                return null;
+                throw new KeyNotFoundException($"Không tìm thấy đơn thuốc ID = {prescriptionId}");
 
-            prescription.Status = newStatus;
-            prescription.UpdateDate = DateTime.UtcNow;
-            prescription.UpdateBy = updatedBy;
+            // 2. Chặn khi đã Dispensed hoặc Cancelled
+            if (prescription.Status == PrescriptionStatus.Dispensed ||
+                prescription.Status == PrescriptionStatus.Cancelled)
+            {
+                throw new InvalidOperationException(
+                    "Đơn thuốc này đã được cấp phát hoặc hủy, không thể thay đổi trạng thái.");
+            }
 
+            // 3. Xử lý chuyển New -> Dispensed
+            if (prescription.Status == PrescriptionStatus.New &&
+                newStatus == PrescriptionStatus.Dispensed)
+            {
+                // KIỂM TRA CÓ DETAIL Ở TRẠNG THÁI NEW
+                var hasNewDetail = prescription.PrescriptionDetails.Any(
+                    pd => pd.Status == PrescriptionDetailStatus.New
+                );
+                if (!hasNewDetail)
+                    throw new InvalidOperationException(
+                        "Đơn thuốc này không có chi tiết nào ở trạng thái 'Mới', không thể cấp phát."
+                    );
+
+                // 3.1 Cập nhật đơn
+                prescription.Status = PrescriptionStatus.Dispensed;
+                prescription.UpdateDate = DateTime.UtcNow;
+                prescription.UpdateBy = await GetDoctorNameAsync(userId);
+
+                // 3.2 Cập nhật detail status
+                foreach (var pd in prescription.PrescriptionDetails)
+                {
+                    pd.Status = PrescriptionDetailStatus.Dispensed;
+                    pd.UpdateDate = DateTime.UtcNow;
+                    pd.UpdateBy = prescription.UpdateBy;
+                }
+
+                // 3.3 Với mỗi detail: tính tổng & trừ kho FIFO
+                foreach (var pd in prescription.PrescriptionDetails)
+                {
+                    var need = pd.Quantity;
+                    var inventoryList = await _context.Medicine_Inventories
+                        .Where(mi => mi.MedicineId == pd.MedicineId
+                                  && mi.Quantity > 0
+                                  && mi.Status == (int)MedicineInventoryStatus.InStock)
+                        .OrderBy(mi => mi.ExpiryDate)
+                        .ToListAsync();
+
+                    var totalAvailable = inventoryList.Sum(mi => mi.Quantity);
+                    if (totalAvailable < need)
+                        throw new InvalidOperationException(
+                            $"Không đủ thuốc trong kho cho thuốc ID={pd.MedicineId}. Cần {need}, chỉ còn {totalAvailable}.");
+
+                    // trừ dần FIFO
+                    foreach (var inv in inventoryList)
+                    {
+                        if (need <= 0) break;
+                        var deduct = Math.Min(inv.Quantity, need);
+                        inv.Quantity -= deduct;
+                        need -= deduct;
+
+                        // Nếu số lượng thuốc sau khi trừ = 0, cập nhật trạng thái về OutOfStock
+                        if (inv.Quantity == 0)
+                            inv.Status = MedicineInventoryStatus.OutOfStock;
+                    }
+                }
+            }
+            // 4. Xử lý chuyển sang Cancelled
+            else if (newStatus == PrescriptionStatus.Cancelled)
+            {
+                prescription.Status = PrescriptionStatus.Cancelled;
+                prescription.UpdateDate = DateTime.UtcNow;
+                prescription.UpdateBy = await GetDoctorNameAsync(userId);
+
+                foreach (var pd in prescription.PrescriptionDetails)
+                {
+                    pd.Status = PrescriptionDetailStatus.Cancelled;
+                    pd.UpdateDate = DateTime.UtcNow;
+                    pd.UpdateBy = prescription.UpdateBy;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Chuyển trạng thái không hợp lệ.");
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task<string> GetDoctorNameAsync(int userId)
+        {
+            var doctor = await _context.Doctors
+                .AsNoTracking()
+                .FirstOrDefaultAsync(d => d.UserId == userId);
+            return doctor?.Name ?? "Bác sĩ không xác định";
+        }
+
+        public async Task<decimal> GetTotalAmountAsync(int prescriptionId)
+        {
+            // 1. Kiểm tra đơn có tồn tại không
+            var exists = await _context.Prescriptions
+                .AnyAsync(p => p.Id == prescriptionId);
+            if (!exists)
+                throw new KeyNotFoundException($"Không tìm thấy đơn thuốc ID = {prescriptionId}");
+
+            // 2. Lấy tất cả detail của đơn
             var details = await _context.PrescriptionDetails
                 .Where(d => d.PrescriptionId == prescriptionId)
                 .ToListAsync();
 
+            // 3. Tính tổng
+            decimal total = 0m;
             foreach (var d in details)
             {
-                d.Status = (PrescriptionDetailStatus)newStatus;
-                d.UpdateDate = DateTime.UtcNow;
-                d.UpdateBy = updatedBy;
+                // Lấy unitPrice theo batch FIFO còn in‑stock
+                var inv = await _context.Medicine_Inventories
+                    .Where(mi => mi.MedicineId == d.MedicineId
+                              && mi.Quantity > 0
+                              && mi.Status == (int)MedicineInventoryStatus.InStock)
+                    .OrderBy(mi => mi.ExpiryDate)
+                    .FirstOrDefaultAsync();
+
+                var unitPrice = inv?.UnitPrice ?? 0m;
+                total += unitPrice * d.Quantity;
             }
 
-            await _context.SaveChangesAsync();
-
-            return _mapper.MapToResponse(prescription);
+            return total;
         }
+
     }
 }
