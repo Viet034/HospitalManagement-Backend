@@ -8,9 +8,9 @@
         public string Status { get; set; }
         public int DoctorId { get; set; }
         public int PatientId { get; set; }
-        public int DiseaseId { get; set; }
+        public int? DiseaseId { get; set; }
         public int AppointmentId { get; set; }
-        public int PrescriptionId { get; set; }
+        public int? PrescriptionId { get; set; }
 
         public MedicalRecordCreateRequest()
         {
@@ -23,9 +23,9 @@
             string status,
             int doctorId,
             int patientId,
-            int diseaseId,
+            int? diseaseId,
             int appointmentId,
-            int prescriptionId)
+            int? prescriptionId)
         {
             Diagnosis = diagnosis;
             TestResults = testResults;

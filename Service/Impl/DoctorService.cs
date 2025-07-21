@@ -194,20 +194,41 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 Email = newUser.Email,
             };
         }
-        public async Task<DoctorResponseDTO> GetDoctorByUserIdAsync(int userId)
-        {
-            if (userId <= 0)
-                throw new ArgumentException("UserId must be greater than 0.");
 
-            var doctor = await _context.Doctors
+        public async Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByClinicIdAsync(int clinicId, DateTime date)
+        {
+            const int MAX_APPOINTMENTS_PER_DOCTOR_PER_DAY = 5;
+            var targetDate = date.Date;
+
+            var doctors = await _context.Doctors
                 .Include(d => d.User)
                 .Include(d => d.Department)
-                .FirstOrDefaultAsync(d => d.UserId == userId);
+                .Include(d => d.Clinic)
+                .Where(d => d.ClinicId == clinicId && d.Status == DoctorStatus.Available)
+                .ToListAsync();
+            
+            var result = new List<DoctorResponseDTO>();
 
-            if (doctor == null)
-                throw new KeyNotFoundException($"No doctor found with UserId {userId}.");
+            foreach (var doctor in doctors)
+            {
+                // Đếm số lịch hẹn của bác sĩ trong ngày được chọn
+                var appointmentCount = await _context.Doctor_Appointments
+                    .Where(da => da.DoctorId == doctor.Id &&
+                                  da.Appointment.AppointmentDate.Date == targetDate)
+                    .CountAsync();
 
-            return _mapper.MapToDto(doctor);
+                var doctorDto = _mapper.MapToDto(doctor);
+                doctorDto.isFull = appointmentCount >= MAX_APPOINTMENTS_PER_DOCTOR_PER_DAY;
+                result.Add(doctorDto);
+            }
+            
+            return result;
+        }
+
+        public async Task<int?> GetDepartmentIdByDoctorIdAsync(int doctorId)
+        {
+            var doctor = await _context.Doctors.FindAsync(doctorId);
+            return doctor?.DepartmentId;
         }
     }
 }

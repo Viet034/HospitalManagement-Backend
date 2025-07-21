@@ -15,14 +15,14 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Patient
         public DateTime Dob { get; set; }
         public string CCCD { get; set; }
         public string Phone { get; set; }
-        public string EmergencyContact { get; set; }
+        public string? EmergencyContact { get; set; }
         public string Address { get; set; }
-        public string InsuranceNumber { get; set; }
+        public string? InsuranceNumber { get; set; }
         public string? Allergies { get; set; }
 
         [EnumDataType(typeof(PatientStatus))]
         public PatientStatus Status { get; set; }
-        public string BloodType { get; set; }
+        public string? BloodType { get; set; }
         public string? ImageURL { get; set; }
         public int UserId { get; set; }
         public DateTime CreateDate { get; set; }

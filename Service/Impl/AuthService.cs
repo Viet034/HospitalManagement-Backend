@@ -255,11 +255,11 @@ public class AuthService : IAuthService
                 break;
 
             case UserType.Patient:
-                var patient = user.Patients.FirstOrDefault();
-                if (patient != null)
+                var patientPatient = user.Patients.OrderBy(p => p.Id).FirstOrDefault();
+                if (patientPatient != null)
                 {
-                    userInfo.FullName = patient.Name;
-                    userInfo.Code = patient.Code;
+                    userInfo.FullName = patientPatient.Name;
+                    userInfo.Code = patientPatient.Code;
                 }
                 break;
 
@@ -350,24 +350,49 @@ public class AuthService : IAuthService
     }
     public async Task<PatientRegisterResponse> RegisterPatientAsync(PatientRegisterRequest request)
     {
-        //  Kiểm tra Email tồn tại chưa
-        if (await _context.Users.AnyAsync(x => x.Email == request.Email))
-            throw new Exception("Email đã tồn tại!");
+        try
+        {
+            Console.WriteLine($"=== AUTH SERVICE: RegisterPatientAsync ===");
+            Console.WriteLine($"Email: {request.Email}");
+            Console.WriteLine($"FullName: {request.FullName}");
+            Console.WriteLine($"Code: {request.Code}");
+            Console.WriteLine($"Gender: {request.Gender}");
+            Console.WriteLine($"Dob: {request.Dob}");
+            Console.WriteLine($"CCCD: {request.CCCD}");
+            Console.WriteLine($"Phone: {request.Phone}");
+            Console.WriteLine($"EmergencyContact: {request.EmergencyContact}");
+            Console.WriteLine($"Address: {request.Address}");
 
-        //  Kiểm tra Phone và CCCD
-        if (await _context.Patients.AnyAsync(x => x.Phone == request.Phone))
-            throw new Exception("Số điện thoại đã tồn tại");
+            //  Kiểm tra Email tồn tại chưa
+            if (await _context.Users.AnyAsync(x => x.Email == request.Email))
+                throw new Exception("Email đã tồn tại!");
 
-        if (await _context.Patients.AnyAsync(x => x.CCCD == request.CCCD))
-            throw new Exception("CCCD đã tồn tại");
+            //  Kiểm tra Phone và CCCD
+            if (await _context.Patients.AnyAsync(x => x.Phone == request.Phone))
+                throw new Exception("Số điện thoại đã tồn tại");
 
-        //  Kiểm tra và chuẩn hóa tên
-        request.FullName = request.FullName.Trim();
-        if (string.IsNullOrEmpty(request.FullName))
-            throw new Exception("Không được để trống tên");
+            if (await _context.Patients.AnyAsync(x => x.CCCD == request.CCCD))
+                throw new Exception("CCCD đã tồn tại");
+                
+            // Validation CCCD (12 số)
+            if (!Regex.IsMatch(request.CCCD, @"^\d{12}$"))
+                throw new Exception("CCCD phải có đúng 12 chữ số");
+                
+            // Validation Phone (10 số, bắt đầu bằng 0)
+            if (!Regex.IsMatch(request.Phone, @"^0\d{9}$"))
+                throw new Exception("Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số");
+                
+            // Validation EmergencyContact (10 số, bắt đầu bằng 0)
+            if (!Regex.IsMatch(request.EmergencyContact, @"^0\d{9}$"))
+                throw new Exception("Số điện thoại khẩn cấp phải bắt đầu bằng 0 và có 10 chữ số");
 
-        if (!Regex.IsMatch(request.FullName, @"^[a-zA-ZÀ-ỹ\s]+$"))
-            throw new Exception("Tên không được chứa kí tự đặc biệt");
+            //  Kiểm tra và chuẩn hóa tên
+            request.FullName = request.FullName.Trim();
+            if (string.IsNullOrEmpty(request.FullName))
+                throw new Exception("Không được để trống tên");
+
+            if (!Regex.IsMatch(request.FullName, @"^[a-zA-ZÀ-ỹĂăÂâĐđÊêÔôƠơƯư\s]+$"))
+                throw new Exception("Tên không được chứa kí tự đặc biệt");
         
         //  Tạo User mới
         var hashedPassword = _passwordHasher.HashPassword(request.Password);
@@ -381,10 +406,43 @@ public class AuthService : IAuthService
         await _context.Users.AddAsync(newUser);
         await _context.SaveChangesAsync(); // Phải save để lấy được newUser.Id
 
+        //  Tạo mã bệnh nhân
+        string patientCode;
+        try
+        {
+            if (!string.IsNullOrEmpty(request.Code) && request.Code != "string")
+            {
+                patientCode = request.Code;
+            }
+            else
+            {
+                patientCode = await CheckUniqueCodeAsync();
+            }
+
+            // Kiểm tra code có bị trùng không
+            int maxAttempts = 10;
+            int attempts = 0;
+            while (await _context.Patients.AnyAsync(p => p.Code == patientCode) && attempts < maxAttempts)
+            {
+                patientCode = await CheckUniqueCodeAsync();
+                attempts++;
+            }
+            
+            if (attempts >= maxAttempts)
+            {
+                throw new Exception("Không thể tạo mã bệnh nhân duy nhất sau nhiều lần thử");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error generating patient code: {ex.Message}");
+            throw new Exception("Lỗi khi tạo mã bệnh nhân: " + ex.Message);
+        }
+
         //  Gán thông tin Patient
         var patient = new Patient
         {
-            Code = request.Code,
+            Code = patientCode,
             Name = request.FullName,
             Phone = request.Phone,
             CCCD = request.CCCD,
@@ -403,19 +461,6 @@ public class AuthService : IAuthService
             ImageURL = "",
             UserId = newUser.Id
         };
-        if (!string.IsNullOrEmpty(request.Code) && request.Code != "string")
-        {
-            patient.Code = request.Code;
-        }
-        else
-        {
-            patient.Code = await CheckUniqueCodeAsync();
-        }
-
-        while (await _context.Patients.AnyAsync(p => p.Code == patient.Code))
-        {
-            patient.Code = await CheckUniqueCodeAsync();
-        }
         await _context.Patients.AddAsync(patient);
 
         //  Gán role PATIENT (nếu dùng User_Role)
@@ -432,12 +477,27 @@ public class AuthService : IAuthService
         await _context.SaveChangesAsync();
 
         //  Trả về response
-        return new PatientRegisterResponse
+        var response = new PatientRegisterResponse
         {
             PatientId = patient.Id,
             FullName = patient.Name,
             Email = newUser.Email
         };
+        
+        Console.WriteLine($"=== AUTH SERVICE: Registration successful ===");
+        Console.WriteLine($"PatientId: {response.PatientId}");
+        Console.WriteLine($"FullName: {response.FullName}");
+        Console.WriteLine($"Email: {response.Email}");
+        
+        return response;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"=== AUTH SERVICE: Registration failed ===");
+            Console.WriteLine($"Error: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            throw;
+        }
     }
 
     public async Task<bool> ResetPasswordAsync(string token, string newPassword, UserType userType)

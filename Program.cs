@@ -109,6 +109,7 @@ builder.Services.AddScoped<IMedicalRecordDetailService, MedicalRecordDetailServi
 builder.Services.AddScoped<IAppointmentReminderService, AppointmentReminderService>();
 builder.Services.AddScoped<IFeedbackMapper, FeedbackMapper>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+builder.Services.AddScoped<IServiceService, ServiceService>();
 
 builder.Services.AddScoped<IDiseaseMapper, DiseaseMapper>();
 builder.Services.AddScoped<IDiseaseService, DiseaseService>();

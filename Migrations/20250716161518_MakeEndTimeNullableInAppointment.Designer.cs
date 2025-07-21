@@ -12,8 +12,8 @@ using SWP391_SE1914_ManageHospital.Data;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250704090351_RecreateMigrations")]
-    partial class RecreateMigrations
+    [Migration("20250716161518_MakeEndTimeNullableInAppointment")]
+    partial class MakeEndTimeNullableInAppointment
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,7 +31,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Appointment", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     b.Property<DateTime>("AppointmentDate")
@@ -53,7 +52,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("EndTime")
+                        .IsRequired()
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Name")
@@ -69,7 +69,10 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReceptionId")
+                    b.Property<int?>("ReceptionId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ServiceId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartTime")
@@ -98,6 +101,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.HasIndex("ReceptionId");
 
+                    b.HasIndex("ServiceId");
+
                     b.ToTable("Appointments", (string)null);
                 });
 
@@ -108,6 +113,10 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -121,6 +130,14 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -155,6 +172,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClinicId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -195,6 +215,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClinicId");
 
                     b.ToTable("Departments", (string)null);
                 });
@@ -313,6 +335,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<int?>("ClinicId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -378,6 +403,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClinicId");
+
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("UserId");
@@ -431,11 +458,17 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
                     b.Property<int>("DoctorId")
                         .HasColumnType("int");
 
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("time(6)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -444,9 +477,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<string>("Notes")
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
-
-                    b.Property<DateTime>("ShiftDate")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("ShiftType")
                         .IsRequired()
@@ -669,7 +699,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<int>("InvoiceId")
                         .HasColumnType("int");
 
-                    b.Property<int>("MedicineId")
+                    b.Property<int?>("MedicineId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -681,6 +711,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<int?>("ServiceId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -702,6 +735,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.HasIndex("InvoiceId");
 
                     b.HasIndex("MedicineId");
+
+                    b.HasIndex("ServiceId");
 
                     b.ToTable("InvoiceDetail", (string)null);
                 });
@@ -1673,6 +1708,64 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.ToTable("Roles", (string)null);
                 });
 
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Service", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("CreateBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdateBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .IsRequired()
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("services", (string)null);
+                });
+
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Supplier", b =>
                 {
                     b.Property<int>("Id")
@@ -1929,8 +2022,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Reception", "Reception")
                         .WithMany("Appointments")
                         .HasForeignKey("ReceptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId");
 
                     b.Navigation("Clinic");
 
@@ -1941,6 +2037,19 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Navigation("Patient");
 
                     b.Navigation("Reception");
+
+                    b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Department", b =>
+                {
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Clinic", "Clinic")
+                        .WithMany("Departments")
+                        .HasForeignKey("ClinicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Clinic");
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.DiseaseDetail", b =>
@@ -1956,6 +2065,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Doctor", b =>
                 {
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Clinic", "Clinic")
+                        .WithMany("Doctors")
+                        .HasForeignKey("ClinicId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Department", "Department")
                         .WithMany("Doctors")
                         .HasForeignKey("DepartmentId")
@@ -1967,6 +2081,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Clinic");
 
                     b.Navigation("Department");
 
@@ -2069,12 +2185,18 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Medicine", "Medicine")
                         .WithMany("InvoiceDetails")
                         .HasForeignKey("MedicineId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Service", "Service")
+                        .WithMany("InvoiceDetails")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Invoice");
 
                     b.Navigation("Medicine");
+
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Medical_Record", b =>
@@ -2335,6 +2457,16 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Service", b =>
+                {
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Department", "Department")
+                        .WithMany("Services")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Department");
+                });
+
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Supply", b =>
                 {
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Appointment", "Appointment")
@@ -2394,6 +2526,10 @@ namespace SWP391_SE1914_ManageHospital.Migrations
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Clinic", b =>
                 {
                     b.Navigation("Appointments");
+
+                    b.Navigation("Departments");
+
+                    b.Navigation("Doctors");
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Department", b =>
@@ -2401,6 +2537,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Navigation("Doctors");
 
                     b.Navigation("Nurses");
+
+                    b.Navigation("Services");
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Disease", b =>
@@ -2440,8 +2578,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Medical_Record", b =>
                 {
-                    b.Navigation("Appointment")
-                        .IsRequired();
+                    b.Navigation("Appointment");
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Medicine", b =>
@@ -2513,6 +2650,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Role", b =>
                 {
                     b.Navigation("User_Roles");
+                });
+
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Service", b =>
+                {
+                    b.Navigation("InvoiceDetails");
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Supplier", b =>

@@ -74,3 +74,5 @@ Properties/launchSettings.json
 
 
 .sonar/
+
+.fake
