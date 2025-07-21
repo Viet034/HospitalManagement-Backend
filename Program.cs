@@ -8,7 +8,6 @@ using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Mapper.Impl;
 using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Service.Impl;
-using SWP391_SE1914_ManageHospital.Service;
 using SWP391_SE1914_ManageHospital.Ultility;
 using System.Text;
 using System.Text.Json.Serialization;

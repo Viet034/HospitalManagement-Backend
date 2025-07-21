@@ -8,6 +8,7 @@ using SWP391_SE1914_ManageHospital.Data;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Appointment;
 
 namespace SWP391_SE1914_ManageHospital.Controllers;
 
@@ -211,24 +212,16 @@ public class AppointmentController : ControllerBase
         var afternoonStart = new TimeSpan(13, 0, 0);
         var afternoonEnd = new TimeSpan(17, 30, 0);
 
-        // Lấy thứ trong tuần từ ngày được chọn (1=Monday, 2=Tuesday, ..., 7=Sunday)
-        // Trong C#, DayOfWeek.Monday = 1, nhưng cần chuyển đổi vì database dùng 1=Monday
-        int dayOfWeek = (int)date.DayOfWeek;
-        // Chuyển đổi: Sunday(0) -> 7, Monday(1) -> 1, Tuesday(2) -> 2, ..., Saturday(6) -> 6
-        if (dayOfWeek == 0) dayOfWeek = 7; // Sunday
-
         // Kiểm tra bác sĩ có làm ca sáng không
         var morningShift = await _context.Doctor_Shifts.FirstOrDefaultAsync(s => 
             s.DoctorId == doctorId && 
-            s.DayOfWeek == dayOfWeek && 
-            s.ShiftType.ToLower() == "morning" &&
-            s.IsActive);
+            s.ShiftDate.Date == date.Date && 
+            s.ShiftType.ToLower() == "morning");
 
         var afternoonShift = await _context.Doctor_Shifts.FirstOrDefaultAsync(s => 
             s.DoctorId == doctorId && 
-            s.DayOfWeek == dayOfWeek && 
-            s.ShiftType.ToLower() == "afternoon" &&
-            s.IsActive);
+            s.ShiftDate.Date == date.Date && 
+            s.ShiftType.ToLower() == "afternoon");
 
         // Đếm số lượng appointment đã đặt cho từng ca
         int morningCount = await _context.Appointments
@@ -621,13 +614,10 @@ public class AppointmentController : ControllerBase
             }
 
             // Kiểm tra bác sĩ có làm việc trong ca này không
-            int dayOfWeek = (int)request.AppointmentDate.DayOfWeek;
-            if (dayOfWeek == 0) dayOfWeek = 7; // Sunday
             var doctorShift = await _context.Doctor_Shifts.FirstOrDefaultAsync(s => 
                 s.DoctorId == request.DoctorId && 
-                s.DayOfWeek == dayOfWeek && 
+                s.ShiftDate.Date == request.AppointmentDate.Date && 
                 s.ShiftType.ToLower() == (request.StartTime >= new TimeSpan(7, 0, 0) && request.StartTime < new TimeSpan(12, 0, 0) ? "morning" : "afternoon") &&
-                s.IsActive &&
                 s.StartTime <= request.StartTime &&
                 s.EndTime > request.StartTime
             );
@@ -1071,9 +1061,8 @@ public class AppointmentController : ControllerBase
 
             var doctorShift = await _context.Doctor_Shifts.FirstOrDefaultAsync(s => 
                 s.DoctorId == request.DoctorId && 
-                s.DayOfWeek == dayOfWeek && 
+                s.ShiftDate.Date == request.AppointmentDate.Date && 
                 s.ShiftType.ToLower() == (request.StartTime >= new TimeSpan(7, 0, 0) && request.StartTime < new TimeSpan(12, 0, 0) ? "morning" : "afternoon") &&
-                s.IsActive &&
                 s.StartTime <= request.StartTime &&
                 s.EndTime > request.StartTime
             );
@@ -1211,6 +1200,156 @@ public class AppointmentController : ControllerBase
         }
     }
 
+    [HttpPost("create-sample-shifts/{doctorId}")]
+    public async Task<IActionResult> CreateSampleShifts(int doctorId, [FromQuery] int year, [FromQuery] int month)
+    {
+        try
+        {
+            // Kiểm tra xem doctor có tồn tại không
+            var doctor = await _context.Doctors.FindAsync(doctorId);
+            if (doctor == null)
+            {
+                return BadRequest(new { success = false, message = "Không tìm thấy bác sĩ" });
+            }
+
+            // Xóa các shifts cũ trong tháng nếu có
+            var existingShifts = await _context.Doctor_Shifts
+                .Where(s => s.DoctorId == doctorId && 
+                           s.ShiftDate.Year == year && 
+                           s.ShiftDate.Month == month)
+                .ToListAsync();
+            
+            if (existingShifts.Any())
+            {
+                _context.Doctor_Shifts.RemoveRange(existingShifts);
+                await _context.SaveChangesAsync();
+            }
+
+            // Tạo lịch làm việc mẫu: Thứ 2-6, ca sáng và chiều
+            var shifts = new List<Doctor_Shift>();
+            var firstDayOfMonth = new DateTime(year, month, 1);
+            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+            for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
+            {
+                // Chỉ tạo lịch cho thứ 2-6 (Monday = 1, Friday = 5)
+                var dayOfWeek = (int)date.DayOfWeek;
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) // Monday to Friday
+                {
+                    // Ca sáng: 8:00 - 12:00
+                    shifts.Add(new Doctor_Shift
+                    {
+                        DoctorId = doctorId,
+                        ShiftDate = date,
+                        ShiftType = "morning",
+                        StartTime = new TimeSpan(8, 0, 0),
+                        EndTime = new TimeSpan(12, 0, 0),
+                        Notes = "Ca sáng",
+                        CreateDate = DateTime.Now,
+                        UpdateDate = DateTime.Now,
+                        CreateBy = "System",
+                        UpdateBy = "System"
+                    });
+
+                    // Ca chiều: 13:00 - 17:00
+                    shifts.Add(new Doctor_Shift
+                    {
+                        DoctorId = doctorId,
+                        ShiftDate = date,
+                        ShiftType = "afternoon",
+                        StartTime = new TimeSpan(13, 0, 0),
+                        EndTime = new TimeSpan(17, 0, 0),
+                        Notes = "Ca chiều",
+                        CreateDate = DateTime.Now,
+                        UpdateDate = DateTime.Now,
+                        CreateBy = "System",
+                        UpdateBy = "System"
+                    });
+                }
+            }
+
+            _context.Doctor_Shifts.AddRange(shifts);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = $"Đã tạo {shifts.Count} ca làm việc cho bác sĩ {doctor.Name} trong tháng {month}/{year}",
+                data = new
+                {
+                    doctorId = doctorId,
+                    doctorName = doctor.Name,
+                    year = year,
+                    month = month,
+                    shiftsCount = shifts.Count,
+                    workingDays = shifts.Select(s => s.ShiftDate.Date).Distinct().Count()
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Lỗi khi tạo lịch làm việc mẫu",
+                error = ex.Message
+            });
+        }
+    }
+
+    [HttpDelete("clear-sample-data")]
+    public async Task<IActionResult> ClearSampleData()
+    {
+        try
+        {
+            // Xóa TẤT CẢ dữ liệu mẫu trong bảng doctor_shifts
+            var allSampleShifts = await _context.Doctor_Shifts
+                .Where(s => s.CreateBy == "System" || s.Notes.Contains("Ca sáng") || s.Notes.Contains("Ca chiều"))
+                .ToListAsync();
+
+            if (allSampleShifts.Any())
+            {
+                _context.Doctor_Shifts.RemoveRange(allSampleShifts);
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    success = true,
+                    message = $"Đã xóa {allSampleShifts.Count} ca làm việc mẫu khỏi database",
+                    data = new
+                    {
+                        deletedCount = allSampleShifts.Count,
+                        shifts = allSampleShifts.Select(s => new
+                        {
+                            doctorId = s.DoctorId,
+                            shiftDate = s.ShiftDate.ToString("yyyy-MM-dd"),
+                            shiftType = s.ShiftType,
+                            notes = s.Notes
+                        }).ToList()
+                    }
+                });
+            }
+            else
+            {
+                return Ok(new
+                {
+                    success = true,
+                    message = "Không có dữ liệu mẫu nào để xóa",
+                    data = new { deletedCount = 0 }
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Lỗi khi xóa dữ liệu mẫu",
+                error = ex.Message
+            });
+        }
+    }
+
     [HttpGet("doctor-working-days/{doctorId}")]
     public async Task<IActionResult> GetDoctorWorkingDays(int doctorId, [FromQuery] int year, [FromQuery] int month)
     {
@@ -1218,48 +1357,52 @@ public class AppointmentController : ControllerBase
         {
             const int MAX_APPOINTMENTS_PER_DAY = 5;
             
-            // Lấy tất cả shifts của doctor
+            // Kiểm tra xem doctor có tồn tại không
+            var doctor = await _context.Doctors.FindAsync(doctorId);
+            if (doctor == null)
+            {
+                return BadRequest(new { success = false, message = "Không tìm thấy bác sĩ" });
+            }
+            
+            // Lấy tất cả shifts của doctor trong tháng (CHỈ lấy từ database, KHÔNG tự tạo)
             var doctorShifts = await _context.Doctor_Shifts
-                .Where(s => s.DoctorId == doctorId && s.IsActive)
+                .Where(s => s.DoctorId == doctorId && 
+                           s.ShiftDate.Year == year && 
+                           s.ShiftDate.Month == month)
                 .ToListAsync();
 
+            // Nếu không có lịch làm việc, trả về danh sách rỗng
             if (!doctorShifts.Any())
             {
                 return Ok(new
                 {
                     success = true,
-                    message = "Bác sĩ không có lịch làm việc",
+                    message = "Bác sĩ không có lịch làm việc trong tháng này",
                     data = new List<object>()
                 });
             }
 
-            // Lấy các ngày trong tuần mà doctor làm việc
-            var workingDaysOfWeek = doctorShifts.Select(s => s.DayOfWeek).Distinct().ToList();
+            // Lấy các ngày mà doctor làm việc
+            var workingDays = doctorShifts.Select(s => s.ShiftDate.Date).Distinct().ToList();
 
             // Tạo danh sách các ngày trong tháng mà doctor làm việc
-            var workingDays = new List<object>();
-            var firstDayOfMonth = new DateTime(year, month, 1);
-            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+            var workingDaysResult = new List<object>();
             var today = DateTime.Today;
 
-            for (var date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
+            foreach (var workingDate in workingDays)
             {
-                // Chuyển đổi DayOfWeek: Sunday(0) -> 7, Monday(1) -> 1, etc.
-                int dayOfWeek = (int)date.DayOfWeek;
-                if (dayOfWeek == 0) dayOfWeek = 7; // Sunday
-
-                // Kiểm tra nếu ngày này là ngày làm việc và không phải ngày trong quá khứ
-                if (workingDaysOfWeek.Contains(dayOfWeek) && date >= today)
+                // Kiểm tra nếu ngày này không phải ngày trong quá khứ
+                if (workingDate >= today)
                 {
                     // Đếm số lượng appointment đã đặt cho ngày này
                     var appointmentCount = await _context.Doctor_Appointments
                         .Where(da => da.DoctorId == doctorId &&
-                                    da.Appointment.AppointmentDate.Date == date.Date)
+                                    da.Appointment.AppointmentDate.Date == workingDate.Date)
                         .CountAsync();
 
-                    workingDays.Add(new
+                    workingDaysResult.Add(new
                     {
-                        day = date.Day,
+                        day = workingDate.Day,
                         appointmentCount = appointmentCount,
                         isAvailable = appointmentCount < MAX_APPOINTMENTS_PER_DAY,
                         maxSlots = MAX_APPOINTMENTS_PER_DAY
@@ -1271,7 +1414,7 @@ public class AppointmentController : ControllerBase
             {
                 success = true,
                 message = "Lấy lịch làm việc của bác sĩ thành công",
-                data = workingDays
+                data = workingDaysResult
             });
         }
         catch (Exception ex)
@@ -1301,15 +1444,10 @@ public class AppointmentController : ControllerBase
                 });
             }
 
-            // Lấy thứ trong tuần
-            int dayOfWeek = (int)parsedDate.DayOfWeek;
-            if (dayOfWeek == 0) dayOfWeek = 7; // Sunday
-
             // Lấy lịch làm việc của bác sĩ cho ngày này
             var doctorShifts = await _context.Doctor_Shifts
                 .Where(s => s.DoctorId == doctorId && 
-                           s.DayOfWeek == dayOfWeek && 
-                           s.IsActive)
+                           s.ShiftDate.Date == parsedDate.Date)
                 .ToListAsync();
 
             if (!doctorShifts.Any())
@@ -1437,5 +1575,771 @@ public class AppointmentController : ControllerBase
     private string SafeTimeSpanToString(TimeSpan time)
     {
         try { return time.ToString(@"hh\:mm"); } catch { return string.Empty; }
+    }
+
+    #region Patient Appointment Management APIs
+
+    /// <summary>
+    /// Lấy danh sách lịch hẹn của bệnh nhân hiện tại
+    /// </summary>
+    /// <param name="status">Trạng thái lịch hẹn (all, today, completed, cancelled, scheduled, noshow)</param>
+    /// <param name="searchTerm">Từ khóa tìm kiếm</param>
+    /// <param name="page">Số trang</param>
+    /// <param name="pageSize">Kích thước trang</param>
+    /// <returns>Danh sách lịch hẹn của bệnh nhân</returns>
+    [Authorize]
+    [HttpGet("patient-appointments")]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.Unauthorized)]
+    public async Task<IActionResult> GetPatientAppointments(
+        [FromQuery] string status = "all",
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            // Lấy user ID từ token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new
+                {
+                    success = false,
+                    message = "Không thể xác định người dùng",
+                    data = (object)null
+                });
+            }
+
+            // Lấy tất cả bệnh nhân (bao gồm người thân) của user
+            var patients = await _context.Patients.Where(p => p.UserId == userId).ToListAsync();
+            if (patients == null || patients.Count == 0)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy thông tin bệnh nhân",
+                    data = (object)null
+                });
+            }
+            var patientIds = patients.Select(p => p.Id).ToList();
+
+            // Xây dựng query cơ bản lấy lịch hẹn của tất cả bệnh nhân thuộc user
+            var query = _context.Appointments
+                .Include(a => a.Patient)
+                .Include(a => a.Clinic)
+                .Include(a => a.Service)
+                .Include(a => a.Doctor_Appointments)
+                    .ThenInclude(da => da.Doctor)
+                .Where(a => patientIds.Contains(a.PatientId));
+
+            // Áp dụng filter theo trạng thái
+            switch (status.ToLower())
+            {
+                case "today":
+                    query = query.Where(a => a.AppointmentDate.Date == DateTime.Now.Date);
+                    break;
+                case "completed":
+                    query = query.Where(a => a.Status == AppointmentStatus.Completed);
+                    break;
+                case "cancelled":
+                    query = query.Where(a => a.Status == AppointmentStatus.Cancelled);
+                    break;
+                case "scheduled":
+                    query = query.Where(a => a.Status == AppointmentStatus.Scheduled);
+                    break;
+                case "noshow":
+                    query = query.Where(a => a.Status == AppointmentStatus.NoShow);
+                    break;
+                case "all":
+                default:
+                    // Không filter gì cả
+                    break;
+            }
+
+            // Áp dụng tìm kiếm
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(a =>
+                    (a.Patient != null && a.Patient.Name.Contains(searchTerm)) ||
+                    (a.Clinic != null && a.Clinic.Name.Contains(searchTerm)) ||
+                    (a.Service != null && a.Service.Name.Contains(searchTerm)) ||
+                    (a.Doctor_Appointments != null && a.Doctor_Appointments.Any(da => da.Doctor != null && da.Doctor.Name.Contains(searchTerm))) ||
+                    (a.Note != null && a.Note.Contains(searchTerm))
+                );
+            }
+
+            // Sắp xếp theo ngày gần nhất
+            query = query.OrderByDescending(a => a.AppointmentDate).ThenByDescending(a => a.StartTime);
+
+            // Tính tổng số bản ghi
+            var totalCount = await query.CountAsync();
+
+            // Phân trang
+            var appointments = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(a => new
+                {
+                    id = a.Id,
+                    appointmentDate = a.AppointmentDate.ToString("dd/MM/yyyy"),
+                    startTime = SafeTimeSpanToString(a.StartTime),
+                    endTime = SafeTimeSpanToString(a.EndTime),
+                    status = a.Status.ToString(),
+                    statusText = GetStatusText(a.Status),
+                    note = a.Note,
+                    isSend = a.isSend,
+                    patient = a.Patient != null ? new
+                    {
+                        id = a.Patient.Id,
+                        name = a.Patient.Name,
+                        phone = a.Patient.Phone,
+                        gender = a.Patient.Gender.ToString()
+                    } : null,
+                    clinic = a.Clinic != null ? new
+                    {
+                        id = a.Clinic.Id,
+                        name = a.Clinic.Name,
+                        address = a.Clinic.Address
+                    } : null,
+                    service = a.Service != null ? new
+                    {
+                        id = a.Service.Id,
+                        name = a.Service.Name,
+                        price = a.Service.Price
+                    } : null,
+                    doctors = a.Doctor_Appointments != null ? a.Doctor_Appointments
+                        .Where(da => da.Doctor != null)
+                        .Select(da => (object)new {
+                            id = da.Doctor.Id,
+                            name = da.Doctor.Name,
+                            imageUrl = da.Doctor.ImageURL
+                        }).ToList() : new List<object>(),
+                    createDate = a.CreateDate.ToString("dd/MM/yyyy HH:mm"),
+                    updateDate = a.UpdateDate.HasValue ? a.UpdateDate.Value.ToString() : null
+                })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Lấy danh sách lịch hẹn thành công",
+                data = new
+                {
+                    appointments = appointments,
+                    pagination = new
+                    {
+                        page = page,
+                        pageSize = pageSize,
+                        totalCount = totalCount,
+                        totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+                    }
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("API ERROR in GetPatientAppointments: " + ex.ToString());
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Đã xảy ra lỗi khi lấy danh sách lịch hẹn",
+                error = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Lấy chi tiết lịch hẹn theo ID
+    /// </summary>
+    /// <param name="appointmentId">ID lịch hẹn</param>
+    /// <returns>Chi tiết lịch hẹn</returns>
+    [Authorize]
+    [HttpGet("patient-appointments/{appointmentId}")]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.Unauthorized)]
+    public async Task<IActionResult> GetPatientAppointmentDetail(int appointmentId)
+    {
+        try
+        {
+            // Lấy user ID từ token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new
+                {
+                    success = false,
+                    message = "Không thể xác định người dùng",
+                    data = (object)null
+                });
+            }
+
+            // Lấy tất cả bệnh nhân (bao gồm người thân) của user
+            var patients = await _context.Patients.Where(p => p.UserId == userId).ToListAsync();
+            if (patients == null || patients.Count == 0)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy thông tin bệnh nhân",
+                    data = (object)null
+                });
+            }
+            var patientIds = patients.Select(p => p.Id).ToList();
+
+            // Lấy lịch hẹn của bất kỳ bệnh nhân nào thuộc user
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == appointmentId && patientIds.Contains(a.PatientId));
+
+            if (appointment == null)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy lịch hẹn",
+                    data = (object)null
+                });
+            }
+
+            var result = new
+            {
+                id = appointment.Id,
+                appointmentDate = appointment.AppointmentDate.ToString("dd/MM/yyyy"),
+                startTime = SafeTimeSpanToString(appointment.StartTime),
+                endTime = SafeTimeSpanToString(appointment.EndTime),
+                status = appointment.Status.ToString(),
+                statusText = GetStatusText(appointment.Status),
+                note = appointment.Note,
+                isSend = appointment.isSend,
+                patient = new
+                {
+                    id = appointment.Patient.Id,
+                    name = appointment.Patient.Name,
+                    phone = appointment.Patient.Phone,
+                    gender = appointment.Patient.Gender.ToString(),
+                    dob = appointment.Patient.Dob.ToString("dd/MM/yyyy"),
+                    address = appointment.Patient.Address,
+                    cccd = appointment.Patient.CCCD,
+                    insuranceNumber = appointment.Patient.InsuranceNumber,
+                    allergies = appointment.Patient.Allergies,
+                    bloodType = appointment.Patient.BloodType,
+                    imageUrl = appointment.Patient.ImageURL
+                },
+                clinic = new
+                {
+                    id = appointment.Clinic.Id,
+                    name = appointment.Clinic.Name,
+                    address = appointment.Clinic.Address,
+                    email = appointment.Clinic.Email
+                },
+                service = appointment.Service != null ? new
+                {
+                    id = appointment.Service.Id,
+                    name = appointment.Service.Name,
+                    price = appointment.Service.Price,
+                    description = appointment.Service.Description
+                } : null,
+                doctors = appointment.Doctor_Appointments.Select(da => new
+                {
+                    id = da.Doctor.Id,
+                    name = da.Doctor.Name,
+                    imageUrl = da.Doctor.ImageURL,
+                    phone = da.Doctor.Phone
+                }).ToList(),
+                invoice = appointment.Invoice != null ? new
+                {
+                    id = appointment.Invoice.Id,
+                    totalAmount = appointment.Invoice.TotalAmount,
+                    status = appointment.Invoice.Status.ToString()
+                } : null,
+                createDate = appointment.CreateDate.ToString("dd/MM/yyyy HH:mm"),
+                updateDate = appointment.UpdateDate.HasValue ? appointment.UpdateDate.Value.ToString() : null
+            };
+
+            return Ok(new
+            {
+                success = true,
+                message = "Lấy chi tiết lịch hẹn thành công",
+                data = result
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Đã xảy ra lỗi khi lấy chi tiết lịch hẹn",
+                error = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Cập nhật lịch hẹn của bệnh nhân
+    /// </summary>
+    /// <param name="appointmentId">ID lịch hẹn</param>
+    /// <param name="request">Thông tin cập nhật</param>
+    /// <returns>Kết quả cập nhật</returns>
+    [Authorize]
+    [HttpPut("patient-appointments/{appointmentId}")]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.Unauthorized)]
+    public async Task<IActionResult> UpdatePatientAppointment(
+        int appointmentId,
+        [FromBody] AppointmentUpdateRequest request)
+    {
+        try
+        {
+            // Lấy user ID từ token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new
+                {
+                    success = false,
+                    message = "Không thể xác định người dùng",
+                    data = (object)null
+                });
+            }
+
+            // Lấy patient ID từ user ID (chỉ lấy bệnh nhân chính)
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (patient == null)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy thông tin bệnh nhân",
+                    data = (object)null
+                });
+            }
+
+            // Lấy lịch hẹn
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == appointmentId && a.PatientId == patient.Id);
+
+            if (appointment == null)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy lịch hẹn",
+                    data = (object)null
+                });
+            }
+
+            // Kiểm tra trạng thái lịch hẹn
+            if (appointment.Status != AppointmentStatus.Scheduled)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Chỉ có thể cập nhật lịch hẹn đang chờ xác nhận",
+                    data = (object)null
+                });
+            }
+
+            // Cập nhật thông tin
+            if (request.AppointmentDate.HasValue)
+            {
+                appointment.AppointmentDate = request.AppointmentDate.Value;
+            }
+
+            if (request.StartTime.HasValue)
+            {
+                appointment.StartTime = request.StartTime.Value;
+            }
+
+            if (request.Note != null)
+            {
+                appointment.Note = request.Note;
+            }
+
+            appointment.UpdateDate = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Cập nhật lịch hẹn thành công",
+                data = new
+                {
+                    id = appointment.Id,
+                    appointmentDate = appointment.AppointmentDate.ToString("dd/MM/yyyy"),
+                    startTime = SafeTimeSpanToString(appointment.StartTime),
+                    note = appointment.Note,
+                    updateDate = appointment.UpdateDate.HasValue ? appointment.UpdateDate.Value.ToString() : null
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Đã xảy ra lỗi khi cập nhật lịch hẹn",
+                error = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Hủy lịch hẹn của bệnh nhân
+    /// </summary>
+    /// <param name="appointmentId">ID lịch hẹn</param>
+    /// <param name="request">Lý do hủy</param>
+    /// <returns>Kết quả hủy lịch hẹn</returns>
+    [Authorize]
+    [HttpPut("patient-appointments/{appointmentId}/cancel")]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.NotFound)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.Unauthorized)]
+    public async Task<IActionResult> CancelPatientAppointment(
+        int appointmentId,
+        [FromBody] AppointmentCancelRequest request)
+    {
+        try
+        {
+            // Lấy user ID từ token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new
+                {
+                    success = false,
+                    message = "Không thể xác định người dùng",
+                    data = (object)null
+                });
+            }
+
+            // Lấy tất cả bệnh nhân (bao gồm người thân) của user
+            var patients = await _context.Patients.Where(p => p.UserId == userId).ToListAsync();
+            if (patients == null || patients.Count == 0)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy thông tin bệnh nhân",
+                    data = (object)null
+                });
+            }
+            var patientIds = patients.Select(p => p.Id).ToList();
+
+            // Lấy lịch hẹn của bất kỳ bệnh nhân nào thuộc user
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == appointmentId && patientIds.Contains(a.PatientId));
+
+            if (appointment == null)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy lịch hẹn",
+                    data = (object)null
+                });
+            }
+
+            // Kiểm tra trạng thái lịch hẹn
+            if (appointment.Status != AppointmentStatus.Scheduled)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Chỉ có thể hủy lịch hẹn đang chờ xác nhận",
+                    data = (object)null
+                });
+            }
+
+            // Kiểm tra thời gian hủy (không cho phép hủy trước 24h)
+            var timeUntilAppointment = appointment.AppointmentDate - DateTime.Now;
+            if (timeUntilAppointment.TotalHours < 24)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Chỉ có thể hủy lịch hẹn trước 24 giờ",
+                    data = (object)null
+                });
+            }
+
+            // Cập nhật trạng thái
+            appointment.Status = AppointmentStatus.Cancelled;
+            appointment.Note = request.Reason ?? "Bệnh nhân hủy lịch hẹn";
+            appointment.UpdateDate = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Hủy lịch hẹn thành công",
+                data = new
+                {
+                    id = appointment.Id,
+                    status = appointment.Status.ToString(),
+                    statusText = GetStatusText(appointment.Status),
+                    note = appointment.Note,
+                    updateDate = appointment.UpdateDate.HasValue ? appointment.UpdateDate.Value.ToString() : null
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Đã xảy ra lỗi khi hủy lịch hẹn",
+                error = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Tìm kiếm lịch hẹn của bệnh nhân
+    /// </summary>
+    /// <param name="searchTerm">Từ khóa tìm kiếm</param>
+    /// <param name="startDate">Ngày bắt đầu</param>
+    /// <param name="endDate">Ngày kết thúc</param>
+    /// <param name="status">Trạng thái</param>
+    /// <param name="page">Số trang</param>
+    /// <param name="pageSize">Kích thước trang</param>
+    /// <returns>Kết quả tìm kiếm</returns>
+    [Authorize]
+    [HttpGet("patient-appointments/search")]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.OK)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.BadRequest)]
+    [ProducesResponseType(typeof(object), (int)HttpStatusCode.Unauthorized)]
+    public async Task<IActionResult> SearchPatientAppointments(
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null,
+        [FromQuery] string? status = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            // Lấy user ID từ token
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+            {
+                return Unauthorized(new
+                {
+                    success = false,
+                    message = "Không thể xác định người dùng",
+                    data = (object)null
+                });
+            }
+
+            // Lấy tất cả bệnh nhân (bao gồm người thân) của user
+            var patients = await _context.Patients.Where(p => p.UserId == userId).ToListAsync();
+            if (patients == null || patients.Count == 0)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy thông tin bệnh nhân",
+                    data = (object)null
+                });
+            }
+            var patientIds = patients.Select(p => p.Id).ToList();
+
+            // Xây dựng query cơ bản
+            var query = _context.Appointments
+                .Include(a => a.Patient)
+                .Include(a => a.Clinic)
+                .Include(a => a.Service)
+                .Include(a => a.Doctor_Appointments)
+                    .ThenInclude(da => da.Doctor)
+                .Where(a => patientIds.Contains(a.PatientId));
+
+            // Áp dụng filter theo ngày
+            if (startDate.HasValue)
+            {
+                query = query.Where(a => a.AppointmentDate.Date >= startDate.Value.Date);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(a => a.AppointmentDate.Date <= endDate.Value.Date);
+            }
+
+            // Áp dụng filter theo trạng thái
+            if (!string.IsNullOrEmpty(status))
+            {
+                switch (status.ToLower())
+                {
+                    case "completed":
+                        query = query.Where(a => a.Status == AppointmentStatus.Completed);
+                        break;
+                    case "cancelled":
+                        query = query.Where(a => a.Status == AppointmentStatus.Cancelled);
+                        break;
+                    case "scheduled":
+                        query = query.Where(a => a.Status == AppointmentStatus.Scheduled);
+                        break;
+                    case "noshow":
+                        query = query.Where(a => a.Status == AppointmentStatus.NoShow);
+                        break;
+                }
+            }
+
+            // Áp dụng tìm kiếm
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(a =>
+                    a.Patient.Name.Contains(searchTerm) ||
+                    a.Clinic.Name.Contains(searchTerm) ||
+                    (a.Service != null && a.Service.Name.Contains(searchTerm)) ||
+                    a.Doctor_Appointments.Any(da => da.Doctor.Name.Contains(searchTerm)) ||
+                    (a.Note != null && a.Note.Contains(searchTerm))
+                );
+            }
+
+            // Sắp xếp theo ngày gần nhất
+            query = query.OrderByDescending(a => a.AppointmentDate).ThenByDescending(a => a.StartTime);
+
+            // Tính tổng số bản ghi
+            var totalCount = await query.CountAsync();
+
+            // Phân trang
+            var appointments = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(a => new
+                {
+                    id = a.Id,
+                    appointmentDate = a.AppointmentDate.ToString("dd/MM/yyyy"),
+                    startTime = SafeTimeSpanToString(a.StartTime),
+                    endTime = SafeTimeSpanToString(a.EndTime),
+                    status = a.Status.ToString(),
+                    statusText = GetStatusText(a.Status),
+                    note = a.Note,
+                    clinic = new
+                    {
+                        id = a.Clinic.Id,
+                        name = a.Clinic.Name,
+                        address = a.Clinic.Address
+                    },
+                    service = a.Service != null ? new
+                    {
+                        id = a.Service.Id,
+                        name = a.Service.Name,
+                        price = a.Service.Price
+                    } : null,
+                    doctors = a.Doctor_Appointments.Select(da => new
+                    {
+                        id = da.Doctor.Id,
+                        name = da.Doctor.Name,
+                        imageUrl = da.Doctor.ImageURL
+                    }).ToList(),
+                    createDate = a.CreateDate.ToString("dd/MM/yyyy HH:mm")
+                })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Tìm kiếm lịch hẹn thành công",
+                data = new
+                {
+                    appointments = appointments,
+                    pagination = new
+                    {
+                        page = page,
+                        pageSize = pageSize,
+                        totalCount = totalCount,
+                        totalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+                    },
+                    filters = new
+                    {
+                        searchTerm = searchTerm,
+                        startDate = startDate.HasValue ? startDate.Value.ToString("dd/MM/yyyy") : null,
+                        endDate = endDate.HasValue ? endDate.Value.ToString("dd/MM/yyyy") : null,
+                        status = status
+                    }
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Đã xảy ra lỗi khi tìm kiếm lịch hẹn",
+                error = ex.Message
+            });
+        }
+    }
+
+    #endregion
+
+    // Helper method để lấy text trạng thái
+    private string GetStatusText(AppointmentStatus status)
+    {
+        return status switch
+        {
+            AppointmentStatus.Scheduled => "Đã lên lịch",
+            AppointmentStatus.Completed => "Đã hoàn thành",
+            AppointmentStatus.Cancelled => "Đã hủy",
+            AppointmentStatus.NoShow => "Không đến",
+            _ => "Không xác định"
+        };
+    }
+
+    /// <summary>
+    /// API test lấy danh sách lịch hẹn theo userId, không cần xác thực
+    /// </summary>
+    [HttpGet("patient-appointments/test")]
+    public async Task<IActionResult> GetPatientAppointmentsTest([FromQuery] int userId)
+    {
+        // Lấy tất cả bệnh nhân (bao gồm người thân) của user
+        var patients = await _context.Patients.Where(p => p.UserId == userId).ToListAsync();
+        if (patients == null || patients.Count == 0)
+        {
+            return NotFound(new
+            {
+                success = false,
+                message = "Không tìm thấy thông tin bệnh nhân",
+                data = (object)null
+            });
+        }
+        var patientIds = patients.Select(p => p.Id).ToList();
+        var query = _context.Appointments
+            .Include(a => a.Patient)
+            .Include(a => a.Clinic)
+            .Include(a => a.Service)
+            .Include(a => a.Doctor_Appointments)
+                .ThenInclude(da => da.Doctor)
+            .Where(a => patientIds.Contains(a.PatientId));
+        var appointments = await query.ToListAsync();
+        return Ok(new
+        {
+            success = true,
+            message = "Lấy danh sách lịch hẹn thành công (test mode)",
+            data = new
+            {
+                appointments = appointments.Select(a => new {
+                    id = a.Id,
+                    appointmentDate = a.AppointmentDate.ToString("dd/MM/yyyy"),
+                    startTime = SafeTimeSpanToString(a.StartTime),
+                    endTime = SafeTimeSpanToString(a.EndTime),
+                    status = a.Status.ToString(),
+                    note = a.Note,
+                    patient = a.Patient != null ? new { id = a.Patient.Id, name = a.Patient.Name } : null,
+                    clinic = a.Clinic != null ? new { id = a.Clinic.Id, name = a.Clinic.Name } : null,
+                    service = a.Service != null ? new { id = a.Service.Id, name = a.Service.Name } : null,
+                    doctors = a.Doctor_Appointments != null ? a.Doctor_Appointments.Where(da => da.Doctor != null).Select(da => (object)new { id = da.Doctor.Id, name = da.Doctor.Name }).ToList() : new List<object>(),
+                    createDate = a.CreateDate.ToString("dd/MM/yyyy HH:mm")
+                }).ToList()
+            }
+        });
     }
 } 
