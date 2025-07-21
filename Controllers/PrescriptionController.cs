@@ -121,11 +121,24 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                 return Forbid("Chỉ bác sĩ mới có quyền tạo đơn thuốc.");
 
             request.UserId = userId;
-
-            var created = await _prescriptionService.CreateAsync(request);
-            // Sau khi tạo xong đơn thuốc, trả về đơn thuốc mới tạo
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            try
+            {
+                var created = await _prescriptionService.CreateAsync(request);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            }
+            catch (Exception ex)
+            {
+                // Kiểm tra lỗi do không tìm thấy bệnh nhân (nội dung giống bạn)
+                if (ex.Message.Contains("Không tìm thấy bệnh nhân với thông tin cung cấp."))
+                {
+                    // Trả về lỗi gọn 1 dòng message
+                    return BadRequest(new { message = "Không tìm thấy bệnh nhân với thông tin cung cấp." });
+                }
+                // Các lỗi khác: trả về lỗi mặc định hoặc log lại tùy nhu cầu
+                return BadRequest(new { message = ex.Message });
+            }
         }
+
 
 
         // Cập nhật đơn thuốc
@@ -166,105 +179,46 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         }
 
         [HttpPut("update-status/{id}")]
-        [Authorize(Roles = "Doctor, Admin")]
-        public async Task<IActionResult> UpdateStatus(int id, [FromBody] PrescriptionUpdateStatusRequest request)
+        [Authorize(Roles = "Doctor,Admin")]
+        public async Task<IActionResult> UpdateStatus(
+        int id,
+        [FromBody] PrescriptionUpdateStatusRequest request)
         {
-            // Lấy thông tin đơn thuốc từ ID
-            var prescription = await _context.Prescriptions.FindAsync(id);
-            if (prescription == null)
+            // Lấy userId từ token claims
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out var userId))
+                return Unauthorized("User chưa đăng nhập hoặc token không hợp lệ.");
+
+            try
             {
-                return NotFound($"Không tìm thấy đơn thuốc với ID = {id}");
+                await _prescriptionService.UpdateStatusAsync(id, request.Status, userId);
+                return Ok(new { Message = "Cập nhật trạng thái thành công." });
             }
-
-            // Kiểm tra nếu trạng thái hiện tại là Dispensed hoặc Cancelled, không cho phép thay đổi nữa
-            if (prescription.Status == PrescriptionStatus.Dispensed || prescription.Status == PrescriptionStatus.Cancelled)
+            catch (KeyNotFoundException knf)
             {
-                return BadRequest("Đơn thuốc này đã được cấp phát hoặc hủy, không thể thay đổi trạng thái.");
+                return NotFound(knf.Message);
             }
-
-            // Kiểm tra nếu trạng thái đang từ "New" chuyển sang "Dispensed" thì cần trừ thuốc khỏi kho
-            if (prescription.Status == PrescriptionStatus.New && request.Status == PrescriptionStatus.Dispensed)
+            catch (InvalidOperationException inv)
             {
-                // Cập nhật trạng thái của đơn thuốc thành Dispensed
-                prescription.Status = PrescriptionStatus.Dispensed;
-                prescription.UpdateDate = DateTime.UtcNow;
-
-                // Cập nhật tên bác sĩ vào UpdateBy
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Lấy UserId từ Claims
-                var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == int.Parse(userId));
-                if (doctor != null)
-                {
-                    prescription.UpdateBy = doctor.Name;  // Cập nhật tên bác sĩ
-                }
-                else
-                {
-                    prescription.UpdateBy = "Bác sĩ không xác định";  // Nếu không tìm thấy bác sĩ
-                }
-
-                // Cập nhật trạng thái của tất cả PrescriptionDetail thành "Dispensed"
-                var prescriptionDetails = await _context.PrescriptionDetails
-                    .Where(pd => pd.PrescriptionId == id)
-                    .ToListAsync();
-
-                foreach (var pd in prescriptionDetails)
-                {
-                    pd.Status = PrescriptionDetailStatus.Dispensed;  // Cập nhật trạng thái của PrescriptionDetail
-                }
-
-                // Cập nhật kho thuốc chỉ khi trạng thái là Dispensed
-                foreach (var pd in prescriptionDetails)
-                {
-                    var medicine = await _context.Medicine_Inventories
-                        .FirstOrDefaultAsync(mi => mi.MedicineId == pd.MedicineId);
-
-                    if (medicine == null || medicine.Quantity < pd.Quantity)
-                    {
-                        return BadRequest($"Không đủ thuốc trong kho cho thuốc: {pd.MedicineId}");
-                    }
-
-                    // Trừ số lượng thuốc trong kho
-                    medicine.Quantity -= pd.Quantity;
-                }
+                return BadRequest(inv.Message);
             }
-            // Nếu trạng thái chuyển thành Cancelled thì không trừ thuốc khỏi kho, chỉ cập nhật trạng thái
-            else if (request.Status == PrescriptionStatus.Cancelled)
-            {
-                prescription.Status = PrescriptionStatus.Cancelled;
-                prescription.UpdateDate = DateTime.UtcNow;
-
-                // Cập nhật tên bác sĩ vào UpdateBy
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Lấy UserId từ Claims
-                var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.UserId == int.Parse(userId));
-                if (doctor != null)
-                {
-                    prescription.UpdateBy = doctor.Name;  // Cập nhật tên bác sĩ
-                }
-                else
-                {
-                    prescription.UpdateBy = "Bác sĩ không xác định";  // Nếu không tìm thấy bác sĩ
-                }
-
-                // Cập nhật trạng thái của tất cả PrescriptionDetail thành "Cancelled"
-                var prescriptionDetails = await _context.PrescriptionDetails
-                    .Where(pd => pd.PrescriptionId == id)
-                    .ToListAsync();
-
-                foreach (var pd in prescriptionDetails)
-                {
-                    pd.Status = PrescriptionDetailStatus.Cancelled;  // Cập nhật trạng thái của PrescriptionDetail
-                }
-            }
-            else
-            {
-                return BadRequest("Trạng thái không hợp lệ cho phép thay đổi.");
-            }
-
-            // Lưu tất cả thay đổi vào cơ sở dữ liệu
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Message = "Trạng thái đơn thuốc đã được cập nhật thành công và kho thuốc đã được trừ." });
         }
-
+        
+        [HttpGet("get-total/{prescriptionId}")]
+        [Authorize(Roles = "Doctor,Admin,Patient")]
+        public async Task<IActionResult> GetTotalAmount(int prescriptionId)
+        {
+            try
+            {
+                // Gọi đúng field đã inject
+                var total = await _prescriptionService.GetTotalAmountAsync(prescriptionId);
+                return Ok(new { prescriptionId, totalAmount = total });
+            }
+            catch (KeyNotFoundException knf)
+            {
+                return NotFound(knf.Message);
+            }
+        }
 
 
     }
