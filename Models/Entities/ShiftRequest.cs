@@ -1,7 +1,8 @@
 namespace SWP391_SE1914_ManageHospital.Models.Entities;
 
-public class ShiftRequest : BaseEntity
+public class ShiftRequest
 {
+    public int Id { get; set; }
     public int DoctorId { get; set; }
     public int ShiftId { get; set; }
     public string RequestType { get; set; } = string.Empty;

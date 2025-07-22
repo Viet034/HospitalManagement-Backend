@@ -12,8 +12,8 @@ using SWP391_SE1914_ManageHospital.Data;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250720180809_SyncWithNewDatabaseSchema")]
-    partial class SyncWithNewDatabaseSchema
+    [Migration("20250722122319_FullSyncWithDatabase")]
+    partial class FullSyncWithDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -445,16 +445,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("CreateBy")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<DateTime>("CreateDate")
+                    b.Property<DateTime?>("CreateDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("DoctorId")
@@ -462,10 +457,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("time(6)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(255)
