@@ -22,6 +22,9 @@ public class DoctorResponseDTO
     public string CreateBy { get; set; }
     public string? UpdateBy { get; set; }
 
+    // Thêm trường để biết bác sĩ đã kín lịch chưa
+    public bool isFull { get; set; } = false;
+
     public DoctorResponseDTO() { }
     public DoctorResponseDTO(int id, string name, string code, Gender gender, DateTime dob, string cCCD, string phone, string? imageURL, string licenseNumber, float yearOfExperience, float workingHours, DoctorStatus status, int userId, int departmentId, DateTime createDate, DateTime? updateDate, string createBy, string? updateBy)
     {

@@ -3,6 +3,7 @@ using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Nurse;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
 
 namespace SWP391_SE1914_ManageHospital.Service
 {
@@ -18,6 +19,11 @@ namespace SWP391_SE1914_ManageHospital.Service
         Task<bool> DeleteDoctorAsync(int id, DoctorDelete doctorDeleteDto);
         Task<DoctorRegisterResponse> DoctorRegisterAsync(DoctorRegisterRequest request);
         Task<DoctorResponseDTO> GetDoctorByUserIdAsync(int userId);
+
         Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByDepartmentAsync(int departmentId);
+
+        Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByClinicIdAsync(int clinicId, DateTime date);
+        Task<int?> GetDepartmentIdByDoctorIdAsync(int doctorId);
+
     }
 }

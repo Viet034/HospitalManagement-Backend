@@ -14,6 +14,12 @@ public class ClinicResponseDTO
     public DateTime? UpdateDate { get; set; }
     public string CreateBy { get; set; }
     public string? UpdateBy { get; set; }
+    public string? Address { get; set; }
+    public string? Email { get; set; }
+    public string? ImageUrl { get; set; }
+
+    // Thêm trường để biết phòng khám đã kín lịch chưa
+    public bool isFull { get; set; } = false;
 
     public ClinicResponseDTO()
     {

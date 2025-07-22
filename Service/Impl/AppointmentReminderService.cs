@@ -29,8 +29,8 @@ public class AppointmentReminderService : IAppointmentReminderService
                 !a.isSend &&
                 a.Status == AppointmentStatus.Scheduled &&
                 a.AppointmentDate.Date == reminderThreshold.Date &&
-                a.StartTime.Hour == reminderThreshold.Hour &&
-                a.StartTime.Minute == reminderThreshold.Minute)
+                a.StartTime.Hours == reminderThreshold.Hour &&
+                a.StartTime.Minutes == reminderThreshold.Minute)
             .Include(a => a.Patient)
                 .ThenInclude(p => p.User)
             .ToListAsync();
@@ -42,7 +42,7 @@ public class AppointmentReminderService : IAppointmentReminderService
 
             if (!string.IsNullOrEmpty(email))
             {
-                await _emailService.SendAppointmentReminderEmailAsync(email, name, appointment.StartTime);
+                await _emailService.SendAppointmentReminderEmailAsync(email, name, appointment.AppointmentDate.Date.Add(appointment.StartTime));
                 appointment.isSend = true; 
             }
         }

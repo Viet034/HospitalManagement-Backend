@@ -7,8 +7,8 @@ public class Appointment : BaseEntity
 {
 
     public DateTime AppointmentDate { get; set; }
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
+    public TimeSpan StartTime { get; set; }
+    public TimeSpan? EndTime { get; set; }
 
     [EnumDataType(typeof(AppointmentStatus))]
     public AppointmentStatus Status { get; set; }
@@ -16,12 +16,14 @@ public class Appointment : BaseEntity
     public bool isSend { get; set; }
     public int PatientId { get; set; }
     public int ClinicId { get; set; }
-    public int ReceptionId { get; set; }
-    public virtual Patient Patient { get; set; } = null!;
-    public virtual Clinic Clinic { get; set; } = null!;
-    public virtual Invoice Invoice { get; set; } = null!;
-    public virtual Reception Reception { get; set; } = null!;
-    public virtual Medical_Record Medical_Record { get; set; } = null!;
+    public int? ReceptionId { get; set; }
+    public int? ServiceId { get; set; } // Thêm dòng này để lưu dịch vụ bác sĩ
+    public virtual Patient? Patient { get; set; }
+    public virtual Clinic? Clinic { get; set; }
+    public virtual Invoice? Invoice { get; set; }
+    public virtual Reception? Reception { get; set; }
+    public virtual Medical_Record? Medical_Record { get; set; }
+    public virtual Service? Service { get; set; } // Navigation property
     public virtual ICollection<Doctor_Appointment> Doctor_Appointments { get; set; } = new List<Doctor_Appointment>();
     public virtual ICollection<Nurse_Appointment> Nurse_Appointments { get; set; } = new List<Nurse_Appointment>();
     public virtual ICollection<Supply> Supplies { get; set; } = new List<Supply>();

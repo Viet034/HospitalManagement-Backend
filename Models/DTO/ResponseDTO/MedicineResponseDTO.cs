@@ -28,6 +28,8 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
         public string MedicineCategoryName { get; set; }
         public string UnitName { get; set; }
 
+        public string SupplierName { get; set; }
+
     }
 
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -6,12 +7,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateDoctorShiftsTableNoBaseEntity : Migration
+    public partial class FullSyncWithDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdateDate",
                 table: "doctor_shifts",
@@ -115,20 +115,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 oldNullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.AddColumn<string>(
-                name: "Code",
-                table: "doctor_shifts",
-                type: "longtext",
-                nullable: false)
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.AddColumn<string>(
-                name: "Name",
-                table: "doctor_shifts",
-                type: "longtext",
-                nullable: false)
-                .Annotation("MySql:CharSet", "utf8mb4");
         }
     }
 }

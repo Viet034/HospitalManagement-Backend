@@ -45,6 +45,9 @@ public class ClinicMapper : IClinicMapper
         response.CreateBy = entity.CreateBy;
         response.UpdateDate = entity.UpdateDate;
         response.UpdateBy = entity.UpdateBy;
+        response.Address = entity.Address;
+        response.Email = entity.Email;
+        response.ImageUrl = entity.ImageUrl;
         return response;
     }
 

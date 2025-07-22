@@ -11,8 +11,8 @@ public class AppointmentDTO
     public string Name { get; set; }
     public string Code { get; set; }
     public DateTime AppointmentDate { get; set; }
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
+    public TimeSpan? StartTime { get; set; }
+    public TimeSpan? EndTime { get; set; }
     [EnumDataType(typeof(AppointmentStatus))]
     public AppointmentStatus Status { get; set; }
     public string? Note { get; set; }

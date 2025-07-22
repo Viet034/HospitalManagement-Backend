@@ -103,7 +103,7 @@ public class FeedbackService : IFeedbackService
         }
         if (startTime.HasValue)
         {
-            query = query.Where(a => a.Appointment.StartTime.TimeOfDay == startTime.Value.TimeOfDay);
+            query = query.Where(a => a.Appointment.StartTime == startTime.Value.TimeOfDay);
         }
 
         var feedbackList = await query.ToListAsync();

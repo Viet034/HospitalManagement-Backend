@@ -112,6 +112,11 @@ public static class Status
         Active = 0, Banned = 1
     }
 
+    public enum ServiceStatus
+    {
+        Active = 0, Inactive = 1
+    }
+
     public enum ClinicType
     {
         Consultation = 0, Lab = 1
