@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using Microsoft.AspNetCore.Mvc;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Doctor;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
+using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Service;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace SWP391_SE1914_ManageHospital.Controllers
@@ -90,25 +93,25 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
         }
 
-        [HttpPut("UpdateDoctor/{id}")]
-        public async Task<IActionResult> UpdateDoctor(int id, [FromBody] DoctorUpdate doctorUpdateDto)
+        [HttpPut("UpdateDoctor/{userid}")]
+        public async Task<IActionResult> UpdateDoctor(int userid, [FromBody] DoctorUpdate doctorUpdateDto)
         {
             try
             {
-                if (id != doctorUpdateDto.Id)
-                {
-                    return BadRequest("Doctor ID mismatch.");
-                }
+                //if (id != doctorUpdateDto.Id)
+                //{
+                //    return BadRequest("Doctor ID mismatch.");
+                //}
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
-                var updatedDoctor = await _doctorService.UpdateDoctorAsync(id, doctorUpdateDto);
+                var updatedDoctor = await _doctorService.UpdateDoctorAsync(userid, doctorUpdateDto);
                 if (updatedDoctor == null)
                 {
-                    return NotFound($"Doctor with ID {id} not found.");
+                    return NotFound($"Doctor with ID {userid} not found.");
                 }
-                return NoContent();
+                return Ok(updatedDoctor);
             }
             catch (Exception ex)
             {
@@ -148,6 +151,22 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("get-by-departmentId")]
+        [ProducesResponseType(typeof(IEnumerable<Doctor>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<ActionResult<IEnumerable<Doctor>>> GetAllDepartment(int departmentId)
+        {
+            try
+            {
+                var response = await _doctorService.GetDoctorsByDepartmentAsync(departmentId);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
             }
         }
     }
