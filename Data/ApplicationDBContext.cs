@@ -48,8 +48,8 @@ public class ApplicationDBContext : DbContext
     public DbSet<MedicineImport> MedicineImports { get; set; }
     public DbSet<MedicineImportDetail> MedicineImportDetails { get; set; }
     public DbSet<Doctor_Shift> Doctor_Shifts { get; set; }
+    public DbSet<ShiftRequest> ShiftRequests { get; set; }
     public IEnumerable<object> UserRoles { get; internal set; }
-    public DbSet<Shift_Request> Shift_Requests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -57,7 +57,7 @@ public class ApplicationDBContext : DbContext
         {
             entity.ToTable("Appointments");
             entity.HasKey(a => a.Id);
-            entity.Property(a => a.Id).ValueGeneratedOnAdd();
+            entity.Property(a => a.Id).ValueGeneratedNever();
             entity.Property(a => a.Name).IsRequired().HasMaxLength(100);
             entity.Property(a => a.Code).IsRequired().HasMaxLength(100);
             entity.Property(a => a.CreateDate).IsRequired();
@@ -66,7 +66,7 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.UpdateBy).IsRequired().HasMaxLength(100);
             entity.Property(a => a.AppointmentDate).IsRequired();
             entity.Property(a => a.StartTime).IsRequired();
-            entity.Property(a => a.EndTime).IsRequired();
+            entity.Property(a => a.EndTime).IsRequired(false);
             entity.Property(a => a.Note).IsRequired().HasMaxLength(100);
 
 
@@ -115,12 +115,11 @@ public class ApplicationDBContext : DbContext
                   .IsRequired()
                   .HasMaxLength(50);
 
+            entity.Property(e => e.ShiftDate).IsRequired();
             entity.Property(e => e.StartTime).IsRequired();
             entity.Property(e => e.EndTime).IsRequired();
-            entity.Property(e => e.ShiftDate).IsRequired();
 
             entity.Property(e => e.Notes).HasMaxLength(255);
-
 
             entity.Property(e => e.CreateDate);
             entity.Property(e => e.UpdateDate);
@@ -130,6 +129,38 @@ public class ApplicationDBContext : DbContext
             entity.HasOne(e => e.Doctor)
                   .WithMany(d => d.Doctor_Shifts)
                   .HasForeignKey(e => e.DoctorId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ShiftRequest>(entity =>
+        {
+            entity.ToTable("shift_request");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.RequestType)
+                  .IsRequired()
+                  .HasMaxLength(50);
+
+            entity.Property(e => e.Reason)
+                  .IsRequired()
+                  .HasColumnType("TEXT");
+
+            entity.Property(e => e.Status)
+                  .IsRequired()
+                  .HasMaxLength(20);
+
+            entity.Property(e => e.CreatedDate).IsRequired();
+            entity.Property(e => e.ApprovedDate);
+
+            entity.HasOne(e => e.Doctor)
+                  .WithMany()
+                  .HasForeignKey(e => e.DoctorId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Shift)
+                  .WithMany()
+                  .HasForeignKey(e => e.ShiftId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -237,11 +268,13 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.Id).ValueGeneratedOnAdd();
             entity.Property(a => a.Name).IsRequired().HasMaxLength(100);
             entity.Property(a => a.Code).IsRequired().HasMaxLength(100);
+            entity.Property(a => a.Address).HasMaxLength(255);
+            entity.Property(a => a.Email).HasMaxLength(100);
+            entity.Property(a => a.ImageUrl).HasMaxLength(255);
             entity.Property(a => a.CreateDate).IsRequired();
             entity.Property(a => a.CreateBy).IsRequired().HasMaxLength(100);
             entity.Property(a => a.UpdateDate).IsRequired();
             entity.Property(a => a.UpdateBy).IsRequired().HasMaxLength(100);
-
 
             entity.Property(emp => emp.Status).IsRequired().HasMaxLength(100)
                 .HasConversion(status => (int)status,  // Lưu số nguyên vào database
@@ -255,7 +288,13 @@ public class ApplicationDBContext : DbContext
                 .WithOne(a => a.Clinic)
                 .HasForeignKey(a => a.ClinicId).OnDelete(DeleteBehavior.Cascade);
 
+            entity.HasMany(d => d.Doctors)
+                .WithOne(a => a.Clinic)
+                .HasForeignKey(a => a.ClinicId).OnDelete(DeleteBehavior.SetNull);
 
+            entity.HasMany(d => d.Departments)
+                .WithOne(a => a.Clinic)
+                .HasForeignKey(a => a.ClinicId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Department>(entity =>
@@ -284,6 +323,43 @@ public class ApplicationDBContext : DbContext
             entity.HasMany(d => d.Nurses)
                 .WithOne(a => a.Department)
                 .HasForeignKey(a => a.DepartmentId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(d => d.Services)
+                .WithOne(a => a.Department)
+                .HasForeignKey(a => a.DepartmentId).OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(p => p.Clinic)
+                 .WithMany(cv => cv.Departments)
+                 .HasForeignKey(cus => cus.ClinicId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SWP391_SE1914_ManageHospital.Models.Entities.Service>(entity =>
+        {
+            entity.ToTable("services");
+            entity.HasKey(a => a.Id);
+            entity.Property(a => a.Id).ValueGeneratedOnAdd();
+            entity.Property(a => a.Name).IsRequired().HasMaxLength(100);
+            entity.Property(a => a.Code).IsRequired().HasMaxLength(100);
+            entity.Property(a => a.Description).HasColumnType("TEXT");
+            entity.Property(a => a.ImageUrl).HasMaxLength(255);
+            entity.Property(a => a.Price).IsRequired().HasColumnType("decimal(18,2)");
+            entity.Property(a => a.CreateDate).IsRequired();
+            entity.Property(a => a.CreateBy).IsRequired().HasMaxLength(100);
+            entity.Property(a => a.UpdateDate).IsRequired();
+            entity.Property(a => a.UpdateBy).IsRequired().HasMaxLength(100);
+
+            entity.Property(emp => emp.Status).IsRequired()
+                .HasConversion(status => (int)status,
+                value => (ServiceStatus)value);
+
+            entity.HasOne(p => p.Department)
+                .WithMany(d => d.Services)
+                .HasForeignKey(p => p.DepartmentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasMany(d => d.InvoiceDetails)
+                .WithOne(a => a.Service)
+                .HasForeignKey(a => a.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Unit>(entity =>
@@ -393,6 +469,9 @@ public class ApplicationDBContext : DbContext
             entity.HasOne(p => p.Department)
                  .WithMany(cv => cv.Doctors)
                  .HasForeignKey(cus => cus.DepartmentId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(p => p.Clinic)
+                 .WithMany(cv => cv.Doctors)
+                 .HasForeignKey(cus => cus.ClinicId).OnDelete(DeleteBehavior.SetNull);
 
             entity.HasMany(d => d.Doctor_Appointments)
                 .WithOne(a => a.Doctor)
@@ -550,6 +629,10 @@ public class ApplicationDBContext : DbContext
             entity.HasOne(p => p.Medicine)
                  .WithMany(cv => cv.InvoiceDetails)
                  .HasForeignKey(cus => cus.MedicineId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(p => p.Service)
+                 .WithMany(cv => cv.InvoiceDetails)
+                 .HasForeignKey(cus => cus.ServiceId)
                  .OnDelete(DeleteBehavior.Cascade);
 
         });
@@ -802,7 +885,7 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.Allergies).IsRequired().HasMaxLength(100);
             entity.Property(a => a.InsuranceNumber).IsRequired().HasMaxLength(100);
             entity.Property(a => a.Address).IsRequired().HasMaxLength(100);
-            entity.Property(a => a.EmergencyContact).IsRequired().HasMaxLength(100);
+            entity.Property(p => p.EmergencyContact).IsRequired(false);
             entity.Property(a => a.BloodType).IsRequired().HasMaxLength(100);
 
             entity.Property(dr => dr.Gender).IsRequired().HasMaxLength(100)
@@ -1078,44 +1161,6 @@ public class ApplicationDBContext : DbContext
                  .WithMany(cv => cv.User_Roles)
                  .HasForeignKey(cus => cus.RoleId).OnDelete(DeleteBehavior.Cascade);
 
-        });
-
-        modelBuilder.Entity<Shift_Request>(entity =>
-        {
-            entity.ToTable("shift_request");
-
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-
-            entity.Property(e => e.DoctorId).IsRequired();
-            entity.Property(e => e.ShiftId).IsRequired();
-
-            entity.Property(e => e.RequestType)
-                 .IsRequired()
-                 .HasConversion<string>()
-                 .HasMaxLength(50);
-
-            entity.Property(e => e.Reason)
-                .IsRequired()
-                .HasColumnType("text");
-
-            entity.Property(e => e.Status)
-                .IsRequired()
-                .HasConversion<string>()
-                .HasMaxLength(20);
-
-            entity.Property(e => e.CreatedDate).IsRequired();
-            entity.Property(e => e.ApprovedDate);
-
-            entity.HasOne(e => e.Doctor)
-                .WithMany()
-                .HasForeignKey(e => e.DoctorId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(e => e.Doctor_Shift)
-                .WithMany()
-                .HasForeignKey(e => e.ShiftId)
-                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

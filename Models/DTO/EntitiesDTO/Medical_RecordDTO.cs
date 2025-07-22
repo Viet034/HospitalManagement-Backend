@@ -14,8 +14,8 @@ public class Medical_RecordDTO
     public int AppointmentId { get; set; }
     public int PatientId { get; set; }
     public int DoctorId { get; set; }
-    public int PrescriptionId { get; set; }
-    public int DiseaseId { get; set; }
+    public int? PrescriptionId { get; set; }
+    public int? DiseaseId { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime? UpdateDate { get; set; }
     public string CreateBy { get; set; }

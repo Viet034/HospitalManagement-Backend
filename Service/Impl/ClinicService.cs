@@ -114,9 +114,10 @@ public class ClinicService : IClinicService
     public async Task<IEnumerable<ClinicResponseDTO>> SearchClinicByKeyAsync(string name)
     {
         var cid = await _context.Clinics.FromSqlRaw("Select * from Clinics where Name like {0}", "%" + name + "%").ToListAsync();
-        if (cid == null)
+        if (cid == null || !cid.Any())
         {
-            throw new Exception($"Không có tên {name} nào tồn tại!");
+            // Trả về danh sách rỗng thay vì throw exception
+            return new List<ClinicResponseDTO>();
         }
         var response = _mapper.ListEntityToResponse(cid);
         return response;
@@ -142,6 +143,38 @@ public class ClinicService : IClinicService
         return response;
     }
 
+    public async Task<IEnumerable<ClinicResponseDTO>> GetActiveClinicsForAppointmentAsync(DateTime date)
+    {
+        const int MAX_APPOINTMENTS_PER_DOCTOR_PER_DAY = 5;
+        var targetDate = date.Date;
 
+        var activeClinics = await _context.Clinics
+            .Include(c => c.Doctors)
+            .Where(c => c.Status == ClinicStatus.Available)
+            .ToListAsync();
+
+        var result = new List<ClinicResponseDTO>();
+
+        foreach (var clinic in activeClinics)
+        {
+            bool allDoctorsFull = true;
+            foreach (var doctor in clinic.Doctors)
+            {
+                var appointmentCount = await _context.Doctor_Appointments
+                    .Where(da => da.DoctorId == doctor.Id &&
+                                  da.Appointment.AppointmentDate.Date == targetDate)
+                    .CountAsync();
+                if (appointmentCount < MAX_APPOINTMENTS_PER_DOCTOR_PER_DAY)
+                {
+                    allDoctorsFull = false;
+                    break;
+                }
+            }
+            var dto = _mapper.EntityToResponse(clinic);
+            dto.isFull = allDoctorsFull; // Thêm trạng thái kín lịch
+            result.Add(dto);
+        }
+        return result;
+    }
    
 }

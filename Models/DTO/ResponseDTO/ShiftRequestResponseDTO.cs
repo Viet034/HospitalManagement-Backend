@@ -8,9 +8,9 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO.ShiftRequest
         public int Id { get; set; }
         public int DoctorId { get; set; }
         public int ShiftId { get; set; }
-        public ShiftRequestType RequestType { get; set; }
+        public string RequestType { get; set; } = string.Empty;
         public string Reason { get; set; } = string.Empty;
-        public ShiftRequestStatus Status { get; set; }
+        public string Status { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; }
         public DateTime? ApprovedDate { get; set; }
         public string? DoctorName { get; set; }

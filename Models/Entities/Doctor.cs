@@ -15,8 +15,10 @@ public class Doctor : BaseEntity
     public DoctorStatus Status { get; set; }
     public int UserId { get; set; }
     public int DepartmentId { get; set; }
+    public int? ClinicId { get; set; }
     public virtual User User { get; set; }
     public virtual Department Department { get; set; }
+    public virtual Clinic? Clinic { get; set; }
     public virtual ICollection<Doctor_Appointment> Doctor_Appointments { get; set; } = new List<Doctor_Appointment>();
     public virtual ICollection<Medical_Record> Medical_Records { get; set; } = new List<Medical_Record>();
     public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();

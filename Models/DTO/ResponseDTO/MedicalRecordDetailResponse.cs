@@ -24,7 +24,7 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
 
         public int AppointmentId { get; set; }
 
-        public int PrescriptionId { get; set; }
+        public int? PrescriptionId { get; set; }
 
         public MedicalRecordDetailResponse()
         {
@@ -38,7 +38,7 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
             this.PatientName = string.Empty;
             this.DiseaseName = string.Empty;
             this.AppointmentId = 0;
-            this.PrescriptionId = 0;
+            this.PrescriptionId = null;
         }
 
         public MedicalRecordDetailResponse(
@@ -52,7 +52,7 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
             string patientName,
             string diseaseName,
             int appointmentId,
-            int prescriptionId)
+            int? prescriptionId)
         {
             this.Id = id;
             this.Diagnosis = diagnosis;

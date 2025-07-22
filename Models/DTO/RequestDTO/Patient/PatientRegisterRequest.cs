@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Patient;
@@ -16,7 +17,9 @@ public class PatientRegisterRequest
 
     // PATIENT
     [Required]
+    [JsonPropertyName("fullName")]
     public string FullName { get; set; }
+    
     [Required]
     public string Code { get; set; }
 
