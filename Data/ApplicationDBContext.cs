@@ -288,13 +288,7 @@ public class ApplicationDBContext : DbContext
                 .WithOne(a => a.Clinic)
                 .HasForeignKey(a => a.ClinicId).OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasMany(d => d.Doctors)
-                .WithOne(a => a.Clinic)
-                .HasForeignKey(a => a.ClinicId).OnDelete(DeleteBehavior.SetNull);
 
-            entity.HasMany(d => d.Departments)
-                .WithOne(a => a.Clinic)
-                .HasForeignKey(a => a.ClinicId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Department>(entity =>
@@ -327,9 +321,6 @@ public class ApplicationDBContext : DbContext
                 .WithOne(a => a.Department)
                 .HasForeignKey(a => a.DepartmentId).OnDelete(DeleteBehavior.SetNull);
 
-            entity.HasOne(p => p.Clinic)
-                 .WithMany(cv => cv.Departments)
-                 .HasForeignKey(cus => cus.ClinicId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<SWP391_SE1914_ManageHospital.Models.Entities.Service>(entity =>
@@ -469,9 +460,6 @@ public class ApplicationDBContext : DbContext
             entity.HasOne(p => p.Department)
                  .WithMany(cv => cv.Doctors)
                  .HasForeignKey(cus => cus.DepartmentId).OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(p => p.Clinic)
-                 .WithMany(cv => cv.Doctors)
-                 .HasForeignKey(cus => cus.ClinicId).OnDelete(DeleteBehavior.SetNull);
 
             entity.HasMany(d => d.Doctor_Appointments)
                 .WithOne(a => a.Doctor)

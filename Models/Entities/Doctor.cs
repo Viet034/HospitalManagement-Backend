@@ -15,7 +15,6 @@ public class Doctor : BaseEntity
     public DoctorStatus Status { get; set; }
     public int UserId { get; set; }
     public int DepartmentId { get; set; }
-    public int? ClinicId { get; set; }
     public virtual User User { get; set; }
     public virtual Department Department { get; set; }
     public virtual Clinic? Clinic { get; set; }

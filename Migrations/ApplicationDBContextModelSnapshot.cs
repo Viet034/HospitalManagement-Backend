@@ -1759,26 +1759,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<DateTime?>("ApprovedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("CreateBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("DoctorId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<string>("Reason")
                         .IsRequired()
@@ -1796,12 +1781,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
-
-                    b.Property<string>("UpdateBy")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 

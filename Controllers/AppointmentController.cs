@@ -61,39 +61,6 @@ public class AppointmentController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách bác sĩ theo phòng khám cho đặt lịch hẹn
-    /// </summary>
-    /// <param name="clinicId">ID phòng khám</param>
-    /// <param name="date">Ngày đặt lịch</param>
-    /// <returns>Danh sách bác sĩ có thể đặt lịch</returns>
-    [HttpGet("doctors/{clinicId}")]
-    [ProducesResponseType(typeof(IEnumerable<DoctorResponseDTO>), (int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-    [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-    public async Task<IActionResult> GetDoctorsByClinic(int clinicId, [FromQuery] DateTime date)
-    {
-        try
-        {
-            var doctors = await _doctorService.GetDoctorsByClinicIdAsync(clinicId, date);
-            return Ok(new
-            {
-                success = true,
-                message = "Lấy danh sách bác sĩ thành công",
-                data = doctors
-            });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new
-            {
-                success = false,
-                message = ex.Message,
-                data = (object)null
-            });
-        }
-    }
-
-    /// <summary>
     /// Tìm kiếm phòng khám theo tên cho đặt lịch hẹn
     /// </summary>
     /// <param name="name">Tên phòng khám cần tìm</param>
@@ -350,14 +317,12 @@ public class AppointmentController : ControllerBase
                 Console.WriteLine($"Doctor_Appointment - DoctorId: {da.DoctorId}, AppointmentId: {da.AppointmentId}");
             }
             
+            // Lấy các time slots đã được đặt (chỉ lấy lịch hẹn chưa bị hủy)
             var bookedSlots = await _context.Appointments
                 .Where(a => a.AppointmentDate.Date == parsedDate.Date
-                    && a.Doctor_Appointments.Any(da => da.DoctorId == doctorId))
-                .Select(a => new
-                {
-                    startTime = a.StartTime,
-                    endTime = a.EndTime
-                })
+                    && a.Doctor_Appointments.Any(da => da.DoctorId == doctorId)
+                    && a.Status != AppointmentStatus.Cancelled)
+                .Select(a => a.StartTime)
                 .ToListAsync();
 
             Console.WriteLine($"Found {bookedSlots.Count} booked slots");
@@ -369,13 +334,13 @@ public class AppointmentController : ControllerBase
                 try
                 {
                     // Format TimeSpan thành HH:mm
-                    var timeString = $"{slot.startTime.Hours:D2}:{slot.startTime.Minutes:D2}";
+                    var timeString = $"{slot.Hours:D2}:{slot.Minutes:D2}";
                     bookedTimeSlots.Add(timeString);
                     Console.WriteLine($"Added time slot: {timeString}");
                 }
                 catch (Exception timeEx)
                 {
-                    Console.WriteLine($"Error formatting time slot: {slot.startTime}, Error: {timeEx.Message}");
+                    Console.WriteLine($"Error formatting time slot: {slot}, Error: {timeEx.Message}");
                 }
             }
 
@@ -587,7 +552,7 @@ public class AppointmentController : ControllerBase
                 return BadRequest(new { success = false, message = "Phòng khám không tồn tại hoặc không hoạt động!" });
 
             // Kiểm tra doctor có tồn tại và làm việc tại clinic
-            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == request.DoctorId && d.ClinicId == request.ClinicId);
+            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == request.DoctorId);
             if (doctor == null)
                 return BadRequest(new { success = false, message = "Bác sĩ không làm việc tại phòng khám này!" });
 
@@ -1029,7 +994,7 @@ public class AppointmentController : ControllerBase
 
             // Kiểm tra doctor có tồn tại và làm việc tại clinic
             var doctor = await _context.Doctors
-                .FirstOrDefaultAsync(d => d.Id == request.DoctorId && d.ClinicId == request.ClinicId);
+                .FirstOrDefaultAsync(d => d.Id == request.DoctorId);
             if (doctor == null)
                 return BadRequest(new { success = false, message = "Bác sĩ không làm việc tại phòng khám này!" });
 
@@ -1371,8 +1336,17 @@ public class AppointmentController : ControllerBase
                            s.ShiftDate.Month == month)
                 .ToListAsync();
 
+            // Lấy tất cả shift request đã duyệt nghỉ của bác sĩ trong tháng
+            var approvedShiftRequests = await _context.ShiftRequests
+                .Where(r => r.DoctorId == doctorId && r.Status == "Approved")
+                .Select(r => r.ShiftId)
+                .ToListAsync();
+
+            // Loại bỏ các ca trực đã được duyệt nghỉ
+            var workingShifts = doctorShifts.Where(s => !approvedShiftRequests.Contains(s.Id)).ToList();
+
             // Nếu không có lịch làm việc, trả về danh sách rỗng
-            if (!doctorShifts.Any())
+            if (!workingShifts.Any())
             {
                 return Ok(new
                 {
@@ -1382,8 +1356,8 @@ public class AppointmentController : ControllerBase
                 });
             }
 
-            // Lấy các ngày mà doctor làm việc
-            var workingDays = doctorShifts.Select(s => s.ShiftDate.Date).Distinct().ToList();
+            // Lấy các ngày mà doctor làm việc (sau khi loại ngày nghỉ)
+            var workingDays = workingShifts.Select(s => s.ShiftDate.Date).Distinct().ToList();
 
             // Tạo danh sách các ngày trong tháng mà doctor làm việc
             var workingDaysResult = new List<object>();
@@ -1450,6 +1424,13 @@ public class AppointmentController : ControllerBase
                            s.ShiftDate.Date == parsedDate.Date)
                 .ToListAsync();
 
+            // Loại bỏ các ca đã được duyệt nghỉ trong ngày
+            var approvedShiftRequests = await _context.ShiftRequests
+                .Where(r => r.DoctorId == doctorId && r.Status == "Approved")
+                .Select(r => r.ShiftId)
+                .ToListAsync();
+            doctorShifts = doctorShifts.Where(s => !approvedShiftRequests.Contains(s.Id)).ToList();
+
             if (!doctorShifts.Any())
             {
                 return Ok(new
@@ -1477,10 +1458,11 @@ public class AppointmentController : ControllerBase
                 "15:15", "15:30", "15:45", "16:00", "16:15", "16:30", "16:45"
             };
 
-            // Lấy các time slots đã được đặt
+            // Lấy các time slots đã được đặt (chỉ lấy lịch hẹn chưa bị hủy)
             var bookedSlots = await _context.Appointments
                 .Where(a => a.AppointmentDate.Date == parsedDate.Date
-                    && a.Doctor_Appointments.Any(da => da.DoctorId == doctorId))
+                    && a.Doctor_Appointments.Any(da => da.DoctorId == doctorId)
+                    && a.Status != AppointmentStatus.Cancelled)
                 .Select(a => a.StartTime)
                 .ToListAsync();
 
@@ -1510,7 +1492,8 @@ public class AppointmentController : ControllerBase
                     available = isInWorkingHours && !isBooked && !isPast,
                     booked = isBooked,
                     disabled = !isInWorkingHours || isPast,
-                    reason = !isInWorkingHours ? "Ngoài giờ làm việc" :
+                    reason = morningShift == null ? "Bác sĩ đã nghỉ ca sáng" :
+                             !isInWorkingHours ? "Ngoài giờ làm việc" :
                              isBooked ? "Đã được đặt" :
                              isPast ? "Đã quá giờ hiện tại" : "Có sẵn"
                 };
@@ -1532,7 +1515,8 @@ public class AppointmentController : ControllerBase
                     available = isInWorkingHours && !isBooked && !isPast,
                     booked = isBooked,
                     disabled = !isInWorkingHours || isPast,
-                    reason = !isInWorkingHours ? "Ngoài giờ làm việc" :
+                    reason = afternoonShift == null ? "Bác sĩ đã nghỉ ca chiều" :
+                             !isInWorkingHours ? "Ngoài giờ làm việc" :
                              isBooked ? "Đã được đặt" :
                              isPast ? "Đã quá giờ hiện tại" : "Có sẵn"
                 };
@@ -1593,6 +1577,7 @@ public class AppointmentController : ControllerBase
     [ProducesResponseType(typeof(object), (int)HttpStatusCode.BadRequest)]
     [ProducesResponseType(typeof(object), (int)HttpStatusCode.Unauthorized)]
     public async Task<IActionResult> GetPatientAppointments(
+        [FromQuery] int userId,
         [FromQuery] string status = "all",
         [FromQuery] string? searchTerm = null,
         [FromQuery] int page = 1,
@@ -1600,27 +1585,23 @@ public class AppointmentController : ControllerBase
     {
         try
         {
-            // Lấy user ID từ token
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-            {
-                return Unauthorized(new
-                {
-                    success = false,
-                    message = "Không thể xác định người dùng",
-                    data = (object)null
-                });
-            }
-
             // Lấy tất cả bệnh nhân (bao gồm người thân) của user
             var patients = await _context.Patients.Where(p => p.UserId == userId).ToListAsync();
             if (patients == null || patients.Count == 0)
             {
-                return NotFound(new
+                return Ok(new
                 {
-                    success = false,
-                    message = "Không tìm thấy thông tin bệnh nhân",
-                    data = (object)null
+                    success = true,
+                    message = "Không có lịch hẹn nào cho user này",
+                    data = new {
+                        appointments = Array.Empty<object>(),
+                        pagination = new {
+                            page = page,
+                            pageSize = pageSize,
+                            totalCount = 0,
+                            totalPages = 0
+                        }
+                    }
                 });
             }
             var patientIds = patients.Select(p => p.Id).ToList();
@@ -1688,33 +1669,33 @@ public class AppointmentController : ControllerBase
                     endTime = SafeTimeSpanToString(a.EndTime),
                     status = a.Status.ToString(),
                     statusText = GetStatusText(a.Status),
-                    note = a.Note,
+                    note = a.Note ?? string.Empty,
                     isSend = a.isSend,
                     patient = a.Patient != null ? new
                     {
                         id = a.Patient.Id,
-                        name = a.Patient.Name,
-                        phone = a.Patient.Phone,
-                        gender = a.Patient.Gender.ToString()
+                        name = a.Patient.Name ?? string.Empty,
+                        phone = a.Patient.Phone ?? string.Empty,
+                        gender = a.Patient.Gender != null ? a.Patient.Gender.ToString() : string.Empty
                     } : null,
                     clinic = a.Clinic != null ? new
                     {
                         id = a.Clinic.Id,
-                        name = a.Clinic.Name,
-                        address = a.Clinic.Address
+                        name = a.Clinic.Name ?? string.Empty,
+                        address = a.Clinic.Address ?? string.Empty
                     } : null,
                     service = a.Service != null ? new
                     {
                         id = a.Service.Id,
-                        name = a.Service.Name,
-                        price = a.Service.Price
+                        name = a.Service.Name ?? string.Empty,
+                        price = a.Service.Price != null ? a.Service.Price : 0
                     } : null,
                     doctors = a.Doctor_Appointments != null ? a.Doctor_Appointments
                         .Where(da => da.Doctor != null)
                         .Select(da => (object)new {
                             id = da.Doctor.Id,
-                            name = da.Doctor.Name,
-                            imageUrl = da.Doctor.ImageURL
+                            name = da.Doctor.Name ?? string.Empty,
+                            imageUrl = da.Doctor.ImageURL ?? string.Empty
                         }).ToList() : new List<object>(),
                     createDate = a.CreateDate.ToString("dd/MM/yyyy HH:mm"),
                     updateDate = a.UpdateDate.HasValue ? a.UpdateDate.Value.ToString() : null
@@ -1832,7 +1813,7 @@ public class AppointmentController : ControllerBase
                 {
                     id = appointment.Clinic.Id,
                     name = appointment.Clinic.Name,
-                    address = appointment.Clinic.Address,
+                    address = string.IsNullOrWhiteSpace(appointment.Clinic.Address) ? "Chưa cập nhật" : appointment.Clinic.Address,
                     email = appointment.Clinic.Email
                 },
                 service = appointment.Service != null ? new
@@ -1934,12 +1915,21 @@ public class AppointmentController : ControllerBase
             }
 
             // Kiểm tra trạng thái lịch hẹn
-            if (appointment.Status != AppointmentStatus.Scheduled)
+            bool canEdit = false;
+            if (appointment.Status == AppointmentStatus.Scheduled)
+            {
+                canEdit = true;
+            }
+            else if (appointment.Status == AppointmentStatus.Cancelled && DateTime.Now < appointment.AppointmentDate.Add(appointment.StartTime))
+            {
+                canEdit = true;
+            }
+            if (!canEdit)
             {
                 return BadRequest(new
                 {
                     success = false,
-                    message = "Chỉ có thể cập nhật lịch hẹn đang chờ xác nhận",
+                    message = "Chỉ có thể cập nhật lịch hẹn đang chờ xác nhận hoặc đã hủy nhưng chưa đến thời gian hẹn",
                     data = (object)null
                 });
             }
@@ -1961,6 +1951,21 @@ public class AppointmentController : ControllerBase
             }
 
             appointment.UpdateDate = DateTime.Now;
+
+            // Nếu có trường Status và là 'Scheduled' thì cho phép khôi phục trạng thái
+            if (!string.IsNullOrEmpty(request.Status) && request.Status == "Scheduled")
+            {
+                appointment.Status = AppointmentStatus.Scheduled;
+            }
+            // Nếu có trường Status và là 'Completed' thì cập nhật trạng thái và EndTime
+            if (!string.IsNullOrEmpty(request.Status) && request.Status == "Completed")
+            {
+                appointment.Status = AppointmentStatus.Completed;
+                if (!appointment.EndTime.HasValue)
+                {
+                    appointment.EndTime = DateTime.Now.TimeOfDay;
+                }
+            }
 
             await _context.SaveChangesAsync();
 
@@ -2053,18 +2058,6 @@ public class AppointmentController : ControllerBase
                 {
                     success = false,
                     message = "Chỉ có thể hủy lịch hẹn đang chờ xác nhận",
-                    data = (object)null
-                });
-            }
-
-            // Kiểm tra thời gian hủy (không cho phép hủy trước 24h)
-            var timeUntilAppointment = appointment.AppointmentDate - DateTime.Now;
-            if (timeUntilAppointment.TotalHours < 24)
-            {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Chỉ có thể hủy lịch hẹn trước 24 giờ",
                     data = (object)null
                 });
             }
@@ -2334,7 +2327,7 @@ public class AppointmentController : ControllerBase
                     status = a.Status.ToString(),
                     note = a.Note,
                     patient = a.Patient != null ? new { id = a.Patient.Id, name = a.Patient.Name } : null,
-                    clinic = a.Clinic != null ? new { id = a.Clinic.Id, name = a.Clinic.Name } : null,
+                    clinic = a.Clinic != null ? new { id = a.Clinic.Id, name = a.Clinic.Name, address = string.IsNullOrWhiteSpace(a.Clinic.Address) ? "Chưa cập nhật" : a.Clinic.Address } : null,
                     service = a.Service != null ? new { id = a.Service.Id, name = a.Service.Name } : null,
                     doctors = a.Doctor_Appointments != null ? a.Doctor_Appointments.Where(da => da.Doctor != null).Select(da => (object)new { id = da.Doctor.Id, name = da.Doctor.Name }).ToList() : new List<object>(),
                     createDate = a.CreateDate.ToString("dd/MM/yyyy HH:mm")

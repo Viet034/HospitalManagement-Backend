@@ -143,9 +143,9 @@ builder.Services.AddControllers()
     });
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://127.0.0.1:5501")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -246,7 +246,7 @@ if (app.Environment.IsDevelopment())
 }
 
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

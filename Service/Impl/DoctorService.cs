@@ -209,36 +209,6 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             };
         }
 
-        public async Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByClinicIdAsync(int clinicId, DateTime date)
-        {
-            const int MAX_APPOINTMENTS_PER_DOCTOR_PER_DAY = 5;
-            var targetDate = date.Date;
-
-            var doctors = await _context.Doctors
-                .Include(d => d.User)
-                .Include(d => d.Department)
-                .Include(d => d.Clinic)
-                .Where(d => d.ClinicId == clinicId && d.Status == DoctorStatus.Available)
-                .ToListAsync();
-            
-            var result = new List<DoctorResponseDTO>();
-
-            foreach (var doctor in doctors)
-            {
-                // Đếm số lịch hẹn của bác sĩ trong ngày được chọn
-                var appointmentCount = await _context.Doctor_Appointments
-                    .Where(da => da.DoctorId == doctor.Id &&
-                                  da.Appointment.AppointmentDate.Date == targetDate)
-                    .CountAsync();
-
-                var doctorDto = _mapper.MapToDto(doctor);
-                doctorDto.isFull = appointmentCount >= MAX_APPOINTMENTS_PER_DOCTOR_PER_DAY;
-                result.Add(doctorDto);
-            }
-            
-            return result;
-        }
-
         public async Task<int?> GetDepartmentIdByDoctorIdAsync(int doctorId)
         {
             var doctor = await _context.Doctors.FindAsync(doctorId);
