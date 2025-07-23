@@ -143,38 +143,38 @@ public class ClinicService : IClinicService
         return response;
     }
 
-    public async Task<IEnumerable<ClinicResponseDTO>> GetActiveClinicsForAppointmentAsync(DateTime date)
-    {
-        const int MAX_APPOINTMENTS_PER_DOCTOR_PER_DAY = 5;
-        var targetDate = date.Date;
+    //public async Task<IEnumerable<ClinicResponseDTO>> GetActiveClinicsForAppointmentAsync(DateTime date)
+    //{
+    //    const int MAX_APPOINTMENTS_PER_DOCTOR_PER_DAY = 5;
+    //    var targetDate = date.Date;
 
-        var activeClinics = await _context.Clinics
-            .Include(c => c.Doctors)
-            .Where(c => c.Status == ClinicStatus.Available)
-            .ToListAsync();
+    //    var activeClinics = await _context.Clinics
+    //        .Include(c => c.Doctors)
+    //        .Where(c => c.Status == ClinicStatus.Available)
+    //        .ToListAsync();
 
-        var result = new List<ClinicResponseDTO>();
+    //    var result = new List<ClinicResponseDTO>();
 
-        foreach (var clinic in activeClinics)
-        {
-            bool allDoctorsFull = true;
-            foreach (var doctor in clinic.Doctors)
-            {
-                var appointmentCount = await _context.Doctor_Appointments
-                    .Where(da => da.DoctorId == doctor.Id &&
-                                  da.Appointment.AppointmentDate.Date == targetDate)
-                    .CountAsync();
-                if (appointmentCount < MAX_APPOINTMENTS_PER_DOCTOR_PER_DAY)
-                {
-                    allDoctorsFull = false;
-                    break;
-                }
-            }
-            var dto = _mapper.EntityToResponse(clinic);
-            dto.isFull = allDoctorsFull; // Thêm trạng thái kín lịch
-            result.Add(dto);
-        }
-        return result;
-    }
+    //    foreach (var clinic in activeClinics)
+    //    {
+    //        bool allDoctorsFull = true;
+    //        foreach (var doctor in clinic.Doctors)
+    //        {
+    //            var appointmentCount = await _context.Doctor_Appointments
+    //                .Where(da => da.DoctorId == doctor.Id &&
+    //                              da.Appointment.AppointmentDate.Date == targetDate)
+    //                .CountAsync();
+    //            if (appointmentCount < MAX_APPOINTMENTS_PER_DOCTOR_PER_DAY)
+    //            {
+    //                allDoctorsFull = false;
+    //                break;
+    //            }
+    //        }
+    //        var dto = _mapper.EntityToResponse(clinic);
+    //        dto.isFull = allDoctorsFull; // Thêm trạng thái kín lịch
+    //        result.Add(dto);
+    //    }
+    //    return result;
+    //}
    
 }
