@@ -18,7 +18,6 @@ namespace SWP391_SE1914_ManageHospital.Service
         Task<bool> DeleteDoctorAsync(int id, DoctorDelete doctorDeleteDto);
         Task<DoctorRegisterResponse> DoctorRegisterAsync(DoctorRegisterRequest request);
         Task<DoctorResponseDTO> GetDoctorByUserIdAsync(int userId);
-        Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByClinicIdAsync(int clinicId, DateTime date);
         Task<int?> GetDepartmentIdByDoctorIdAsync(int doctorId);
     }
 }

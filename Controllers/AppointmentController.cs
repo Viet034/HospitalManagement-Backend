@@ -61,39 +61,6 @@ public class AppointmentController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách bác sĩ theo phòng khám cho đặt lịch hẹn
-    /// </summary>
-    /// <param name="clinicId">ID phòng khám</param>
-    /// <param name="date">Ngày đặt lịch</param>
-    /// <returns>Danh sách bác sĩ có thể đặt lịch</returns>
-    [HttpGet("doctors/{clinicId}")]
-    [ProducesResponseType(typeof(IEnumerable<DoctorResponseDTO>), (int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-    [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-    public async Task<IActionResult> GetDoctorsByClinic(int clinicId, [FromQuery] DateTime date)
-    {
-        try
-        {
-            var doctors = await _doctorService.GetDoctorsByClinicIdAsync(clinicId, date);
-            return Ok(new
-            {
-                success = true,
-                message = "Lấy danh sách bác sĩ thành công",
-                data = doctors
-            });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new
-            {
-                success = false,
-                message = ex.Message,
-                data = (object)null
-            });
-        }
-    }
-
-    /// <summary>
     /// Tìm kiếm phòng khám theo tên cho đặt lịch hẹn
     /// </summary>
     /// <param name="name">Tên phòng khám cần tìm</param>
@@ -585,7 +552,7 @@ public class AppointmentController : ControllerBase
                 return BadRequest(new { success = false, message = "Phòng khám không tồn tại hoặc không hoạt động!" });
 
             // Kiểm tra doctor có tồn tại và làm việc tại clinic
-            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == request.DoctorId && d.ClinicId == request.ClinicId);
+            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == request.DoctorId);
             if (doctor == null)
                 return BadRequest(new { success = false, message = "Bác sĩ không làm việc tại phòng khám này!" });
 
@@ -1027,7 +994,7 @@ public class AppointmentController : ControllerBase
 
             // Kiểm tra doctor có tồn tại và làm việc tại clinic
             var doctor = await _context.Doctors
-                .FirstOrDefaultAsync(d => d.Id == request.DoctorId && d.ClinicId == request.ClinicId);
+                .FirstOrDefaultAsync(d => d.Id == request.DoctorId);
             if (doctor == null)
                 return BadRequest(new { success = false, message = "Bác sĩ không làm việc tại phòng khám này!" });
 

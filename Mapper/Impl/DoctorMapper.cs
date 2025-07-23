@@ -25,7 +25,6 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             response.WorkingHours = doctor.WorkingHours;
             response.Status = (DoctorStatus)doctor.Status;
             response.UserId = doctor.UserId;
-            response.DepartmentId = doctor.DepartmentId;
             response.CreateDate = doctor.CreateDate;
             response.UpdateDate = doctor.UpdateDate;
             response.CreateBy = doctor.CreateBy;
@@ -54,7 +53,6 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
                 response.WorkingHours = doctor.WorkingHours;
                 response.Status = (DoctorStatus)doctor.Status;
                 response.UserId = doctor.UserId;
-                response.DepartmentId = doctor.DepartmentId;
                 response.CreateDate = doctor.CreateDate;
                 response.UpdateDate = doctor.UpdateDate;
                 response.CreateBy = doctor.CreateBy;
@@ -82,7 +80,6 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             doctor.WorkingHours = create.WorkingHours;
             doctor.Status = (DoctorStatus)create.Status;
             doctor.UserId = create.UserId;
-            doctor.DepartmentId = create.DepartmentId;
             doctor.CreateDate = create.CreateDate;
             doctor.UpdateDate = create.UpdateDate;
             doctor.CreateBy = create.CreateBy;
@@ -106,7 +103,6 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             doctor.WorkingHours = update.WorkingHours.HasValue ? update.WorkingHours.Value : doctor.WorkingHours;
             doctor.Status = update.Status.HasValue ? (DoctorStatus)update.Status.Value : doctor.Status;
             doctor.UserId = update.UserId.HasValue ? update.UserId.Value : doctor.UserId;
-            doctor.DepartmentId = update.DepartmentId.HasValue ? update.DepartmentId.Value : doctor.DepartmentId;
             doctor.CreateDate = update.CreateDate.HasValue ? update.CreateDate.Value : doctor.CreateDate;
             doctor.UpdateDate = update.UpdateDate.HasValue ? update.UpdateDate.Value : doctor.UpdateDate;
             doctor.CreateBy = update.CreateBy;
