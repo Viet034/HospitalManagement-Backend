@@ -6,7 +6,7 @@ namespace SWP391_SE1914_ManageHospital.Service
 {
     public interface IMedicineImportExcelService
     {
-        Task<MedicineImportRequest> ParseImportExcelToRequest(IFormFile file, int supplierId);
+        Task<MedicineImportRequest> ParseImportExcelToRequest(IFormFile file, int supplierId, string importName);
         Task<bool> ConfirmImportAsync(MedicineImportRequest request);
     }
 }

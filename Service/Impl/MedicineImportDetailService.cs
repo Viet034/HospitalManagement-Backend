@@ -83,13 +83,15 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 .Include(d => d.Supplier)
                 .Include(d => d.Unit)
                 .Include(d => d.Medicine.MedicineCategory)
+                .Include(d => d.Import)
                 .AsQueryable();
 
             query = query.Where(d => 
             (d.Medicine.Code != null && d.Medicine.Code.ToLower().Contains(keyword)) ||
             (d.Medicine.Name != null && d.Medicine.Name.ToLower().Contains(keyword)) ||
             (d.Medicine.MedicineCategory.Name != null && d.Medicine.MedicineCategory.Name.ToLower().Contains(keyword)) ||
-            (d.Supplier.Name != null && d.Supplier.Name.ToLower().Contains(keyword))
+            (d.Supplier.Name != null && d.Supplier.Name.ToLower().Contains(keyword)) ||
+            (d.Import.Name != null && d.Import.Name.ToLower().Contains(keyword))
             );
 
             if (startDate.HasValue)
@@ -129,6 +131,10 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                         ? query.OrderBy(d => d.Supplier.Name)
                         : query.OrderByDescending(d => d.Supplier.Name),
 
+                    "importName" => ascending
+                        ? query.OrderBy(d => d.Import.Name)
+                        : query.OrderByDescending(d => d.Import.Name),
+
                     _ => query.OrderByDescending(d => d.CreateDate) 
                 };
             }
@@ -149,6 +155,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 Id = d.Id,
                 MedicineCode = d.Medicine?.Code ?? string.Empty,
                 ImportId = d.ImportId,
+                ImportName = d.Import.Name ?? string.Empty,
                 MedicineId = d.MedicineId,
                 UnitId = d.UnitId,
                 MedicineName = d.Medicine?.Name ?? "N/A",
@@ -216,6 +223,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 Id = d.Id,
                 MedicineCode = d.Medicine?.Code ?? string.Empty,
                 ImportId = d.ImportId,
+                ImportName = d.Import?.Name ?? "",
                 MedicineId = d.MedicineId,
                 UnitId = d.UnitId,
                 MedicineName = d.Medicine?.Name ?? "N/A",

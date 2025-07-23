@@ -1,4 +1,6 @@
-﻿namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Supplier
+﻿using static SWP391_SE1914_ManageHospital.Ultility.Status;
+
+namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Supplier
 {
     public class SupplierUpdate
     {
@@ -7,6 +9,7 @@
         public string Email { get; set; }
         public string Address { get; set; }
         public string Code { get; set; }
+        public SupplierStatus Status { get; set; }
         public DateTime? UpdateDate { get; set; }
         public string? UpdateBy { get; set; }
 

@@ -126,4 +126,9 @@ public static class Status
     {
         Yes = 1, No = 0 
     }
+
+    public enum SupplierStatus
+    {
+        Active = 0, Inactive = 1
+    }
 }
