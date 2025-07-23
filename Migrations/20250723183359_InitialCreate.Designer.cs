@@ -12,7 +12,7 @@ using SWP391_SE1914_ManageHospital.Data;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250723164746_InitialCreate")]
+    [Migration("20250723183359_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

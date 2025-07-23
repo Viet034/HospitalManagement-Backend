@@ -79,7 +79,8 @@ builder.Services.AddScoped<IPrescriptionDetailService, PrescriptionDetailService
 
 
 
-//builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IPaymentMapper, PaymentMapper>();
 //builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 builder.Services.AddScoped<ISupplierMapper, SupplierMapper>();

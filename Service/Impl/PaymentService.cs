@@ -27,7 +27,7 @@ public class PaymentService : IPaymentService
             // 1. Lấy thông tin Invoice và liên kết liên quan
             var invoice = await _context.Invoices
                 .Include(i => i.Payment_Invoices)
-                .Include(i => i.Appointment)
+                .Include(i => i.Appointment).Include(a => a.InvoiceDetails).ThenInclude(a=>a.Service)
                 .FirstOrDefaultAsync(i => i.Id == create.InvoiceId);
 
             if (invoice == null)

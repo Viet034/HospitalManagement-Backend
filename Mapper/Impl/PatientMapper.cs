@@ -69,6 +69,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             respone.Dob = entity.Dob;
             respone.CCCD = entity.CCCD;
             respone.Phone = entity.Phone;
+            respone.Address = entity.Address;
             respone.EmergencyContact = entity.EmergencyContact is DBNull ? null : entity.EmergencyContact;
             respone.InsuranceNumber = entity.InsuranceNumber is DBNull ? null : entity.InsuranceNumber;
             respone.Allergies = entity.Allergies is DBNull ? null : entity.Allergies;
