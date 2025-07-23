@@ -11,7 +11,6 @@
         public int? DiseaseId { get; set; }
         public int AppointmentId { get; set; }
         public int? PrescriptionId { get; set; }
-
         public MedicalRecordUpdateRequest()
         {
         }

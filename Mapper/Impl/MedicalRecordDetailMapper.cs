@@ -1,6 +1,11 @@
-﻿using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicalRecord;
+﻿using CloudinaryDotNet.Actions;
+using DocumentFormat.OpenXml.ExtendedProperties;
+using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.AspNetCore.Http.HttpResults;
+using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicalRecord;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
+using SWP391_SE1914_ManageHospital.Ultility;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Mapper.Impl
@@ -9,23 +14,35 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
     {
         public MedicalRecordDetailResponse EntityToDetailResponse(Medical_Record entity)
         {
-            return new MedicalRecordDetailResponse
-            {
-                Id = entity.Id,
-                Diagnosis = entity.Diagnosis,
-                TestResults = entity.TestResults,
-                Notes = entity.Notes,
-                Status = entity.Status.ToString(),
-                CreateDate = entity.CreateDate,
-                DoctorName = entity.Doctor?.Name ?? "",
-                PatientName = entity.Patient?.Name ?? "",
-                DiseaseName = entity.Disease?.Name ?? "",
-                AppointmentId = entity.AppointmentId,
-                PrescriptionId = entity.PrescriptionId
-            };
+            return new MedicalRecordDetailResponse(
+                id: entity.Id,
+                diagnosis: entity.Diagnosis,
+                testResults: entity.TestResults,
+                notes: entity.Notes,
+                status: entity.Status.ToString(),
+                appointmentId: entity.AppointmentId,
+                patientId: entity.PatientId,
+                doctorId: entity.DoctorId,
+                prescriptionId: entity.PrescriptionId,
+                diseaseId: entity.DiseaseId,
+                name: entity.Name,
+                code: entity.Code,
+                createDate: entity.CreateDate,
+                updateDate: entity.UpdateDate,
+                createBy: entity.CreateBy,
+                updateBy: entity.UpdateBy,
+                doctorName: entity.Doctor?.Name ?? "",
+                patientName: entity.Patient?.Name ?? "",
+                diseaseName: entity.Disease?.Name ?? ""
+            );
         }
 
-        public Medical_Record CreateRequestToEntity(MedicalRecordCreateRequest request)
+        public IEnumerable<MedicalRecordDetailResponse> ListEntityToResponse(IEnumerable<Medical_Record> entities)
+        {
+            return entities.Select(x => EntityToDetailResponse(x)).ToList();
+        }
+
+        public Medical_Record CreateRequestToEntity(MedicalRecordCreateRequest request, string doctorName)
         {
             return new Medical_Record
             {
@@ -38,11 +55,24 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
                 DiseaseId = request.DiseaseId,
                 AppointmentId = request.AppointmentId,
                 PrescriptionId = request.PrescriptionId,
-                CreateDate = DateTime.UtcNow
+                Name = request.Diagnosis,
+                Code = GenerateMedicalRecordCode(),
+                CreateDate = DateTime.UtcNow.AddHours(7),
+                CreateBy = doctorName,
+                UpdateDate = DateTime.UtcNow.AddHours(7),
+                UpdateBy = doctorName
             };
         }
 
-        public void UpdateEntityFromRequest(Medical_Record entity, MedicalRecordUpdateRequest request)
+        public Medical_Record DeleteRequestToEntity(MedicalRecordDeleteRequest request)
+        {
+            return new Medical_Record
+            {
+                Id = request.Id
+            };
+        }
+
+        public void UpdateEntityFromRequest(Medical_Record entity, MedicalRecordUpdateRequest request, string doctorName)
         {
             entity.Diagnosis = request.Diagnosis;
             entity.TestResults = request.TestResults;
@@ -53,6 +83,14 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             entity.DiseaseId = request.DiseaseId;
             entity.AppointmentId = request.AppointmentId;
             entity.PrescriptionId = request.PrescriptionId;
+            entity.Name = request.Diagnosis;
+            entity.UpdateDate = DateTime.UtcNow.AddHours(7);
+            entity.UpdateBy = doctorName;
+        }
+
+        private string GenerateMedicalRecordCode()
+        {
+            return $"MR-{DateTime.UtcNow.Ticks}";
         }
     }
 }

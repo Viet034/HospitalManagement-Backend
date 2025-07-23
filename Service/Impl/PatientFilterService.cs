@@ -42,7 +42,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             _logger.LogInformation($"ToDate: {filter.ToDate}");
             _logger.LogInformation($"PatientName: {filter.PatientName}");
 
-            // ✅ KIỂM TRA DOCTOR TỒN TẠI
+            // KIỂM TRA DOCTOR TỒN TẠI
             var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == filter.DoctorId);
             if (doctor == null)
             {
@@ -51,7 +51,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             }
             _logger.LogInformation($"Doctor found: {doctor.Name}");
 
-            // ✅ KIỂM TRA DOCTOR_APPOINTMENTS
+            // KIỂM TRA DOCTOR_APPOINTMENTS
             var doctorAppointments = await _context.Doctor_Appointments
                 .Where(da => da.DoctorId == filter.DoctorId)
                 .ToListAsync();
@@ -64,7 +64,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 return new List<PatientFilterResponse>();
             }
 
-            // ✅ KIỂM TRA APPOINTMENTS
+            // KIỂM TRA APPOINTMENTS
             var appointmentIds = doctorAppointments.Select(da => da.AppointmentId).ToList();
             _logger.LogInformation($"Appointment IDs: {string.Join(", ", appointmentIds)}");
 
@@ -80,7 +80,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 _logger.LogInformation($"Appointment: ID={appointment.Id}, Patient={appointment.Patient?.Name ?? "null"}, Date={appointment.AppointmentDate:yyyy-MM-dd HH:mm}, Status={appointment.Status}");
             }
 
-            // ✅ FILTER BY DATE
+            // FILTER BY DATE
             if (filter.FromDate.HasValue)
             {
                 var fromDate = filter.FromDate.Value.Date;
@@ -101,7 +101,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 _logger.LogInformation($"After ToDate filter: {beforeFilter} -> {appointments.Count}");
             }
 
-            // ✅ FILTER BY PATIENT NAME
+            // FILTER BY PATIENT NAME
             if (!string.IsNullOrEmpty(filter.PatientName))
             {
                 var beforeFilter = appointments.Count;
@@ -117,7 +117,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 return new List<PatientFilterResponse>();
             }
 
-            // ✅ CONVERT TO PATIENTAPPOINTMENTDATA
+            // CONVERT TO PATIENTAPPOINTMENTDATA
             var patientDataList = appointments.Select(a => new PatientAppointmentData
             {
                 Patient = a.Patient,
@@ -127,7 +127,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
             _logger.LogInformation($"PatientDataList count: {patientDataList.Count}");
 
-            // ✅ MAP TO RESPONSE
+            // MAP TO RESPONSE
             var result = _patientMapper.ListEntityToResponse(patientDataList);
             _logger.LogInformation($"Mapped result count: {result.Count}");
 
