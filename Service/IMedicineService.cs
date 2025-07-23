@@ -3,7 +3,7 @@ using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 
 public interface IMedicineService
 {
-    Task<List<MedicineResponseDTO>> GetAllAsync();
+    Task<List<MedicineResponseDTO>> GetAllAsync(string? sortBy = null, string? sortOrder = "asc");
     Task<MedicineResponseDTO?> GetByIdAsync(int id);
     Task<MedicineResponseDTO> CreateAsync(MedicineRequest request);
     Task<MedicineResponseDTO?> UpdateAsync(int id, MedicineRequest request);
@@ -11,5 +11,6 @@ public interface IMedicineService
     Task<List<MedicineResponseDTO>> GetByPrescribedAsync(int prescribed);
 
     Task<IEnumerable<MedicineResponseDTO>> GetByCategoryIdAsync(int categoryId);
+
 
 }
