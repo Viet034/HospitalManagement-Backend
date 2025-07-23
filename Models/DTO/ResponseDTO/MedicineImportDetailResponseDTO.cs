@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public int ImportId { get; set; }
+        public string ImportName { get; set; } = string.Empty;
         public int MedicineId { get; set; }
         public string BatchNumber { get; set; } = string.Empty;
         public int Quantity { get; set; }

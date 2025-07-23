@@ -27,14 +27,18 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpPost("import-excel-preview")]
         [ProducesResponseType(typeof(MedicineImportRequest), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> ImportMedicinesPreview( IFormFile file, [FromForm] int supplierId)
+        public async Task<IActionResult> ImportMedicinesPreview( IFormFile file, [FromForm] int supplierId, [FromForm] string importName)
         {
             try
             {
                 if (file == null || file.Length == 0)
                     return BadRequest("Vui lòng chọn file Excel để tải lên.");
+                if(string.IsNullOrWhiteSpace(importName))
+                {
+                    return BadRequest("Tên đơn nhập không được bỏ trống.");
+                }
 
-                var previewRequest = await _service.ParseImportExcelToRequest(file, supplierId);
+                var previewRequest = await _service.ParseImportExcelToRequest(file, supplierId, importName);
                 return Ok(previewRequest);
             }
             catch (Exception ex)

@@ -1,6 +1,7 @@
 ﻿using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Supplier;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Mapper.Impl
 {
@@ -14,6 +15,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             supplier.Email = create.Email;
             supplier.Address = create.Address;
             supplier.Code = create.Code;
+            supplier.Status = SupplierStatus.Active;
             return supplier;
         }
 
@@ -26,6 +28,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             respone.Email = entity.Email;
             respone.Address = entity.Address;
             respone.Code = entity.Code;
+            respone.Status = entity.Status;
             respone.CreateDate = entity.CreateDate;
             respone.CreateBy = entity.CreateBy;
             return respone;
@@ -43,6 +46,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             supplier.Phone = update.Phone;
             supplier.Email = update.Email;
             supplier.Address = update.Address;
+            supplier.Status = update.Status;
             supplier.UpdateDate = update.UpdateDate;
             supplier.UpdateBy = update.UpdateBy;
             return supplier;
