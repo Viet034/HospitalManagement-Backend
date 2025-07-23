@@ -10,15 +10,20 @@ namespace SWP391_SE1914_ManageHospital.Service
     public interface IDoctorService
     {
         Task<DoctorResponseDTO> GetDoctorByIdAsync(int id);
+        
         Task<IEnumerable<DoctorResponseDTO>> GetAllDoctorsAsync();
         Task<IEnumerable<DoctorResponseDTO>> GetDoctorByNameAsync(string name);
         Task<DoctorResponseDTO> CreateDoctorAsync(DoctorCreate doctorCreateDto);
         Task<string> CheckUniqueCodeAsync();
-        Task<DoctorResponseDTO> UpdateDoctorAsync(int id, DoctorUpdate doctorUpdateDto);
+        Task<DoctorResponseDTO> UpdateDoctorAsync(int userid, DoctorUpdate doctorUpdateDto);
         Task<bool> DeleteDoctorAsync(int id, DoctorDelete doctorDeleteDto);
         Task<DoctorRegisterResponse> DoctorRegisterAsync(DoctorRegisterRequest request);
         Task<DoctorResponseDTO> GetDoctorByUserIdAsync(int userId);
+
+        Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByDepartmentAsync(int departmentId);
+
         Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByClinicIdAsync(int clinicId, DateTime date);
         Task<int?> GetDepartmentIdByDoctorIdAsync(int doctorId);
+
     }
 }

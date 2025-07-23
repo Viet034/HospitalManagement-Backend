@@ -35,3 +35,4 @@ public class DepartmentResponseDTO
         UpdateBy = updateBy;
     }
 }
+
