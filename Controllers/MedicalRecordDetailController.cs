@@ -71,7 +71,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Đã xảy ra lỗi khi tạo mới Medical Record.");
-                return StatusCode(500, "Đã xảy ra lỗi khi tạo mới Medical Record");
+                return StatusCode(500, ex.ToString());
             }
         }
 
