@@ -33,32 +33,32 @@ public class AppointmentController : ControllerBase
     /// Lấy danh sách phòng khám đang hoạt động (status = 0) để đặt lịch hẹn
     /// </summary>
     /// <returns>Danh sách phòng khám có thể đặt lịch</returns>
-    [HttpGet("clinics")]
-    [ProducesResponseType(typeof(IEnumerable<ClinicResponseDTO>), (int)HttpStatusCode.OK)]
-    [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-    [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
-    public async Task<IActionResult> GetActiveClinics([FromQuery] DateTime date)
-    {
-        try
-        {
-            var clinics = await _clinicService.GetActiveClinicsForAppointmentAsync(date);
-            return Ok(new
-            {
-                success = true,
-                message = "Lấy danh sách phòng khám thành công",
-                data = clinics
-            });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new
-            {
-                success = false,
-                message = ex.Message,
-                data = (object)null
-            });
-        }
-    }
+    //[HttpGet("clinics")]
+    //[ProducesResponseType(typeof(IEnumerable<ClinicResponseDTO>), (int)HttpStatusCode.OK)]
+    //[ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+    //[ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+    //public async Task<IActionResult> GetActiveClinics([FromQuery] DateTime date)
+    //{
+    //    try
+    //    {
+    //        var clinics = await _clinicService.GetActiveClinicsForAppointmentAsync(date);
+    //        return Ok(new
+    //        {
+    //            success = true,
+    //            message = "Lấy danh sách phòng khám thành công",
+    //            data = clinics
+    //        });
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return BadRequest(new
+    //        {
+    //            success = false,
+    //            message = ex.Message,
+    //            data = (object)null
+    //        });
+    //    }
+    //}
 
     /// <summary>
     /// Tìm kiếm phòng khám theo tên cho đặt lịch hẹn
