@@ -10,6 +10,7 @@ using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
 using System.Text.RegularExpressions;
 using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
 {
@@ -84,6 +85,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             existing.Phone = update.Phone;
             existing.Email = update.Email;
             existing.Address = update.Address;
+            existing.Status = update.Status;
             existing.Code = update.Code;
             existing.UpdateDate = DateTime.Now;
             existing.UpdateBy = "system";
@@ -139,6 +141,9 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 throw new Exception("Email nhà cung cấp đã tồn tại!");
             }
             var supplier = _mapper.CreateToEntity(create);
+
+            supplier.Status = SupplierStatus.Active;
+
             if (!string.IsNullOrEmpty(create.Code) && create.Code != "string")
             {
                 supplier.Code = create.Code;

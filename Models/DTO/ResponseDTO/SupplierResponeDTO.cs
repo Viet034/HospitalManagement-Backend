@@ -1,4 +1,7 @@
-﻿namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
+﻿
+using static SWP391_SE1914_ManageHospital.Ultility.Status;
+
+namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
 {
 
     public class SupplierResponeDTO
@@ -9,6 +12,7 @@
         public string Email { get; set; }
         public string Address { get; set; }
         public string Code { get; set; }
+        public SupplierStatus Status { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
         public string CreateBy { get; set; }
@@ -16,7 +20,7 @@
 
         public SupplierResponeDTO() { }
 
-        public SupplierResponeDTO(int id, string name, string phone, string email, string address, string code, DateTime createDate, DateTime? updateDate, string createBy, string? updateBy)
+        public SupplierResponeDTO(int id, string name, string phone, string email, string address, string code, SupplierStatus status, DateTime createDate, DateTime? updateDate, string createBy, string? updateBy)
         {
             Id = id;
             Name = name;
@@ -24,6 +28,7 @@
             Email = email;
             Address = address;
             Code = code;
+            Status = status;
             CreateDate = createDate;
             UpdateDate = updateDate;
             CreateBy = createBy;

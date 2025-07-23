@@ -6,6 +6,7 @@ using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.ImportMedicineEX;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
 using SWP391_SE1914_ManageHospital.Ultility.Validation;
+using System.Text.RegularExpressions;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
@@ -21,12 +22,19 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             _mapper = mapper;
         }
 
-        public async Task<MedicineImportRequest> ParseImportExcelToRequest(IFormFile file, int supplierId)
+        public async Task<MedicineImportRequest> ParseImportExcelToRequest(IFormFile file, int supplierId, string importName)
         {
+
+            var existingImport = await _context.MedicineImports.FirstOrDefaultAsync(i => i.Name.ToLower().Trim() == importName.ToLower().Trim());
+
+            if (existingImport != null) 
+            {
+                throw new Exception($"Tên đơn nhập '{importName}' đẫ tồn tại.");
+            }
             var request = new MedicineImportRequest
             {
                 ImportCode = GenerateCode.GenerateMedicineImportCode(),
-                ImportName = "Import từ Excel",
+                ImportName = importName,
                 SupplierId = supplierId,
                 Details = new List<MedicineImportDetailRequest>()
             };

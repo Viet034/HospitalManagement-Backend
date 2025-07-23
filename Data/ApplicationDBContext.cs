@@ -190,17 +190,20 @@ public class ApplicationDBContext : DbContext
         // Supplier
         modelBuilder.Entity<Supplier>(entity =>
         {
-            entity.ToTable("suppliers");
+        entity.ToTable("suppliers");
 
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.Phone).HasMaxLength(20);
-            entity.Property(e => e.Email).HasMaxLength(100);
-            entity.Property(e => e.Address).HasColumnType("TEXT");
-            entity.Property(e => e.CreateDate).IsRequired();
-            entity.Property(e => e.UpdateDate);
-            entity.Property(e => e.CreateBy).HasMaxLength(100);
-            entity.Property(e => e.UpdateBy).HasMaxLength(100);
+        entity.HasKey(e => e.Id);
+        entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+        entity.Property(e => e.Phone).HasMaxLength(20);
+        entity.Property(e => e.Email).HasMaxLength(100);
+        entity.Property(e => e.Address).HasColumnType("TEXT");
+        entity.Property(e => e.CreateDate).IsRequired();
+        entity.Property(e => e.UpdateDate);
+        entity.Property(e => e.CreateBy).HasMaxLength(100);
+        entity.Property(e => e.UpdateBy).HasMaxLength(100);
+        entity.Property(e => e.Status).IsRequired()
+            .HasConversion(status => (int)status,
+                value => (SupplierStatus)value);
         });
 
         // MedicineImport
