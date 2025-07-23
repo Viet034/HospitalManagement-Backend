@@ -58,18 +58,20 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             try
             {
                 if (request == null)
-                {
                     throw new ArgumentNullException(nameof(request), "Thông tin Medical Record không được để trống");
-                }
 
                 if (string.IsNullOrWhiteSpace(request.Diagnosis))
-                {
                     throw new ArgumentException("Chẩn đoán không được để trống", nameof(request));
-                }
 
                 ValidateRelatedEntities(request.DoctorId, request.PatientId, request.DiseaseId);
 
-                var entity = _detailMapper.CreateRequestToEntity(request);
+                // Lấy tên bác sĩ từ DB
+                var doctorName = _context.Doctors
+                    .Where(d => d.Id == request.DoctorId)
+                    .Select(d => d.Name)
+                    .FirstOrDefault() ?? "Unknown";
+
+                var entity = _detailMapper.CreateRequestToEntity(request, doctorName);
                 _context.Medical_Records.Add(entity);
                 _context.SaveChanges();
 
@@ -94,19 +96,13 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             try
             {
                 if (id <= 0)
-                {
                     throw new ArgumentException("ID Medical Record không hợp lệ", nameof(id));
-                }
 
                 if (request == null)
-                {
                     throw new ArgumentNullException(nameof(request), "Thông tin cập nhật không được để trống");
-                }
 
                 if (string.IsNullOrWhiteSpace(request.Diagnosis))
-                {
                     throw new ArgumentException("Chẩn đoán không được để trống", nameof(request));
-                }
 
                 ValidateRelatedEntities(request.DoctorId, request.PatientId, request.DiseaseId);
 
@@ -117,11 +113,16 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                     .FirstOrDefault(mr => mr.Id == id);
 
                 if (entity == null)
-                {
                     throw new ArgumentException($"Không tìm thấy Medical Record với ID: {id}", nameof(id));
-                }
 
-                _detailMapper.UpdateEntityFromRequest(entity, request);
+                // Lấy tên bác sĩ từ DB
+                var doctorName = _context.Doctors
+                    .Where(d => d.Id == request.DoctorId)
+                    .Select(d => d.Name)
+                    .FirstOrDefault() ?? "Unknown";
+
+                _detailMapper.UpdateEntityFromRequest(entity, request, doctorName);
+
                 _context.SaveChanges();
 
                 _context.Entry(entity).Reference(e => e.Doctor).Load();
