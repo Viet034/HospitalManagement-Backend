@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Doctor;
@@ -33,7 +34,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 .Include(d => d.User)
                 .Include(d => d.Department)
                 .FirstOrDefaultAsync(d => d.Id == id);
-            return _mapper.MapToDto(doctor);
+            return _mapper.EntityToResponse(doctor);
         }
 
         public async Task<IEnumerable<DoctorResponseDTO>> GetAllDoctorsAsync()
@@ -42,7 +43,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 .Include(d => d.User)
                 .Include(d => d.Department)
                 .ToListAsync();
-            return _mapper.MapToDtoList(doctors);
+            return _mapper.ListEntityToResponse(doctors);
         }
 
         public async Task<IEnumerable<DoctorResponseDTO>> GetDoctorByNameAsync(string name)
@@ -54,19 +55,19 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 .Include(d => d.Department)
                 .Where(d => EF.Functions.Like(d.Name, $"%{name}%"))
                 .ToListAsync();
-            return _mapper.MapToDtoList(doctors);
+            return _mapper.ListEntityToResponse(doctors);
         }
 
         public async Task<DoctorResponseDTO> CreateDoctorAsync(DoctorCreate doctorCreateDto)
         {
-            var doctor = _mapper.MapToEntity(doctorCreateDto);
+            var doctor = _mapper.CreateToEntity(doctorCreateDto);
             doctor.CreateDate = DateTime.Now.AddHours(7);
             doctor.UpdateDate = DateTime.Now.AddHours(7);
 
             _context.Doctors.Add(doctor);
             await _context.SaveChangesAsync();
 
-            return _mapper.MapToDto(doctor);
+            return _mapper.EntityToResponse(doctor);
         }
 
         public async Task<string> CheckUniqueCodeAsync()
@@ -84,18 +85,31 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return newCode;
         }
 
-        public async Task<DoctorResponseDTO> UpdateDoctorAsync(int id, DoctorUpdate doctorUpdateDto)
+        public async Task<DoctorResponseDTO> UpdateDoctorAsync(int userId, DoctorUpdate doctorUpdateDto)
         {
-            var doctor = await _context.Doctors.FindAsync(id);
-            if (doctor == null) return null;
+            var coID = await _context.Doctors.FirstOrDefaultAsync(p => p.UserId == userId)
+                ?? throw new Exception($"Không thể tìm Bệnh nhân có user id: {userId}");
 
-            _mapper.MapToEntity(doctorUpdateDto, doctor);
-            doctor.UpdateDate = DateTime.Now.AddHours(7);
 
-            _context.Doctors.Update(doctor);
+
+            coID.Name = doctorUpdateDto.Name;
+            coID.Code = doctorUpdateDto.Code;
+            coID.Gender = doctorUpdateDto.Gender;
+            coID.Dob = doctorUpdateDto.Dob;
+            coID.CCCD = doctorUpdateDto.CCCD;
+            coID.Phone = doctorUpdateDto.Phone;
+            coID.ImageURL = doctorUpdateDto.ImageURL;
+            coID.LicenseNumber = doctorUpdateDto.LicenseNumber;
+            coID.YearOfExperience = doctorUpdateDto.YearOfExperience;
+            coID.WorkingHours = doctorUpdateDto.WorkingHours;
+            coID.Status = doctorUpdateDto.Status;
+            coID.DepartmentId = doctorUpdateDto.DepartmentId;
+            
+            coID.CreateBy = "Admin";
+            coID.UpdateBy = "Admin";
             await _context.SaveChangesAsync();
 
-            return _mapper.MapToDto(doctor);
+            return _mapper.EntityToResponse(coID);
         }
 
         public async Task<bool> DeleteDoctorAsync(int id, DoctorDelete doctorDeleteDto)
@@ -201,6 +215,18 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return doctor?.DepartmentId;
         }
 
+
+            return _mapper.EntityToResponse(doctor);
+        }
+
+        public async Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByDepartmentAsync(int departmentId)
+        {
+            var doctors = await _context.Doctors
+                .Where(d => d.DepartmentId == departmentId)
+                .ToListAsync();
+
+            return _mapper.ListEntityToResponse(doctors);
+
         public async Task<DoctorResponseDTO> GetDoctorByUserIdAsync(int userId)
         {
             var doctor = await _context.Doctors
@@ -208,6 +234,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 .Include(d => d.Department)
                 .FirstOrDefaultAsync(d => d.UserId == userId);
             return _mapper.MapToDto(doctor);
+
         }
     }
 }

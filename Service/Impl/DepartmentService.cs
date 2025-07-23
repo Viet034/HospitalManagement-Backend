@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Department;
@@ -76,9 +77,20 @@ public class DepartmentService : IDepartmentService
     public async Task<IEnumerable<DepartmentResponseDTO>> GetAllDepartmentAsync()
     {
         var co = await _context.Departments.OrderByDescending(x => x.CreateDate).ToListAsync();
-        if (co == null) throw new Exception($"Không có bản ghi nào");
-        var response = _mapper.ListEntityToResponse(co);
-        return response;
+        var result = new List<DepartmentResponseDTO>();
+
+        foreach (var d in co)
+        {
+            var doctorCount = await _context.Doctors.CountAsync(x => x.DepartmentId == d.Id);
+            var nurseCount = await _context.Nurses.CountAsync(x => x.DepartmentId == d.Id);
+            var total = doctorCount + nurseCount;
+
+            var dto = _mapper.EntityToResponse(d);
+            dto.TotalAmountOfPeople = total;
+            result.Add(dto);
+        }
+
+        return result; 
     }
 
     public async Task<bool> HardDeleteDepartmentAsync(int id)
@@ -87,7 +99,7 @@ public class DepartmentService : IDepartmentService
             ?? throw new KeyNotFoundException($"Không có Id {id} tồn tại");
 
         _context.Departments.Remove(coId);
-        _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
         return true;
     }
 

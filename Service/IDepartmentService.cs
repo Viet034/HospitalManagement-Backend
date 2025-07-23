@@ -13,5 +13,6 @@ public interface IDepartmentService
     public Task<DepartmentResponseDTO> SoftDeleteDepartmentAsync(int id, DepartmentStatus newStatus);
     public Task<bool> HardDeleteDepartmentAsync(int id);
     public Task<DepartmentResponseDTO> FindDepartmentByIdAsync(int id);
+    
     public Task<string> CheckUniqueCodeAsync();
 }

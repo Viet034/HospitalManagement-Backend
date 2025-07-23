@@ -47,4 +47,5 @@ public class DoctorResponseDTO
         CreateBy = createBy;
         UpdateBy = updateBy;
     }
+    
 }
