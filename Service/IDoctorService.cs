@@ -22,7 +22,7 @@ namespace SWP391_SE1914_ManageHospital.Service
 
         Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByDepartmentAsync(int departmentId);
 
-        Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByClinicIdAsync(int clinicId, DateTime date);
+        //Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByClinicIdAsync(int clinicId, DateTime date);
 
         Task<int?> GetDepartmentIdByDoctorIdAsync(int doctorId);
 

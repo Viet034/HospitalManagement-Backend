@@ -216,8 +216,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
         }
 
 
-            return _mapper.EntityToResponse(doctor);
-        }
+            
 
         public async Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByDepartmentAsync(int departmentId)
         {
@@ -226,6 +225,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 .ToListAsync();
 
             return _mapper.ListEntityToResponse(doctors);
+        }
 
         public async Task<DoctorResponseDTO> GetDoctorByUserIdAsync(int userId)
         {
@@ -233,7 +233,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 .Include(d => d.User)
                 .Include(d => d.Department)
                 .FirstOrDefaultAsync(d => d.UserId == userId);
-            return _mapper.MapToDto(doctor);
+            return _mapper.EntityToResponse(doctor);
 
         }
     }
