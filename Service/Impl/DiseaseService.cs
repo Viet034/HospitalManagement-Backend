@@ -72,23 +72,12 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             if (string.IsNullOrWhiteSpace(request.Name))
                 throw new ArgumentException("Tên bệnh không được để trống");
 
-            if (string.IsNullOrWhiteSpace(request.Code))
-                throw new ArgumentException("Mã bệnh không được để trống");
-
-            var diseaseEntity = new Disease
-            {
-                Name = request.Name,
-                Code = request.Code,
-                Description = request.Description,
-                Status = request.Status,
-                CreateDate = DateTime.Now,
-                CreateBy = request.CreateBy
-            };
+            var diseaseEntity = _diseaseMapper.MapCreateRequestToEntity(request);
 
             _context.Diseases.Add(diseaseEntity);
             _context.SaveChanges();
 
-            var createdDiseaseDTO = new DiseaseDTO
+            var diseaseDTO = new DiseaseDTO
             {
                 Id = diseaseEntity.Id,
                 Name = diseaseEntity.Name,
@@ -96,10 +85,12 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 Description = diseaseEntity.Description,
                 Status = diseaseEntity.Status,
                 CreateDate = diseaseEntity.CreateDate,
-                CreateBy = diseaseEntity.CreateBy
+                UpdateDate = diseaseEntity.UpdateDate,
+                CreateBy = diseaseEntity.CreateBy,
+                UpdateBy = diseaseEntity.UpdateBy
             };
 
-            return _diseaseMapper.MapToResponse(createdDiseaseDTO);
+            return _diseaseMapper.MapToResponse(diseaseDTO);
         }
 
         public DiseaseResponse UpdateDisease(int id, DiseaseUpdateRequest request)
@@ -113,28 +104,19 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             if (string.IsNullOrWhiteSpace(request.Name))
                 throw new ArgumentException("Tên bệnh không được để trống");
 
-            if (string.IsNullOrWhiteSpace(request.Code))
-                throw new ArgumentException("Mã bệnh không được để trống");
-
             var disease = _context.Diseases.Find(id);
             if (disease == null)
                 throw new ArgumentException($"Không tìm thấy bệnh với ID: {id}");
 
-            disease.Name = request.Name;
-            disease.Code = request.Code;
-            disease.Description = request.Description;
-            disease.Status = request.Status;
-            disease.UpdateDate = DateTime.Now;
-            disease.UpdateBy = request.UpdateBy;
+            _diseaseMapper.MapUpdateRequestToEntity(disease, request);
 
             _context.Diseases.Update(disease);
             _context.SaveChanges();
 
-            var updatedDiseaseDTO = new DiseaseDTO
+            var diseaseDTO = new DiseaseDTO
             {
                 Id = disease.Id,
                 Name = disease.Name,
-                Code = disease.Code,
                 Description = disease.Description,
                 Status = disease.Status,
                 CreateDate = disease.CreateDate,
@@ -143,7 +125,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 UpdateBy = disease.UpdateBy
             };
 
-            return _diseaseMapper.MapToResponse(updatedDiseaseDTO);
+            return _diseaseMapper.MapToResponse(diseaseDTO);
         }
 
         public bool DeleteDisease(int id)

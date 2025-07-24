@@ -1,7 +1,8 @@
-﻿using System;
-using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
+﻿using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Disease;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
+using SWP391_SE1914_ManageHospital.Models.Entities;
+using System;
 
 namespace SWP391_SE1914_ManageHospital.Mapper.Impl
 {
@@ -25,35 +26,32 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             );
         }
 
-        public DiseaseDTO MapToEntity(DiseaseCreateRequest request)
+        public Disease MapCreateRequestToEntity(DiseaseCreateRequest request)
         {
-            if (request == null)
-                return null;
-
-            return new DiseaseDTO
+            return new Disease
             {
                 Name = request.Name,
-                Code = request.Code,
+                Code = GenerateDiseaseCode(),
                 Description = request.Description,
                 Status = request.Status,
-                CreateDate = DateTime.Now,
-                CreateBy = request.CreateBy
+                CreateDate = DateTime.UtcNow.AddHours(7),
+                UpdateDate = DateTime.UtcNow.AddHours(7),
+                CreateBy = request.CreateBy,
+                UpdateBy = request.CreateBy
             };
         }
 
-        public DiseaseDTO MapToEntity(DiseaseUpdateRequest request, DiseaseDTO existingEntity)
+        public void MapUpdateRequestToEntity(Disease entity, DiseaseUpdateRequest request)
         {
-            if (request == null || existingEntity == null)
-                return existingEntity;
-
-            existingEntity.Name = request.Name;
-            existingEntity.Code = request.Code;
-            existingEntity.Description = request.Description;
-            existingEntity.Status = request.Status;
-            existingEntity.UpdateDate = DateTime.Now;
-            existingEntity.UpdateBy = request.UpdateBy;
-
-            return existingEntity;
+            entity.Name = request.Name;
+            entity.Description = request.Description;
+            entity.Status = request.Status;
+            entity.UpdateDate = DateTime.UtcNow.AddHours(7);
+            entity.UpdateBy = request.UpdateBy;
+        }
+        private string GenerateDiseaseCode()
+        {
+            return $"DS-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString("N")[..6]}";
         }
     }
 }
