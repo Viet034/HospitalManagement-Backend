@@ -8,7 +8,7 @@ public class InvoiceDTO
     public string Name { get; set; }
     public string Code { get; set; }
     public decimal InitialAmount { get; set; } //Price ban dau
-    public decimal DiscountAmount { get; set; } //Price duoc giam
+    public decimal? DiscountAmount { get; set; } //Price duoc giam
     public decimal TotalAmount { get; set; } //Price cuoi cung
     public string? Notes { get; set; }
     public InvoiceStatus Status { get; set; }
@@ -19,4 +19,5 @@ public class InvoiceDTO
     public DateTime? UpdateDate { get; set; }
     public string CreateBy { get; set; }
     public string? UpdateBy { get; set; }
+    public List<PaymentDTO> Payments { get; set; } = new();
 }
