@@ -32,14 +32,13 @@ public class FeedbackService : IFeedbackService
 
         if (appointment.Status != AppointmentStatus.Completed)
             throw new Exception("Chỉ có thể gửi sau khi hoàn tất khám");
-
+        
+        
         var existingFeedback = await _context.Feedbacks.
             FirstOrDefaultAsync(f => f.AppointmentId == appointment.Id);
 
         if (existingFeedback != null)
             throw new Exception("Bạn đã gửi nhận xét cho lịch khám này rồi");
-
-        
 
         var feedback = _mapper.CreateToEntity(create);
 
