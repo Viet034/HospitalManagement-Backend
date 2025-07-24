@@ -9,9 +9,9 @@ public class InvoiceDetail : BaseEntity
     public decimal TotalAmount { get; set; }
     public string? Notes { get; set; }
     public int InvoiceId { get; set; }
-    public int? MedicineId { get; set; }
+    public int? PrescriptionsId { get; set; }
     public int? ServiceId { get; set; }
     public virtual Invoice Invoice { get; set; }
-    public virtual Medicine? Medicine { get; set; }
+    public virtual Prescription Prescription { get; set; }
     public virtual Service? Service { get; set; }
 }

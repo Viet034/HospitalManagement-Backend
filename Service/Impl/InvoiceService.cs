@@ -15,36 +15,7 @@ public class InvoiceService : IInvoiceService
 
     public async Task<List<InvoiceDTO>> GetPaymentsByPatientIdAsync(int userId)
     {
-        //var invoices = await _context.Invoices
-        //.Include(i => i.Appointment)
-        //    .ThenInclude(a => a.Patient) // để truy cập Patient.UserId
-        //.Include(i => i.Payment_Invoices)
-        //    .ThenInclude(pi => pi.Payment)
-        //.Where(i => i.Appointment.Patient.UserId == userId)
-        //.Select(i => new InvoiceDTO
-        //{
-        //    Id = i.Id,
-        //    TotalAmount = i.TotalAmount,
-        //    DiscountAmount = i.DiscountAmount,
-        //    AppointmentId = i.AppointmentId,
-        //    InsuranceId = i.InsuranceId,
-        //    PatientId = i.PatientId,
-        //    CreateDate = i.CreateDate,
-        //    Status = i.Status,
-
-        //    Payments = i.Payment_Invoices.Select(pi => new PaymentDTO
-        //    {
-        //        Id = pi.Payment.Id,
-        //        Amount = pi.Payment.Amount,
-        //        PaymentDate = pi.Payment.PaymentDate,
-        //        PaymentMethod = pi.Payment.PaymentMethod,
-        //        Payer = pi.Payment.Payer,
-        //        Notes = pi.Payment.Notes
-        //    }).ToList()
-        //})
-        //.ToListAsync();
-
-        //return invoices;
+        
         var invoices = await _context.Invoices
         .Include(i => i.Appointment)
             .ThenInclude(a => a.Patient)
