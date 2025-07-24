@@ -20,4 +20,5 @@ public class InvoiceDTO
     public string CreateBy { get; set; }
     public string? UpdateBy { get; set; }
     public List<PaymentDTO> Payments { get; set; } = new();
+    public bool HasFeedback { get; set; }
 }
