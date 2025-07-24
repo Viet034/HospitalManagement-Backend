@@ -15,14 +15,14 @@ public class InvoiceController : ControllerBase
         _service = service;
     }
 
-    [HttpGet("get-by-id/{patientId}")]
+    [HttpGet("get-by-id/{userId}")]
     [ProducesResponseType(typeof(IEnumerable<Invoice>), (int)HttpStatusCode.OK)]
     [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-    public async Task<IActionResult> FindById(int patientId)
+    public async Task<IActionResult> FindById(int userId)
     {
         try
         {
-            var response = await _service.GetPaymentsByPatientIdAsync(patientId);
+            var response = await _service.GetPaymentsByPatientIdAsync(userId);
             return Ok(response);
         }
         catch (Exception ex)

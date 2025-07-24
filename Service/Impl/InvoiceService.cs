@@ -13,13 +13,14 @@ public class InvoiceService : IInvoiceService
         _context = context;
     }
 
-    public async Task<List<InvoiceDTO>> GetPaymentsByPatientIdAsync(int patientId)
+    public async Task<List<InvoiceDTO>> GetPaymentsByPatientIdAsync(int userId)
     {
         var invoices = await _context.Invoices
         .Include(i => i.Appointment)
+            .ThenInclude(a => a.Patient) // để truy cập Patient.UserId
         .Include(i => i.Payment_Invoices)
             .ThenInclude(pi => pi.Payment)
-        .Where(i => i.Appointment.PatientId == patientId && i.Payment_Invoices.Any())
+        .Where(i => i.Appointment.Patient.UserId == userId && i.Payment_Invoices.Any())
         .Select(i => new InvoiceDTO
         {
             Id = i.Id,
