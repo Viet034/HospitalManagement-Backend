@@ -809,6 +809,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     PatientId = table.Column<int>(type: "int", nullable: false),
                     DoctorId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(65,30)", maxLength: 100, nullable: false),
                     Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Code = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
@@ -1063,7 +1064,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     Notes = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     InvoiceId = table.Column<int>(type: "int", nullable: false),
-                    MedicineId = table.Column<int>(type: "int", nullable: true),
+                    PrescriptionsId = table.Column<int>(type: "int", nullable: true),
                     ServiceId = table.Column<int>(type: "int", nullable: true),
                     Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -1086,9 +1087,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_InvoiceDetail_Medicines_MedicineId",
-                        column: x => x.MedicineId,
-                        principalTable: "Medicines",
+                        name: "FK_InvoiceDetail_Prescriptions_PrescriptionsId",
+                        column: x => x.PrescriptionsId,
+                        principalTable: "Prescriptions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -1429,9 +1430,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 column: "InvoiceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_InvoiceDetail_MedicineId",
+                name: "IX_InvoiceDetail_PrescriptionsId",
                 table: "InvoiceDetail",
-                column: "MedicineId");
+                column: "PrescriptionsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InvoiceDetail_ServiceId",

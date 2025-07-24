@@ -12,7 +12,7 @@ public class InvoiceDetailDTO
     public decimal TotalAmount { get; set; }
     public string? Notes { get; set; }
     public int InvoiceId { get; set; }
-    public int MedicineId { get; set; }
+    public int PrescriptionId { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime? UpdateDate { get; set; }
     public string CreateBy { get; set; }
