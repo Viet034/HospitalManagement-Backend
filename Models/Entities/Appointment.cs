@@ -23,7 +23,7 @@ public class Appointment : BaseEntity
     public virtual Invoice? Invoice { get; set; }
     public virtual Reception? Reception { get; set; }
     public virtual Medical_Record? Medical_Record { get; set; }
-    public virtual Service? Service { get; set; } // Navigation property
+    public virtual Servicess? Service { get; set; } // Navigation property
     public virtual ICollection<Doctor_Appointment> Doctor_Appointments { get; set; } = new List<Doctor_Appointment>();
     public virtual ICollection<Nurse_Appointment> Nurse_Appointments { get; set; } = new List<Nurse_Appointment>();
     public virtual ICollection<Supply> Supplies { get; set; } = new List<Supply>();

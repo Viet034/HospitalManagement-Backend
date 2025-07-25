@@ -11,5 +11,5 @@ public class Department : BaseEntity
 
     public virtual ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
     public virtual ICollection<Nurse> Nurses { get; set; } = new List<Nurse>();
-    public virtual ICollection<Service> Services { get; set; } = new List<Service>();
+    public virtual ICollection<Servicess> Services { get; set; } = new List<Servicess>();
 }

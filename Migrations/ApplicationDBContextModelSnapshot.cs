@@ -1684,7 +1684,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.ToTable("Roles", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Service", b =>
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Servicess", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1739,7 +1739,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.HasIndex("DepartmentId");
 
-                    b.ToTable("services", (string)null);
+                    b.ToTable("Services", (string)null);
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.ShiftRequest", b =>
@@ -2046,7 +2046,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasForeignKey("ReceptionId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Service", "Service")
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Servicess", "Service")
                         .WithMany()
                         .HasForeignKey("ServiceId");
 
@@ -2190,7 +2190,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasForeignKey("PrescriptionsId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Service", "Service")
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Servicess", "Service")
                         .WithMany("InvoiceDetails")
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -2458,7 +2458,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Service", b =>
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Servicess", b =>
                 {
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Department", "Department")
                         .WithMany("Services")
@@ -2668,7 +2668,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Navigation("User_Roles");
                 });
 
-            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Service", b =>
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Servicess", b =>
                 {
                     b.Navigation("InvoiceDetails");
                 });
