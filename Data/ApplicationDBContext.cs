@@ -49,6 +49,7 @@ public class ApplicationDBContext : DbContext
     public DbSet<MedicineImportDetail> MedicineImportDetails { get; set; }
     public DbSet<Doctor_Shift> Doctor_Shifts { get; set; }
     public DbSet<ShiftRequest> ShiftRequests { get; set; }
+    public DbSet<Servicess> Services { get; set; }
     public IEnumerable<object> UserRoles { get; internal set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -326,9 +327,9 @@ public class ApplicationDBContext : DbContext
 
         });
 
-        modelBuilder.Entity<SWP391_SE1914_ManageHospital.Models.Entities.Service>(entity =>
+        modelBuilder.Entity<Servicess>(entity =>
         {
-            entity.ToTable("services");
+            entity.ToTable("Services");
             entity.HasKey(a => a.Id);
             entity.Property(a => a.Id).ValueGeneratedOnAdd();
             entity.Property(a => a.Name).IsRequired().HasMaxLength(100);
@@ -617,9 +618,9 @@ public class ApplicationDBContext : DbContext
                  .WithMany(cv => cv.InvoiceDetails)
                  .HasForeignKey(cus => cus.InvoiceId)
                  .OnDelete(DeleteBehavior.Cascade);
-            entity.HasOne(p => p.Medicine)
+            entity.HasOne(p => p.Prescription)
                  .WithMany(cv => cv.InvoiceDetails)
-                 .HasForeignKey(cus => cus.MedicineId)
+                 .HasForeignKey(cus => cus.PrescriptionsId)
                  .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(p => p.Service)
                  .WithMany(cv => cv.InvoiceDetails)
@@ -712,10 +713,7 @@ public class ApplicationDBContext : DbContext
                 .WithOne(a => a.Medicine)
                 .HasForeignKey(a => a.MedicineId)
                 .OnDelete(DeleteBehavior.Cascade);
-            entity.HasMany(a => a.InvoiceDetails)
-                .WithOne(a => a.Medicine)
-                .HasForeignKey(a => a.MedicineId)
-                .OnDelete(DeleteBehavior.Cascade);
+            
             entity.HasOne(a => a.Unit)
                 .WithMany(u => u.Medicines)
                 .HasForeignKey(a => a.UnitId)
@@ -960,6 +958,7 @@ public class ApplicationDBContext : DbContext
             entity.Property(a => a.UpdateDate).IsRequired();
             entity.Property(a => a.UpdateBy).IsRequired().HasMaxLength(100);
             entity.Property(a => a.Note).IsRequired().HasMaxLength(100);
+            entity.Property(a => a.Amount).IsRequired().HasMaxLength(100);
 
             entity.Property(emp => emp.Status).IsRequired()
                 .HasConversion(status => (int)status,  // Lưu số nguyên vào database

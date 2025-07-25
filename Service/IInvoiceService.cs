@@ -5,5 +5,6 @@ namespace SWP391_SE1914_ManageHospital.Service;
 public interface IInvoiceService
 {
     public Task<List<InvoiceDTO>> GetPaymentsByPatientIdAsync(int patientId);
+    Task<bool> GenerateInvoiceDetailsAsync(int appointmentId);
 
 }
