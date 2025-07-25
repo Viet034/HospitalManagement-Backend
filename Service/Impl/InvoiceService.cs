@@ -3,6 +3,7 @@ using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 using SWP391_SE1914_ManageHospital.Models.Entities;
+using SWP391_SE1914_ManageHospital.Ultility;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl;
 
@@ -14,10 +15,27 @@ public class InvoiceService : IInvoiceService
     {
         _context = context;
     }
+    public async Task<string> CheckUniqueCodeAsync()
+    {
+        string newCode;
+        bool isExist;
+
+        do
+        {
+            newCode = GenerateCode.GenerateDepartmentCode();
+            _context.ChangeTracker.Clear();
+            isExist = await _context.Departments.AnyAsync(p => p.Code == newCode);
+        }
+        while (isExist);
+
+        return newCode;
+    }
 
     public async Task<bool> GenerateInvoiceDetailsAsync(int appointmentId)
     {
-        var appointment = await _context.Appointments
+        try
+        {
+            var appointment = await _context.Appointments
             .Include(a => a.Invoice)
             .Include(a => a.Medical_Record)
             .FirstOrDefaultAsync(a => a.Id == appointmentId);
@@ -26,9 +44,10 @@ public class InvoiceService : IInvoiceService
             return false;
 
         var invoice = appointment.Invoice;
+        
         decimal totalAmount = 0;
 
-        // Xử lý Prescription
+        // Xử lý Tuền thuốc
         var prescriptionId = appointment.Medical_Record?.PrescriptionId;
 
         if (prescriptionId.HasValue)
@@ -41,57 +60,101 @@ public class InvoiceService : IInvoiceService
                 var prescription = await _context.Prescriptions.FindAsync(prescriptionId);
                 if (prescription != null)
                 {
-                    var detail = new InvoiceDetail
+                    var presDetail = new InvoiceDetail
                     {
                         InvoiceId = invoice.Id,
                         PrescriptionsId = prescription.Id,
+                        ServiceId = null,
                         TotalAmount = prescription.Amount,
+                        Notes = "Tiền thuốc",
+                        Name = prescription.Name,
+                        Code = "PRES-" + prescription.Id,
                         Status = InvoiceDetailStatus.Normal,
-                        Notes = "Tiền thuốc"
+                        Discount = 0,
+                        CreateDate = DateTime.Now,
+                        UpdateDate = DateTime.Now,
+                        UpdateBy = "System",
+                        CreateBy = "System"
                     };
-                    _context.InvoiceDetails.Add(detail);
-                    totalAmount += prescription.Amount;
+                        //Console.WriteLine("Adding InvoiceDetail for PrescriptionId: " + prescriptionId);
+
+                        //if (invoice.InvoiceDetails == null)
+                        //    invoice.InvoiceDetails = new List<InvoiceDetail>();
+
+                        //invoice.InvoiceDetails.Add(presDetail);
+
+                        //var entry = _context.Entry(presDetail);
+                        //Console.WriteLine("Entity state after adding: " + entry.State); // Phải là Added
+                        _context.InvoiceDetails.Add(presDetail);
+
+                    }
                 }
-            }
+            //Console.WriteLine($"Prescription alreadyAdded: {alreadyAdded}");
         }
 
-        // Xử lý Service
-        var serviceId = appointment.ServiceId;
+         //   Xử lý Service
+           var serviceId = appointment.ServiceId;
 
-        if (serviceId.HasValue)
-        {
-            bool alreadyAdded = await _context.InvoiceDetails
-                .AnyAsync(d => d.InvoiceId == invoice.Id && d.ServiceId == serviceId);
-
-            if (!alreadyAdded)
+            if (serviceId.HasValue)
             {
-                var service = await _context.Services.FindAsync(serviceId);
-                if (service != null)
+                bool alreadyAdded = await _context.InvoiceDetails
+                    .AnyAsync(d => d.InvoiceId == invoice.Id && d.ServiceId == serviceId);
+
+                if (!alreadyAdded)
                 {
-                    var detail = new InvoiceDetail
+                    var service = await _context.Services.FindAsync(serviceId);
+                    if (service != null)
                     {
-                        InvoiceId = invoice.Id,
-                        ServiceId = service.Id,
-                        TotalAmount = service.Price,
-                        Status = InvoiceDetailStatus.Normal,
-                        Notes = "Tiền dịch vụ khám"
-                    };
-                    _context.InvoiceDetails.Add(detail);
-                    totalAmount += service.Price;
+                        var servDetail = new InvoiceDetail
+                        {
+                            InvoiceId = invoice.Id,
+                            PrescriptionsId = null,
+                            ServiceId = service.Id,
+                            TotalAmount = service.Price,
+                            Notes = "Tiền dịch vụ",
+                            Name = service.Name,
+                            Code = "SERV-" + service.Id,
+                            Status = InvoiceDetailStatus.Normal,
+                            CreateDate = DateTime.Now,
+                            Discount = 0,
+                            CreateBy = "System",
+                            UpdateDate = DateTime.Now,
+                            UpdateBy = "System"
+                        };
+                        //Console.WriteLine("Adding InvoiceDetail for ServiceId: " + serviceId);
+                        _context.InvoiceDetails.Add(servDetail);
+                    }
                 }
+                //Console.WriteLine($"Service alreadyAdded: {alreadyAdded}");
             }
+
+
+
+
+            await _context.SaveChangesAsync();
+            // Tổng hợp TotalAmount mới
+            invoice.TotalAmount = await _context.InvoiceDetails
+                .Where(d => d.InvoiceId == invoice.Id)
+                .SumAsync(d => d.TotalAmount);
+
+            invoice.InitialAmount = invoice.TotalAmount;
+            await _context.SaveChangesAsync();
+            //foreach (var entry in _context.ChangeTracker.Entries<InvoiceDetail>())
+            //{
+            //    Console.WriteLine($"EntityState: {entry.State} - InvoiceId: {entry.Entity.InvoiceId}, " +
+            //                      $"PresId: {entry.Entity.PrescriptionsId}, ServiceId: {entry.Entity.ServiceId}");
+            //}
+            //var savedDetails = await _context.InvoiceDetails
+            //    .Where(d => d.InvoiceId == invoice.Id)
+            //    .ToListAsync();
+            //Console.WriteLine($"Saved InvoiceDetails count: {savedDetails.Count}");
+            return true;
         }
-
-        // Tổng hợp TotalAmount mới
-        invoice.TotalAmount = await _context.InvoiceDetails
-            .Where(d => d.InvoiceId == invoice.Id)
-            .SumAsync(d => d.TotalAmount);
-
-        invoice.InitialAmount = invoice.TotalAmount;
-        invoice.UpdateDate = DateTime.Now;
-
-        await _context.SaveChangesAsync();
-        return true;
+        catch (Exception ex)
+        {
+            throw new Exception("Lỗi khi lưu vào database: " + ex.Message);
+            
+        }
     }
     
 

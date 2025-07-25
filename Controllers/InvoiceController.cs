@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Service;
+using SWP391_SE1914_ManageHospital.Service.Impl;
 using System.Net;
 
 namespace SWP391_SE1914_ManageHospital.Controllers;
@@ -29,5 +30,20 @@ public class InvoiceController : ControllerBase
         {
             return BadRequest(ex.Message);
         }
+    }
+
+    [HttpPost("generate-invoice-details/{appointmentId}")]
+    public async Task<IActionResult> GenerateInvoiceDetails(int appointmentId)
+    {
+        try
+        {
+            var result = await _service.GenerateInvoiceDetailsAsync(appointmentId);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+          
     }
 }
