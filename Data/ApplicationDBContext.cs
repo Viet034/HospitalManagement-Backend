@@ -620,11 +620,11 @@ public class ApplicationDBContext : DbContext
                  .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(p => p.Prescription)
                  .WithMany(cv => cv.InvoiceDetails)
-                 .HasForeignKey(cus => cus.PrescriptionsId)
+                 .HasForeignKey(cus => cus.PrescriptionsId).IsRequired(false)
                  .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(p => p.Service)
                  .WithMany(cv => cv.InvoiceDetails)
-                 .HasForeignKey(cus => cus.ServiceId)
+                 .HasForeignKey(cus => cus.ServiceId).IsRequired(false)
                  .OnDelete(DeleteBehavior.Cascade);
 
         });
