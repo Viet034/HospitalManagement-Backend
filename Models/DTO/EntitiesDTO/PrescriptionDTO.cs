@@ -11,6 +11,7 @@ public class PrescriptionDTO
     public PrescriptionStatus Status { get; set; }
     public int PatientId { get; set; }
     public int DoctorId { get; set; }
+    public decimal Amount { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime? UpdateDate { get; set; }
     public string CreateBy { get; set; }

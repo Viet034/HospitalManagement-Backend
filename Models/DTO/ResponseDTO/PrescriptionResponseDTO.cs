@@ -14,6 +14,7 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
         public string DoctorName { get; set; }  // Tên bác sĩ
         public string Name { get; set; }  // Tên đơn thuốc
         public string Code { get; set; }  // Mã đơn thuốc
+        public decimal Amount { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
         public string CreateBy { get; set; }

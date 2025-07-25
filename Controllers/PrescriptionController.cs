@@ -220,6 +220,20 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             }
         }
 
+        [HttpGet("get-total_1/{prescriptionId}")]
+        public async Task<IActionResult> GetTotalAmount1(int prescriptionId)
+        {
+            try
+            {
+                var total = await _prescriptionService.GetTotalAmountAsync(prescriptionId);
+                return Ok(new { prescriptionId, totalAmount = total });
+            }
+            catch (KeyNotFoundException knf)
+            {
+                return NotFound(knf.Message);
+            }
+        }
+
 
     }
 }

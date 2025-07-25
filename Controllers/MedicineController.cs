@@ -17,11 +17,13 @@ public class MedicineController : ControllerBase
     }
 
     [HttpGet("get-all")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(string? sortBy = null, string? sortOrder = "asc")
     {
-        var result = await _service.GetAllAsync();
+        var result = await _service.GetAllAsync(sortBy, sortOrder);
         return Ok(result);
     }
+
+
 
     [HttpGet("get-by-id/{id}")]
     public async Task<IActionResult> GetById(int id)
