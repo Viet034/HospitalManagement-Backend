@@ -4,24 +4,43 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
 {
     public class PatientFilterResponse
     {
-        /// ID của bệnh nhân
-        public int Id { get; set; }
-
-        /// Tên của bệnh nhân
-        public string Name { get; set; }
-
-        /// Thời gian khám bệnh
-        public DateTime ExaminationTime { get; set; }
-
-        /// Trạng thái cuộc hẹn
+        public int AppointmentId { get; set; }
+        public int DoctorId { get; set; }
+        public string DoctorName { get; set; }
+        public int PatientId { get; set; }
+        public string PatientName { get; set; }
+        public DateTime AppointmentDate { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
         public string AppointmentStatus { get; set; }
+        public string? Note { get; set; }
 
         public PatientFilterResponse()
         {
-            this.Id = 0;
-            this.Name = string.Empty;
-            this.ExaminationTime = DateTime.MinValue;
-            this.AppointmentStatus = string.Empty;
+            AppointmentId = 0;
+            DoctorId = 0;
+            DoctorName = string.Empty;
+            PatientId = 0;
+            PatientName = string.Empty;
+            AppointmentDate = DateTime.MinValue;
+            StartTime = TimeSpan.Zero;
+            EndTime = null;
+            AppointmentStatus = string.Empty;
+            Note = null;
+        }
+
+        public PatientFilterResponse(int appointmentId, int doctorId ,int patientId, string doctorName ,string patientName, DateTime appointmentDate, TimeSpan startTime, TimeSpan? endTime, string appointmentStatus, string? note)
+        {
+            AppointmentId = appointmentId;
+            DoctorId = doctorId;
+            DoctorName = doctorName;
+            PatientId = patientId;
+            PatientName = patientName;
+            AppointmentDate = appointmentDate;
+            StartTime = startTime;
+            EndTime = endTime;
+            AppointmentStatus = appointmentStatus;
+            Note = note;
         }
     }
 }
