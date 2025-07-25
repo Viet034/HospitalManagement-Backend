@@ -13,5 +13,5 @@ public class InvoiceDetail : BaseEntity
     public int? ServiceId { get; set; }
     public virtual Invoice Invoice { get; set; }
     public virtual Prescription Prescription { get; set; }
-    public virtual Servicess? Service { get; set; }
+    public virtual Servicess Service { get; set; }
 }
