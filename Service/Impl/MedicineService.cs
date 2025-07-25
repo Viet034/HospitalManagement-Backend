@@ -16,13 +16,33 @@ public class MedicineService : IMedicineService
         _mapper = mapper;
     }
 
-    public async Task<List<MedicineResponseDTO>> GetAllAsync()
+    public async Task<List<MedicineResponseDTO>> GetAllAsync(string? sortBy = null, string? sortOrder = "asc")
     {
-        var medicines = await _context.Medicines
+        var medicinesQuery = _context.Medicines
             .Include(m => m.MedicineCategory)  // Bao gồm bảng MedicineCategory để lấy tên danh mục
             .Include(m => m.Unit)              // Bao gồm bảng Unit để lấy tên đơn vị
-            .AsNoTracking()                   // Đảm bảo không theo dõi thay đổi (tăng hiệu suất)
-            .ToListAsync();                   // Lấy dữ liệu từ cơ sở dữ liệu
+            .AsNoTracking();                   // Đảm bảo không theo dõi thay đổi (tăng hiệu suất)
+
+        // Sorting logic
+        if (sortBy != null)
+        {
+            if (sortBy == "name")
+            {
+                // Sort by name
+                medicinesQuery = sortOrder == "asc"
+                    ? medicinesQuery.OrderBy(m => m.Name)
+                    : medicinesQuery.OrderByDescending(m => m.Name);
+            }
+            else if (sortBy == "price")
+            {
+                // Sort by price
+                medicinesQuery = sortOrder == "asc"
+                    ? medicinesQuery.OrderBy(m => m.UnitPrice)
+                    : medicinesQuery.OrderByDescending(m => m.UnitPrice);
+            }
+        }
+
+        var medicines = await medicinesQuery.ToListAsync();
 
         return medicines.Select(m => new MedicineResponseDTO
         {
@@ -32,19 +52,20 @@ public class MedicineService : IMedicineService
             Dosage = m.Dosage,
             ImageUrl = m.ImageUrl,
             UnitId = m.UnitId,
-            MedicineCategoryName = m.MedicineCategory.Name, // Truy xuất tên từ bảng MedicineCategory
-            UnitName = m.Unit.Name,                         // Truy xuất tên từ bảng Unit
-            Status = (MedicineStatus)m.Status,              // Chuyển từ int sang enum MedicineStatus
-            UnitPrice = m.UnitPrice,                        // Giá thuốc
-            MedicineCategoryId = m.MedicineCategoryId,     // ID của danh mục thuốc
-            Prescribed = m.Prescribed.ToString(),          // Trạng thái prescribed
-            CreateDate = m.CreateDate,                      // Ngày tạo
-            UpdateDate = m.UpdateDate,                      // Ngày cập nhật
-            CreateBy = m.CreateBy,                          // Người tạo
-            UpdateBy = m.UpdateBy,                          // Người cập nhật
-            Description = m.Description                     // Mô tả
-        }).ToList(); // Ánh xạ từ entity sang DTO
+            MedicineCategoryName = m.MedicineCategory.Name,
+            UnitName = m.Unit.Name,
+            Status = (MedicineStatus)m.Status,
+            UnitPrice = m.UnitPrice,
+            MedicineCategoryId = m.MedicineCategoryId,
+            Prescribed = m.Prescribed.ToString(),
+            CreateDate = m.CreateDate,
+            UpdateDate = m.UpdateDate,
+            CreateBy = m.CreateBy,
+            UpdateBy = m.UpdateBy,
+            Description = m.Description
+        }).ToList();
     }
+
 
 
     public async Task<MedicineResponseDTO?> GetByIdAsync(int id)
