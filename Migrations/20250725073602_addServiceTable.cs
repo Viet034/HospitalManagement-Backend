@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class addServiceTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -252,7 +252,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "services",
+                name: "Services",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -277,9 +277,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_services", x => x.Id);
+                    table.PrimaryKey("PK_Services", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_services_Departments_DepartmentId",
+                        name: "FK_Services_Departments_DepartmentId",
                         column: x => x.DepartmentId,
                         principalTable: "Departments",
                         principalColumn: "Id",
@@ -1093,9 +1093,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_InvoiceDetail_services_ServiceId",
+                        name: "FK_InvoiceDetail_Services_ServiceId",
                         column: x => x.ServiceId,
-                        principalTable: "services",
+                        principalTable: "Services",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -1190,9 +1190,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Appointments_services_ServiceId",
+                        name: "FK_Appointments_Services_ServiceId",
                         column: x => x.ServiceId,
-                        principalTable: "services",
+                        principalTable: "Services",
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -1587,8 +1587,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_services_DepartmentId",
-                table: "services",
+                name: "IX_Services_DepartmentId",
+                table: "Services",
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
@@ -1718,7 +1718,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                 name: "Receptions");
 
             migrationBuilder.DropTable(
-                name: "services");
+                name: "Services");
 
             migrationBuilder.DropTable(
                 name: "Insurances");

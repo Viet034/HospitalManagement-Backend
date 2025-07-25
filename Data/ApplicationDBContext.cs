@@ -49,6 +49,7 @@ public class ApplicationDBContext : DbContext
     public DbSet<MedicineImportDetail> MedicineImportDetails { get; set; }
     public DbSet<Doctor_Shift> Doctor_Shifts { get; set; }
     public DbSet<ShiftRequest> ShiftRequests { get; set; }
+    public DbSet<Servicess> Services { get; set; }
     public IEnumerable<object> UserRoles { get; internal set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -326,9 +327,9 @@ public class ApplicationDBContext : DbContext
 
         });
 
-        modelBuilder.Entity<SWP391_SE1914_ManageHospital.Models.Entities.Service>(entity =>
+        modelBuilder.Entity<Servicess>(entity =>
         {
-            entity.ToTable("services");
+            entity.ToTable("Services");
             entity.HasKey(a => a.Id);
             entity.Property(a => a.Id).ValueGeneratedOnAdd();
             entity.Property(a => a.Name).IsRequired().HasMaxLength(100);
