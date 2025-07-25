@@ -59,7 +59,9 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
             if (prescription == null) return null;
 
+
             var response = _mapper.MapToResponse(prescription);
+            response.Amount = prescription.Amount;
             response.PatientName = prescription.Patient?.Name ?? "Unknown Patient";
             response.PatientCCCD = prescription.Patient?.CCCD ?? "Unknown CCCD";
             response.DoctorName = prescription.Doctor?.Name ?? "Unknown Doctor";
@@ -348,6 +350,28 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
             return total;
         }
+        public async Task<decimal> GetTotalAmount1Async(int prescriptionId)
+        {
+            // Lấy tất cả PrescriptionDetails liên quan đến đơn thuốc
+            var prescriptionDetails = await _context.PrescriptionDetails
+                .Where(pd => pd.PrescriptionId == prescriptionId)
+                .Include(pd => pd.Medicine)  // Thực hiện join với bảng Medicine
+                .ToListAsync();
+
+            // Tính tổng giá trị
+            decimal totalAmount = prescriptionDetails.Sum(pd => pd.Medicine.UnitPrice * pd.Quantity);
+
+            // Cập nhật lại Amount cho Prescription
+            var prescription = await _context.Prescriptions.FindAsync(prescriptionId);
+            if (prescription != null)
+            {
+                prescription.Amount = totalAmount;
+                await _context.SaveChangesAsync();
+            }
+
+            return totalAmount;
+        }
+
 
     }
 }

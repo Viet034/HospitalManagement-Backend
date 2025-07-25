@@ -17,6 +17,7 @@ public class PrescriptionMapper : IPrescriptionMapper
             DoctorId = prescription.DoctorId,
             Name = prescription.Name,
             Code = prescription.Code,
+            Amount = prescription.Amount,
             CreateDate = prescription.CreateDate,
             UpdateDate = prescription.UpdateDate ?? DateTime.UtcNow,
             CreateBy = prescription.CreateBy ?? "system",

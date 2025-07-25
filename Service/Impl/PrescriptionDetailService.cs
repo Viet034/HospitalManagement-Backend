@@ -95,55 +95,53 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
 
 
-        public async Task<PrescriptionDetailResponseDTO> CreateAsync(
-    PrescriptionDetailRequest req,
-    int userId
-)
+        public async Task<PrescriptionDetailResponseDTO> CreateAsync(PrescriptionDetailRequest req, int userId)
         {
             // Kiểm tra số lượng thuốc
             if (req.Quantity <= 0)
                 throw new InvalidOperationException("Số lượng thuốc phải lớn hơn 0.");
 
-            // 1. Tìm Prescription
+            // Lấy Prescription
             var prescription = await _context.Prescriptions
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == req.PrescriptionId);
+
             if (prescription == null)
                 throw new InvalidOperationException("Không tìm thấy đơn thuốc.");
 
-            // Check trạng thái đơn thuốc
+            // Kiểm tra trạng thái đơn thuốc
             if (prescription.Status != PrescriptionStatus.New)
                 throw new InvalidOperationException("Chỉ có thể thêm chi tiết cho đơn thuốc mới.");
 
-            // 2. Tìm Medicine
+            // Tìm Medicine
             var medicine = await _context.Medicines
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Name == req.MedicineName);
+
             if (medicine == null)
                 throw new InvalidOperationException($"Không tìm thấy thuốc {req.MedicineName}");
 
-            // 3. Lấy list inventory FIFO
+            // Kiểm tra kho thuốc
             var inventories = await _context.Medicine_Inventories
                 .Where(mi => mi.MedicineId == medicine.Id
                           && mi.Quantity > 0
-                          && mi.Status == 0)
+                          && mi.Status == 0) // In stock
                 .OrderBy(mi => mi.ExpiryDate)
                 .ToListAsync();
 
             var totalAvailable = inventories.Sum(mi => mi.Quantity);
             if (totalAvailable < req.Quantity)
-                throw new InvalidOperationException(
-                    $"Không đủ thuốc trong kho. Cần {req.Quantity}, còn {totalAvailable}."
-                );
+                throw new InvalidOperationException($"Không đủ thuốc trong kho. Cần {req.Quantity}, còn {totalAvailable}.");
 
-            // 4. Tìm bác sĩ để gán CreateBy/UpdateBy
+            // Tìm bác sĩ để gán CreateBy/UpdateBy
             var doctor = await _context.Doctors
                 .AsNoTracking()
                 .FirstOrDefaultAsync(d => d.UserId == userId);
+
             if (doctor == null)
                 throw new InvalidOperationException("Không tìm thấy bác sĩ.");
 
-            // 5. Tạo detail
+            // Tạo PrescriptionDetail
             var detail = new PrescriptionDetail
             {
                 PrescriptionId = req.PrescriptionId,
@@ -162,8 +160,12 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             _context.PrescriptionDetails.Add(detail);
             await _context.SaveChangesAsync();
 
+            // Cập nhật lại Amount cho Prescription sau khi thêm chi tiết
+            await UpdatePrescriptionAmount(req.PrescriptionId);
+
             return _mapper.MapToResponse(detail);
         }
+
 
 
 
@@ -238,5 +240,32 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
             return result;
         }
+
+
+        public async Task UpdatePrescriptionAmount(int prescriptionId)
+        {
+            // Lấy tất cả chi tiết của đơn thuốc
+            var prescriptionDetails = await _context.PrescriptionDetails
+                .Where(pd => pd.PrescriptionId == prescriptionId)
+                .Include(pd => pd.Medicine) // Đảm bảo lấy thông tin về Medicine
+                .ToListAsync();
+
+            // Tính tổng giá trị của đơn thuốc (Tổng = đơn giá * số lượng)
+            decimal totalAmount = prescriptionDetails.Sum(pd => pd.Medicine.UnitPrice * pd.Quantity);
+
+            // Cập nhật Amount cho Prescription
+            var prescription = await _context.Prescriptions.FindAsync(prescriptionId);
+            if (prescription != null)
+            {
+                prescription.Amount = totalAmount;
+                await _context.SaveChangesAsync(); // Lưu lại tổng giá trị
+            }
+        }
+
+
+
     }
+
+
+
 }
