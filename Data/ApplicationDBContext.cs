@@ -58,7 +58,7 @@ public class ApplicationDBContext : DbContext
         {
             entity.ToTable("Appointments");
             entity.HasKey(a => a.Id);
-            entity.Property(a => a.Id).ValueGeneratedNever();
+            entity.Property(a => a.Id).ValueGeneratedOnAdd(); 
             entity.Property(a => a.Name).IsRequired().HasMaxLength(100);
             entity.Property(a => a.Code).IsRequired().HasMaxLength(100);
             entity.Property(a => a.CreateDate).IsRequired();
@@ -86,12 +86,14 @@ public class ApplicationDBContext : DbContext
                 .HasForeignKey(a => a.AppointmentId).OnDelete(DeleteBehavior.Cascade);
 
 
-            entity.HasOne(i => i.Invoice)
-            .WithOne(a => a.Appointment)
-                .HasForeignKey<Invoice>(i => i.Id).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(a => a.Invoice)
+    .WithOne(i => i.Appointment)
+    .HasForeignKey<Invoice>(i => i.AppointmentId)
+    .OnDelete(DeleteBehavior.Cascade);
+
             entity.HasOne(i => i.Medical_Record)
             .WithOne(a => a.Appointment)
-                .HasForeignKey<Medical_Record>(i => i.Id).OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey<Medical_Record>(i => i.AppointmentId).OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(p => p.Patient)
                 .WithMany(cv => cv.Appointments)
