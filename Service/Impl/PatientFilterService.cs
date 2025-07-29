@@ -4,13 +4,11 @@ using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.PatientFilter;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
-using SWP391_SE1914_ManageHospital.Models.Helps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SWP391_SE1914_ManageHospital.Service;
-using static SWP391_SE1914_ManageHospital.Ultility.Status;
 using Microsoft.Extensions.Logging;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
@@ -18,137 +16,145 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
     public class PatientFilterService : IPatientFilterService
     {
         private readonly ApplicationDBContext _context;
-        private readonly IPatientFilterMapper _patientMapper;
+        private readonly IPatientFilterMapper _mapper;
         private readonly ILogger<PatientFilterService> _logger;
 
-        public PatientFilterService(ApplicationDBContext context, IPatientFilterMapper patientMapper, ILogger<PatientFilterService> logger)
+        public PatientFilterService(ApplicationDBContext context, IPatientFilterMapper mapper, ILogger<PatientFilterService> logger)
         {
             _context = context;
-            _patientMapper = patientMapper;
+            _mapper = mapper;
             _logger = logger;
         }
 
-        public async Task<List<PatientFilterResponse>> GetPatientsByDoctorAsync(PatientFilter filter)
+        public async Task<List<PatientFilterResponse>> GetTodayScheduleByDoctorAsync(int doctorId)
+        {
+            if (doctorId <= 0)
+                throw new ArgumentException("ID bác sĩ không hợp lệ", nameof(doctorId));
+
+            var today = DateTime.UtcNow.AddHours(7).Date;
+
+            var doctorAppointments = await _context.Doctor_Appointments
+                .Where(da => da.DoctorId == doctorId)
+                .Include(da => da.Appointment)
+                    .ThenInclude(a => a.Patient)
+                .Include(da => da.Doctor)
+                .ToListAsync();
+
+            var appointments = doctorAppointments
+                .Where(da => da.Appointment.AppointmentDate.Date == today)
+                .OrderBy(da => da.Appointment.StartTime)
+                .Select(da => _mapper.EntityToResponse(
+                    da.Appointment,
+                    da.DoctorId,
+                    da.Doctor.Name
+                ))
+                .ToList();
+
+            return appointments;
+        }
+
+        public async Task<List<PatientFilterResponse>> FilterScheduleAsync(PatientFilter filter)
         {
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter), "Bộ lọc không được để trống.");
 
-            if (filter.DoctorId <= 0)
-                throw new ArgumentException("Thiếu thông tin DoctorId hoặc DoctorId không hợp lệ.", nameof(filter));
+            List<PatientFilterResponse> result;
 
-            _logger.LogInformation($"=== PatientFilterService.GetPatientsByDoctorAsync ===");
-            _logger.LogInformation($"DoctorId: {filter.DoctorId}");
-            _logger.LogInformation($"FromDate: {filter.FromDate}");
-            _logger.LogInformation($"ToDate: {filter.ToDate}");
-            _logger.LogInformation($"PatientName: {filter.PatientName}");
-
-            // ✅ KIỂM TRA DOCTOR TỒN TẠI
-            var doctor = await _context.Doctors.FirstOrDefaultAsync(d => d.Id == filter.DoctorId);
-            if (doctor == null)
+            if (filter.DoctorId > 0)
             {
-                _logger.LogWarning($"Doctor with ID {filter.DoctorId} not found");
-                throw new ArgumentException($"Không tìm thấy bác sĩ có ID: {filter.DoctorId}", nameof(filter));
+                var doctorAppointments = await _context.Doctor_Appointments
+                    .Where(da => da.DoctorId == filter.DoctorId)
+                    .Include(da => da.Appointment)
+                        .ThenInclude(a => a.Patient)
+                    .Include(da => da.Doctor)
+                    .ToListAsync();
+
+                var filtered = doctorAppointments.AsQueryable();
+
+                if (filter.AppointmentId > 0)
+                    filtered = filtered.Where(da => da.AppointmentId == filter.AppointmentId);
+
+                if (filter.PatientId > 0)
+                    filtered = filtered.Where(da => da.Appointment.PatientId == filter.PatientId);
+
+                if (!string.IsNullOrWhiteSpace(filter.PatientName))
+                    filtered = filtered.Where(da => da.Appointment.Patient != null && da.Appointment.Patient.Name.Contains(filter.PatientName));
+
+                if (filter.FromDate.HasValue)
+                    filtered = filtered.Where(da => da.Appointment.AppointmentDate.Date >= filter.FromDate.Value.Date);
+
+                if (filter.ToDate.HasValue)
+                    filtered = filtered.Where(da => da.Appointment.AppointmentDate.Date <= filter.ToDate.Value.Date);
+
+                result = filtered
+                    .OrderBy(da => da.Appointment.AppointmentDate)
+                    .ThenBy(da => da.Appointment.StartTime)
+                    .Select(da => _mapper.EntityToResponse(
+                        da.Appointment,
+                        da.DoctorId,
+                        da.Doctor.Name
+                    ))
+                    .ToList();
             }
-            _logger.LogInformation($"Doctor found: {doctor.Name}");
-
-            // ✅ KIỂM TRA DOCTOR_APPOINTMENTS
-            var doctorAppointments = await _context.Doctor_Appointments
-                .Where(da => da.DoctorId == filter.DoctorId)
-                .ToListAsync();
-
-            _logger.LogInformation($"Doctor_Appointments count: {doctorAppointments.Count}");
-
-            if (doctorAppointments.Count == 0)
+            else
             {
-                _logger.LogWarning("No Doctor_Appointments found for this doctor");
-                return new List<PatientFilterResponse>();
+                var query = _context.Appointments
+                    .Include(a => a.Patient)
+                    .Include(a => a.Doctor_Appointments)
+                        .ThenInclude(da => da.Doctor)
+                    .AsQueryable();
+
+                if (filter.AppointmentId > 0)
+                    query = query.Where(a => a.Id == filter.AppointmentId);
+
+                if (filter.PatientId > 0)
+                    query = query.Where(a => a.PatientId == filter.PatientId);
+
+                if (!string.IsNullOrWhiteSpace(filter.PatientName))
+                    query = query.Where(a => a.Patient != null && a.Patient.Name.Contains(filter.PatientName));
+
+                if (filter.FromDate.HasValue)
+                    query = query.Where(a => a.AppointmentDate.Date >= filter.FromDate.Value.Date);
+
+                if (filter.ToDate.HasValue)
+                    query = query.Where(a => a.AppointmentDate.Date <= filter.ToDate.Value.Date);
+
+                var appointments = await query
+                    .OrderBy(a => a.AppointmentDate)
+                    .ThenBy(a => a.StartTime)
+                    .ToListAsync();
+
+                result = appointments.Select(a =>
+                {
+                    var doctorAppointment = a.Doctor_Appointments.FirstOrDefault();
+                    var doctorId = doctorAppointment?.DoctorId ?? 0;
+                    var doctorName = doctorAppointment?.Doctor?.Name ?? doctorAppointment?.Doctor?.LicenseNumber ?? "Unknown";
+                    return _mapper.EntityToResponse(a, doctorId, doctorName);
+                }).ToList();
             }
-
-            // ✅ KIỂM TRA APPOINTMENTS
-            var appointmentIds = doctorAppointments.Select(da => da.AppointmentId).ToList();
-            _logger.LogInformation($"Appointment IDs: {string.Join(", ", appointmentIds)}");
-
-            var appointments = await _context.Appointments
-                .Include(a => a.Patient)
-                .Where(a => appointmentIds.Contains(a.Id))
-                .ToListAsync();
-
-            _logger.LogInformation($"Appointments found: {appointments.Count}");
-
-            foreach (var appointment in appointments)
-            {
-                _logger.LogInformation($"Appointment: ID={appointment.Id}, Patient={appointment.Patient?.Name ?? "null"}, Date={appointment.AppointmentDate:yyyy-MM-dd HH:mm}, Status={appointment.Status}");
-            }
-
-            // ✅ FILTER BY DATE
-            if (filter.FromDate.HasValue)
-            {
-                var fromDate = filter.FromDate.Value.Date;
-                _logger.LogInformation($"Filtering from date: {fromDate:yyyy-MM-dd}");
-
-                var beforeFilter = appointments.Count;
-                appointments = appointments.Where(a => a.AppointmentDate.Date >= fromDate).ToList();
-                _logger.LogInformation($"After FromDate filter: {beforeFilter} -> {appointments.Count}");
-            }
-
-            if (filter.ToDate.HasValue)
-            {
-                var toDate = filter.ToDate.Value.Date;
-                _logger.LogInformation($"Filtering to date: {toDate:yyyy-MM-dd}");
-
-                var beforeFilter = appointments.Count;
-                appointments = appointments.Where(a => a.AppointmentDate.Date <= toDate).ToList();
-                _logger.LogInformation($"After ToDate filter: {beforeFilter} -> {appointments.Count}");
-            }
-
-            // ✅ FILTER BY PATIENT NAME
-            if (!string.IsNullOrEmpty(filter.PatientName))
-            {
-                var beforeFilter = appointments.Count;
-                appointments = appointments.Where(a => a.Patient != null && a.Patient.Name.Contains(filter.PatientName)).ToList();
-                _logger.LogInformation($"After PatientName filter: {beforeFilter} -> {appointments.Count}");
-            }
-
-            _logger.LogInformation($"Final appointments after all filters: {appointments.Count}");
-
-            if (appointments.Count == 0)
-            {
-                _logger.LogWarning("No appointments found after filtering, returning empty list");
-                return new List<PatientFilterResponse>();
-            }
-
-            // ✅ CONVERT TO PATIENTAPPOINTMENTDATA
-            var patientDataList = appointments.Select(a => new PatientAppointmentData
-            {
-                Patient = a.Patient,
-                ExaminationTime = a.AppointmentDate,
-                AppointmentStatus = a.Status.ToString()
-            }).ToList();
-
-            _logger.LogInformation($"PatientDataList count: {patientDataList.Count}");
-
-            // ✅ MAP TO RESPONSE
-            var result = _patientMapper.ListEntityToResponse(patientDataList);
-            _logger.LogInformation($"Mapped result count: {result.Count}");
 
             return result;
         }
 
-        public async Task<List<PatientFilterResponse>> GetTodayPatientsByDoctorAsync(int doctorId)
+        public async Task<List<PatientFilterResponse>> GetAllSchedulesAsync()
         {
-            if (doctorId <= 0)
-            {
-                throw new ArgumentException("ID bác sĩ không hợp lệ", nameof(doctorId));
-            }
+            var doctorAppointments = await _context.Doctor_Appointments
+                .Include(da => da.Appointment)
+                    .ThenInclude(a => a.Patient)
+                .Include(da => da.Doctor)
+                .OrderBy(da => da.Appointment.AppointmentDate)
+                .ThenBy(da => da.Appointment.StartTime)
+                .ToListAsync();
 
-            var filter = new PatientFilter
-            {
-                DoctorId = doctorId,
-                FromDate = DateTime.Today,
-                ToDate = DateTime.Today.AddDays(1).AddTicks(-1)
-            };
+            var result = doctorAppointments.Select(da =>
+                _mapper.EntityToResponse(
+                    da.Appointment,
+                    da.DoctorId,
+                    da.Doctor.Name
+                )
+            ).ToList();
 
-            return await GetPatientsByDoctorAsync(filter);
+            return result;
         }
     }
 }

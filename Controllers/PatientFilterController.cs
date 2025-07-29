@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.PatientFilter;
 using SWP391_SE1914_ManageHospital.Service;
+using Microsoft.Extensions.Logging;
 
 namespace SWP391_SE1914_ManageHospital.Controllers
 {
@@ -19,88 +20,71 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             _logger = logger;
         }
 
-        [HttpPost("GetPatientSchedule")]
-        public async Task<IActionResult> GetPatientSchedule([FromBody] PatientScheduleRequest request)
+        /// Lấy danh sách lịch khám của bác sĩ theo bộ lọc (lọc theo ngày, tên bệnh nhân, ...)
+        [HttpPost("doctor-schedule")]
+        public async Task<IActionResult> FilterDoctorSchedule([FromBody] PatientFilter filter)
         {
             try
             {
-                _logger.LogInformation($"=== GetPatientSchedule API Called ===");
-                _logger.LogInformation($"DoctorId: {request.DoctorId}, Date: {request.Date}");
+                _logger.LogInformation("FilterDoctorSchedule called with DoctorId: {DoctorId}, FromDate: {FromDate}, ToDate: {ToDate}, PatientName: {PatientName}",
+                    filter.DoctorId, filter.FromDate, filter.ToDate, filter.PatientName);
 
-                var filter = new PatientFilter
-                {
-                    DoctorId = request.DoctorId,
-                    PatientName = request.PatientName
-                };
-
-                var result = await _patientService.GetPatientsByDoctorAsync(filter);
-
-                _logger.LogInformation($"=== Returning {result.Count} appointments ===");
+                var result = await _patientService.FilterScheduleAsync(filter);
                 return Ok(result);
             }
             catch (ArgumentNullException ex)
             {
-                _logger.LogError($"ArgumentNullException: {ex.Message}");
+                _logger.LogError(ex, "ArgumentNullException in FilterDoctorSchedule");
                 return BadRequest(new { message = ex.Message });
             }
             catch (ArgumentException ex)
             {
-                _logger.LogError($"ArgumentException: {ex.Message}");
+                _logger.LogError(ex, "ArgumentException in FilterDoctorSchedule");
                 return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Exception: {ex.Message}");
+                _logger.LogError(ex, "Exception in FilterDoctorSchedule");
                 return StatusCode(500, new { message = $"Có lỗi xảy ra: {ex.Message}" });
             }
         }
 
-        /// Lấy danh sách bệnh nhân của bác sĩ, có thể lọc theo ngày, giờ, tên bệnh nhân.
-        [HttpPost("doctor-patients")]
-        public async Task<IActionResult> GetPatientsByDoctor([FromBody] PatientFilter filter)
+        /// Lấy danh sách lịch khám của bác sĩ trong ngày hiện tại
+        [HttpGet("doctor/{doctorId}/today")]
+        public async Task<IActionResult> GetTodayScheduleByDoctor(int doctorId)
         {
             try
             {
-                Console.WriteLine($"=== GetPatientsByDoctor API Called ===");
-                Console.WriteLine($"DoctorId: {filter.DoctorId}");
-                Console.WriteLine($"FromDate: {filter.FromDate}");
-                Console.WriteLine($"ToDate: {filter.ToDate}");
-
-                var result = await _patientService.GetPatientsByDoctorAsync(filter);
-
-                Console.WriteLine($"=== Returning {result.Count} appointments ===");
+                _logger.LogInformation("GetTodayScheduleByDoctor called with DoctorId: {DoctorId}", doctorId);
+                var result = await _patientService.GetTodayScheduleByDoctorAsync(doctorId);
                 return Ok(result);
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(ex.Message);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, "ArgumentException in GetTodayScheduleByDoctor");
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Có lỗi xảy ra khi xử lý yêu cầu: {ex.Message}\n{ex.StackTrace}");
+                _logger.LogError(ex, "Exception in GetTodayScheduleByDoctor");
+                return StatusCode(500, new { message = $"Có lỗi xảy ra: {ex.Message}" });
             }
         }
 
-        /// Lấy danh sách bệnh nhân của bác sĩ trong ngày hiện tại.
-        [HttpGet("doctor/{doctorId}/today")]
-        public async Task<IActionResult> GetTodayPatientsByDoctor(int doctorId)
+        /// Lấy toàn bộ lịch khám cho admin (có cả DoctorId, DoctorName)
+        [HttpGet("admin/all-schedules")]
+        public async Task<IActionResult> GetAllSchedules()
         {
             try
             {
-                var result = await _patientService.GetTodayPatientsByDoctorAsync(doctorId);
+                _logger.LogInformation("GetAllSchedules called by admin");
+                var result = await _patientService.GetAllSchedulesAsync();
                 return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Có lỗi xảy ra khi xử lý yêu cầu: {ex.Message}\n{ex.StackTrace}");
+                _logger.LogError(ex, "Exception in GetAllSchedules");
+                return StatusCode(500, new { message = $"Có lỗi xảy ra: {ex.Message}" });
             }
         }
     }

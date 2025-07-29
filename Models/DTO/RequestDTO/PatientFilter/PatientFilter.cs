@@ -1,20 +1,32 @@
-﻿namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.PatientFilter
+﻿using System;
+namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.PatientFilter
 {
     public class PatientFilter
     {
-        /// ID của bác sĩ cần lọc danh sách bệnh nhân
+        public int AppointmentId { get; set; }
         public int DoctorId { get; set; }
 
-        /// Ngày bắt đầu lọc
-        public DateTime? FromDate { get; set; }
+        public int PatientId { get; set; }
 
-        /// Ngày kết thúc lọc
+        public string PatientName { get; set; }
+
+        public DateTime AppointmentDate { get; set; }
+
+        public TimeSpan StartTime { get; set; }
+        public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
 
-        /// Tên bệnh nhân để lọc
-        public string? PatientName { get; set; }
-
-        /// Trạng thái cuộc hẹn để lọc (nếu cần)
-        public string? AppointmentStatus { get; set; }
+        public PatientFilter()
+        {
+        }
+        public PatientFilter(int appointmentId, int doctorId, int patientId, string patientName, DateTime appointmentDate, TimeSpan startTime)
+        {
+            AppointmentId = appointmentId;
+            DoctorId = doctorId;
+            PatientId = patientId;
+            PatientName = patientName;
+            AppointmentDate = appointmentDate;
+            StartTime = startTime;
+        }
     }
 }
