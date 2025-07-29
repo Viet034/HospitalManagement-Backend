@@ -205,5 +205,38 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             await _context.SaveChangesAsync();
             return _mapper.EntityToRespone(coId);
         }
+
+        // tính % bênh nhân tăng theo tháng
+        public async Task<decimal> GetNewPatientsGrowthPercentageAsync()
+        {
+            // Lấy ngày đầu tháng này và tháng trước
+            var currentMonthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var previousMonthStart = currentMonthStart.AddMonths(-1);
+            var previousMonthEnd = currentMonthStart.AddDays(-1); // End of previous month
+
+            // Số lượng bệnh nhân mới trong tháng này
+            var newPatientsThisMonth = await _context.Patients
+                .Where(p => p.CreateDate >= currentMonthStart && p.CreateDate < currentMonthStart.AddMonths(1))
+                .CountAsync();
+
+            // Số lượng bệnh nhân mới trong tháng trước
+            var newPatientsLastMonth = await _context.Patients
+                .Where(p => p.CreateDate >= previousMonthStart && p.CreateDate <= previousMonthEnd)
+                .CountAsync();
+
+            // Tính toán tỷ lệ phần trăm tăng trưởng
+            decimal growthPercentage = 0;
+            if (newPatientsLastMonth > 0)
+            {
+                growthPercentage = ((decimal)newPatientsThisMonth - newPatientsLastMonth) / newPatientsLastMonth * 100;
+            }
+            else if (newPatientsLastMonth == 0 && newPatientsThisMonth > 0)
+            {
+                growthPercentage = 100;  // Nếu tháng trước không có bệnh nhân, coi là 100% tăng trưởng
+            }
+            return growthPercentage;
+        }
+
+
     }
 }

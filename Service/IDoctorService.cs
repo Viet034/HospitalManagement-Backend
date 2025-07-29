@@ -25,6 +25,8 @@ namespace SWP391_SE1914_ManageHospital.Service
         //Task<IEnumerable<DoctorResponseDTO>> GetDoctorsByClinicIdAsync(int clinicId, DateTime date);
 
         Task<int?> GetDepartmentIdByDoctorIdAsync(int doctorId);
+        Task<decimal> GetDoctorGrowthPercentageAsync();
+        Task<List<DoctorPrescriptionTopDTO>> GetTopDoctorsByPrescriptionAsync(int top = 3);
 
     }
 }

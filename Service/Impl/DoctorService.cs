@@ -236,5 +236,63 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return _mapper.EntityToResponse(doctor);
 
         }
+
+
+        public async Task<decimal> GetDoctorGrowthPercentageAsync()
+        {
+            // Lấy ngày bắt đầu tháng này và tháng trước
+            var currentMonthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var previousMonthStart = currentMonthStart.AddMonths(-1);
+            var previousMonthEnd = currentMonthStart.AddDays(-1); // End of previous month
+
+            // Số lượng bác sĩ mới trong tháng này
+            var newDoctorsThisMonth = await _context.Doctors
+                .Where(d => d.CreateDate >= currentMonthStart && d.CreateDate < currentMonthStart.AddMonths(1))
+                .CountAsync();
+
+            // Số lượng bác sĩ mới trong tháng trước
+            var newDoctorsLastMonth = await _context.Doctors
+                .Where(d => d.CreateDate >= previousMonthStart && d.CreateDate <= previousMonthEnd)
+                .CountAsync();
+
+            // Tính toán tỷ lệ phần trăm tăng trưởng
+            decimal growthPercentage = 0;
+            if (newDoctorsLastMonth > 0)  // Tránh chia cho 0
+            {
+                growthPercentage = ((decimal)newDoctorsThisMonth - newDoctorsLastMonth) / newDoctorsLastMonth * 100;
+            }
+            else if (newDoctorsLastMonth == 0 && newDoctorsThisMonth > 0)
+            {
+                growthPercentage = 100;  // Nếu tháng trước không có bác sĩ mới, tỷ lệ tăng trưởng là 100%
+            }
+
+            return growthPercentage;
+        }
+
+        public async Task<List<DoctorPrescriptionTopDTO>> GetTopDoctorsByPrescriptionAsync(int top = 3)
+        {
+            var query = _context.Doctors
+                .Select(d => new DoctorPrescriptionTopDTO
+                {
+                    Id = d.Id,
+                    Name = d.Name,
+                    Code = d.Code,
+                    ImageUrl = d.ImageURL,
+                    YearOfExperience = d.YearOfExperience,
+                    PrescriptionCount = _context.Prescriptions.Count(p => p.DoctorId == d.Id)
+                })
+                .OrderByDescending(d => d.PrescriptionCount)
+                .ThenByDescending(d => d.YearOfExperience)
+                .Take(top);
+
+            return await query.ToListAsync();
+        }
+
+
+
     }
+
+
+
+
 }

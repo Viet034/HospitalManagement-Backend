@@ -23,17 +23,20 @@ public class FeedbackMapper : IFeedbackMapper
         return feedback;
     }
 
-    public FeedbackResponseDTO EntityToResponse(Feedback entity)
+    public FeedbackResponseDTO EntityToResponse(Feedback feedback)
     {
-        FeedbackResponseDTO response = new FeedbackResponseDTO();
-        response.Id = entity.Id;
-        response.Content = entity.Content;
-        //response.AppointmentId = entity.AppointmentId;
-        //response.DoctorId = entity.DoctorId;
-        //response.PatientId = entity.PatientId;
-        response.CreateDate = entity.CreateDate;
-        return response;
+        return new FeedbackResponseDTO
+        {
+            Id = feedback.Id,
+            Content = feedback.Content,
+            CreateDate = feedback.CreateDate,
+            DoctorId = feedback.DoctorId,
+            DoctorName = feedback.Doctor?.Name,
+            PatientId = feedback.PatientId,
+            PatientName = feedback.Patient?.Name
+        };
     }
+
 
     public IEnumerable<FeedbackResponseDTO> ListEntityToResponse(IEnumerable<Feedback> entities)
     {
