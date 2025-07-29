@@ -12,8 +12,8 @@ using SWP391_SE1914_ManageHospital.Data;
 namespace SWP391_SE1914_ManageHospital.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250723094821_initial")]
-    partial class initial
+    [Migration("20250729154828_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,7 +31,10 @@ namespace SWP391_SE1914_ManageHospital.Migrations
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Appointment", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AppointmentDate")
                         .HasColumnType("datetime(6)");
@@ -172,9 +175,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ClinicId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -214,8 +214,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ClinicId");
 
                     b.ToTable("Departments", (string)null);
                 });
@@ -334,9 +332,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<int?>("ClinicId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -401,8 +396,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasColumnType("float");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ClinicId");
 
                     b.HasIndex("DepartmentId");
 
@@ -650,6 +643,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AppointmentId")
+                        .IsUnique();
+
                     b.HasIndex("InsuranceId");
 
                     b.HasIndex("PatientId");
@@ -686,9 +682,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<int>("InvoiceId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MedicineId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -698,6 +691,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<int?>("PrescriptionsId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("ServiceId")
                         .HasColumnType("int");
@@ -721,7 +717,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.HasIndex("InvoiceId");
 
-                    b.HasIndex("MedicineId");
+                    b.HasIndex("PrescriptionsId");
 
                     b.HasIndex("ServiceId");
 
@@ -796,6 +792,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId")
+                        .IsUnique();
 
                     b.HasIndex("DiseaseId");
 
@@ -1471,6 +1470,10 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("Amount")
+                        .HasMaxLength(100)
+                        .HasColumnType("decimal(65,30)");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1693,7 +1696,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.ToTable("Roles", (string)null);
                 });
 
-            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Service", b =>
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Servicess", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1748,7 +1751,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.HasIndex("DepartmentId");
 
-                    b.ToTable("services", (string)null);
+                    b.ToTable("Services", (string)null);
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.ShiftRequest", b =>
@@ -1762,26 +1765,11 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Property<DateTime?>("ApprovedDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("CreateBy")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("DoctorId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<string>("Reason")
                         .IsRequired()
@@ -1799,12 +1787,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
-
-                    b.Property<string>("UpdateBy")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -1853,6 +1835,9 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("UpdateBy")
                         .HasMaxLength(100)
@@ -2050,18 +2035,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Invoice", "Invoice")
-                        .WithOne("Appointment")
-                        .HasForeignKey("SWP391_SE1914_ManageHospital.Models.Entities.Appointment", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Medical_Record", "Medical_Record")
-                        .WithOne("Appointment")
-                        .HasForeignKey("SWP391_SE1914_ManageHospital.Models.Entities.Appointment", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Patient", "Patient")
                         .WithMany("Appointments")
                         .HasForeignKey("PatientId")
@@ -2073,32 +2046,17 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasForeignKey("ReceptionId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Service", "Service")
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Servicess", "Service")
                         .WithMany()
                         .HasForeignKey("ServiceId");
 
                     b.Navigation("Clinic");
-
-                    b.Navigation("Invoice");
-
-                    b.Navigation("Medical_Record");
 
                     b.Navigation("Patient");
 
                     b.Navigation("Reception");
 
                     b.Navigation("Service");
-                });
-
-            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Department", b =>
-                {
-                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Clinic", "Clinic")
-                        .WithMany("Departments")
-                        .HasForeignKey("ClinicId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Clinic");
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.DiseaseDetail", b =>
@@ -2114,11 +2072,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Doctor", b =>
                 {
-                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Clinic", "Clinic")
-                        .WithMany("Doctors")
-                        .HasForeignKey("ClinicId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Department", "Department")
                         .WithMany("Doctors")
                         .HasForeignKey("DepartmentId")
@@ -2130,8 +2083,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Clinic");
 
                     b.Navigation("Department");
 
@@ -2206,6 +2157,12 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Invoice", b =>
                 {
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Appointment", "Appointment")
+                        .WithOne("Invoice")
+                        .HasForeignKey("SWP391_SE1914_ManageHospital.Models.Entities.Invoice", "AppointmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Insurance", "Insurance")
                         .WithMany("Invoices")
                         .HasForeignKey("InsuranceId")
@@ -2216,6 +2173,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Appointment");
 
                     b.Navigation("Insurance");
 
@@ -2230,25 +2189,31 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Medicine", "Medicine")
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Prescription", "Prescription")
                         .WithMany("InvoiceDetails")
-                        .HasForeignKey("MedicineId")
+                        .HasForeignKey("PrescriptionsId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Service", "Service")
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Servicess", "Service")
                         .WithMany("InvoiceDetails")
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Invoice");
 
-                    b.Navigation("Medicine");
+                    b.Navigation("Prescription");
 
                     b.Navigation("Service");
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Medical_Record", b =>
                 {
+                    b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Appointment", "Appointment")
+                        .WithOne("Medical_Record")
+                        .HasForeignKey("SWP391_SE1914_ManageHospital.Models.Entities.Medical_Record", "AppointmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Disease", "Disease")
                         .WithMany("Medical_Records")
                         .HasForeignKey("DiseaseId")
@@ -2270,6 +2235,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                         .WithMany("Medical_Records")
                         .HasForeignKey("PrescriptionId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Appointment");
 
                     b.Navigation("Disease");
 
@@ -2503,7 +2470,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Service", b =>
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Servicess", b =>
                 {
                     b.HasOne("SWP391_SE1914_ManageHospital.Models.Entities.Department", "Department")
                         .WithMany("Services")
@@ -2583,6 +2550,10 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
                     b.Navigation("Feedbacks");
 
+                    b.Navigation("Invoice");
+
+                    b.Navigation("Medical_Record");
+
                     b.Navigation("Nurse_Appointments");
 
                     b.Navigation("Supplies");
@@ -2591,10 +2562,6 @@ namespace SWP391_SE1914_ManageHospital.Migrations
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Clinic", b =>
                 {
                     b.Navigation("Appointments");
-
-                    b.Navigation("Departments");
-
-                    b.Navigation("Doctors");
                 });
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Department", b =>
@@ -2633,23 +2600,13 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Invoice", b =>
                 {
-                    b.Navigation("Appointment")
-                        .IsRequired();
-
                     b.Navigation("InvoiceDetails");
 
                     b.Navigation("Payment_Invoices");
                 });
 
-            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Medical_Record", b =>
-                {
-                    b.Navigation("Appointment");
-                });
-
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Medicine", b =>
                 {
-                    b.Navigation("InvoiceDetails");
-
                     b.Navigation("MedicineDetail")
                         .IsRequired();
 
@@ -2702,6 +2659,8 @@ namespace SWP391_SE1914_ManageHospital.Migrations
 
             modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Prescription", b =>
                 {
+                    b.Navigation("InvoiceDetails");
+
                     b.Navigation("Medical_Records");
 
                     b.Navigation("PrescriptionDetails");
@@ -2717,7 +2676,7 @@ namespace SWP391_SE1914_ManageHospital.Migrations
                     b.Navigation("User_Roles");
                 });
 
-            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Service", b =>
+            modelBuilder.Entity("SWP391_SE1914_ManageHospital.Models.Entities.Servicess", b =>
                 {
                     b.Navigation("InvoiceDetails");
                 });

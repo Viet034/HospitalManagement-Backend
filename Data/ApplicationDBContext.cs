@@ -86,14 +86,14 @@ public class ApplicationDBContext : DbContext
                 .HasForeignKey(a => a.AppointmentId).OnDelete(DeleteBehavior.Cascade);
 
 
-            entity.HasOne(a => a.Invoice)
-    .WithOne(i => i.Appointment)
-    .HasForeignKey<Invoice>(i => i.AppointmentId)
-    .OnDelete(DeleteBehavior.Cascade);
+            //entity.HasOne(a => a.Invoice)
+            //    .WithOne(i => i.Appointment)
+            //    .HasForeignKey<Invoice>(i => i.AppointmentId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(i => i.Medical_Record)
-            .WithOne(a => a.Appointment)
-                .HasForeignKey<Medical_Record>(i => i.AppointmentId).OnDelete(DeleteBehavior.Cascade);
+            //entity.HasOne(i => i.Medical_Record)
+            //.WithOne(a => a.Appointment)
+            //    .HasForeignKey<Medical_Record>(i => i.AppointmentId).OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(p => p.Patient)
                 .WithMany(cv => cv.Appointments)
@@ -581,10 +581,14 @@ public class ApplicationDBContext : DbContext
                  .HasForeignKey(cus => cus.InsuranceId)
                  .OnDelete(DeleteBehavior.Cascade);
 
+            //entity.HasOne(p => p.Appointment)
+            //     .WithOne(cv => cv.Invoice)
+            //     .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(p => p.Appointment)
-                 .WithOne(cv => cv.Invoice)
-                 .HasForeignKey<Appointment>(cus => cus.Id)
-                 .OnDelete(DeleteBehavior.Cascade);
+                  .WithOne(cv => cv.Invoice)
+                  .HasForeignKey<Invoice>(x => x.AppointmentId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
 
             entity.HasMany(a => a.InvoiceDetails)
                 .WithOne(ins => ins.Invoice)
@@ -668,10 +672,15 @@ public class ApplicationDBContext : DbContext
                  .HasForeignKey(cus => cus.DiseaseId)
                  .OnDelete(DeleteBehavior.Cascade);
 
+            //entity.HasOne(p => p.Appointment)
+            //     .WithOne(cv => cv.Medical_Record) 
+            //     .OnDelete(DeleteBehavior.Cascade);
+
             entity.HasOne(p => p.Appointment)
-                 .WithOne(cv => cv.Medical_Record)
-                 .HasForeignKey<Appointment>(cus => cus.Id)
-                 .OnDelete(DeleteBehavior.Cascade);
+                  .WithOne(cv => cv.Medical_Record)
+                  .HasForeignKey<Medical_Record>(x => x.AppointmentId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
 
         });
 
