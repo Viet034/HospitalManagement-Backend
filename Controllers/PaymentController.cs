@@ -30,4 +30,12 @@ public class PaymentController : ControllerBase
             return StatusCode(500, $"Lỗi khi thanh toán: {ex.ToString()}");
         }
     }
+
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllPayments()
+    {
+        var result = await _paymentService.GetAllPaymentsAsync();
+        return Ok(result);
+    }
+
 }

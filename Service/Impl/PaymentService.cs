@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Models.DTO.RequestDTO.Payment;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 
@@ -76,4 +77,29 @@ public class PaymentService : IPaymentService
             throw;
         }
     }
+
+    public async Task<List<PaymentResponseDTO>> GetAllPaymentsAsync()
+    {
+        var payments = await _context.Payments.ToListAsync();
+
+        var result = payments.Select(p => new PaymentResponseDTO
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Code = p.Code,
+            CreateDate = p.CreateDate,
+            UpdateDate = p.UpdateDate,
+            CreateBy = p.CreateBy,
+            UpdateBy = p.UpdateBy,
+            PaymentDate = p.PaymentDate,
+            Amount = p.Amount,
+            PaymentMethod = p.PaymentMethod,
+            Payer = p.Payer,
+            Notes = p.Notes
+        }).ToList();
+
+        return result;
+    }
+
+
 }

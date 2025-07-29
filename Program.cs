@@ -29,6 +29,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IAppointmentService_1, AppointmentService_1>();
+
 builder.Services.AddScoped<IClinicMapper, ClinicMapper>();
 builder.Services.AddScoped<IClinicService, ClinicService>();
 builder.Services.AddScoped<IDepartmentMapper, DepartmentMapper>();
@@ -79,6 +81,8 @@ builder.Services.AddScoped<IPrescriptionDetailService, PrescriptionDetailService
 
 
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IInvoiceMapper, InvoiceMapper>();
+
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPaymentMapper, PaymentMapper>();
 //builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();

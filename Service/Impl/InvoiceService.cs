@@ -201,4 +201,81 @@ public class InvoiceService : IInvoiceService
 
         return invoiceDTOs;
     }
+
+    
+    
+
+    public async Task<decimal> GetTotalRevenueByMonthAsync()
+{
+    try
+    {
+        // Lấy ngày bắt đầu tháng này và tháng sau
+        var currentMonthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+        var currentMonthEnd = currentMonthStart.AddMonths(1).AddDays(-1); // End of the current month
+
+        // Tính tổng doanh thu trong tháng này
+        var totalRevenueThisMonth = await _context.Invoices
+            .Where(i => i.CreateDate >= currentMonthStart && i.CreateDate <= currentMonthEnd && (int)i.Status == 1)
+            .SumAsync(i => i.TotalAmount);
+
+        return totalRevenueThisMonth;
+    }
+    catch (Exception ex)
+    {
+        throw new Exception("Error calculating total revenue for the month: " + ex.Message);
+    }
+}
+
+public async Task<decimal> GetTotalRevenueByYearAsync()
+{
+    try
+    {
+        // Lấy ngày bắt đầu năm này và năm sau
+        var currentYearStart = new DateTime(DateTime.Now.Year, 1, 1);
+        var currentYearEnd = new DateTime(DateTime.Now.Year, 12, 31); // End of the current year
+
+        // Tính tổng doanh thu trong năm này
+        var totalRevenueThisYear = await _context.Invoices
+            .Where(i => i.CreateDate >= currentYearStart && i.CreateDate <= currentYearEnd && (int)i.Status == 1)
+            .SumAsync(i => i.TotalAmount);
+
+        return totalRevenueThisYear;
+    }
+    catch (Exception ex)
+    {
+        throw new Exception("Error calculating total revenue for the year: " + ex.Message);
+    }
+}
+
+    // Tính tổng doanh thu
+    public async Task<decimal> GetTotalRevenueAsync()
+    {
+        try
+        {
+            // Tính tổng doanh thu (TotalAmount) trong bảng Invoice chỉ với status = 1
+            var totalRevenue = await _context.Invoices
+                .Where(i => (int)i.Status == 1)
+                .SumAsync(i => i.TotalAmount);
+
+            return totalRevenue;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error calculating total revenue: " + ex.Message);
+        }
+    }
+
+    // Lấy tất cả hóa đơn (Invoice)
+    public async Task<List<Invoice>> GetAllInvoicesAsync()
+    {
+        // Include các entity liên quan để có thể lấy tên
+        var invoices = await _context.Invoices
+            .Include(i => i.Appointment)
+            .Include(i => i.Insurance)
+            .Include(i => i.Patient)
+            .ToListAsync();
+
+        return invoices;
+    }
+
 }
