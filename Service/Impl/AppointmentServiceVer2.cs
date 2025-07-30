@@ -55,17 +55,15 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
                 // Tạo Appointment
                 var appointmentCode = await GenerateUniqueAppointmentCodeAsync();
-                if (string.IsNullOrWhiteSpace(create.Note))
-                {
-                    create.Note = "Không có ghi chú";
-                }
+                //var note = string.IsNullOrWhiteSpace(create.Note) ? "Không có ghi chú" : create.Note;
+
                 var appointment = new Appointment
                 {
                     AppointmentDate = create.AppointmentDate,
                     StartTime = create.StartTime,
                     EndTime = null,
                     Status = AppointmentStatus.Scheduled,
-                    Note = create.Note ?? "Không có ghi chú",
+                    Note = create.Note,
                     PatientId = create.PatientId,
                     ClinicId = create.ClinicId,
                     ServiceId = create.ServiceId,
@@ -106,29 +104,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 _context.Invoices.Add(invoice);
                 await _context.SaveChangesAsync();
 
-                // Tạo Medical Record
-                var medicalRecordCode = await GenerateUniqueMedicalRecordCodeAsync();
-                var medicalRecord = new Medical_Record
-                {
-                    Status = MedicalRecordStatus.Open,
-                    Diagnosis = "Chưa cập nhật",
-                    TestResults = "Chưa cập nhật",
-                    Notes = "Chưa cập nhật",
-                    AppointmentId = appointmentId,
-                    PatientId = appointment.PatientId,
-                    DoctorId = create?.DoctorId ?? 0,
-                    PrescriptionId = null,
-                    DiseaseId = null,
-                    Name = "Chưa cập nhật",
-                    Code = medicalRecordCode,
-                    CreateDate = DateTime.UtcNow,
-                    UpdateDate = DateTime.UtcNow,
-                    CreateBy = "System",
-                    UpdateBy = "System"
-                };
-
-                _context.Medical_Records.Add(medicalRecord);
-                await _context.SaveChangesAsync();
+      
 
                 // Tạo Doctor_Appointment
                 var doctorAppointment = new Doctor_Appointment
