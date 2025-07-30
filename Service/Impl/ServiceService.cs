@@ -18,7 +18,7 @@ public class ServiceService : IServiceService
 
     public async Task<List<ServiceResponseDTO>> GetAllServicesAsync()
     {
-        var services = await _context.Set<SWP391_SE1914_ManageHospital.Models.Entities.Servicess>()
+        var services = await _context.Set<Servicess>()
             .Include(s => s.Department)
             .Select(s => new ServiceResponseDTO
             {
@@ -43,7 +43,7 @@ public class ServiceService : IServiceService
 
     public async Task<ServiceResponseDTO?> GetServiceByIdAsync(int id)
     {
-        var service = await _context.Set<SWP391_SE1914_ManageHospital.Models.Entities.Servicess>()
+        var service = await _context.Set<Servicess>()
             .Include(s => s.Department)
             .FirstOrDefaultAsync(s => s.Id == id);
 
@@ -70,7 +70,7 @@ public class ServiceService : IServiceService
 
     public async Task<ServiceResponseDTO> CreateServiceAsync(ServiceRequestDTO request)
     {
-        var service = new SWP391_SE1914_ManageHospital.Models.Entities.Servicess
+        var service = new Servicess
         {
             Name = request.Name,
             Code = request.Code,
@@ -81,11 +81,11 @@ public class ServiceService : IServiceService
             DepartmentId = request.DepartmentId,
             CreateDate = DateTime.Now,
             UpdateDate = DateTime.Now,
-            CreateBy = "System", // This should come from authentication context
-            UpdateBy = "System"  // This should come from authentication context
+            CreateBy = "System", 
+            UpdateBy = "System"  
         };
 
-        _context.Set<SWP391_SE1914_ManageHospital.Models.Entities.Servicess>().Add(service);
+        _context.Set<Servicess>().Add(service);
         await _context.SaveChangesAsync();
 
         return await GetServiceByIdAsync(service.Id) ?? new ServiceResponseDTO();
@@ -93,7 +93,7 @@ public class ServiceService : IServiceService
 
     public async Task<ServiceResponseDTO?> UpdateServiceAsync(int id, ServiceRequestDTO request)
     {
-        var service = await _context.Set<SWP391_SE1914_ManageHospital.Models.Entities.Servicess>().FindAsync(id);
+        var service = await _context.Set<Servicess>().FindAsync(id);
         if (service == null)
             return null;
 
@@ -105,7 +105,7 @@ public class ServiceService : IServiceService
         service.Status = request.Status;
         service.DepartmentId = request.DepartmentId;
         service.UpdateDate = DateTime.Now;
-        service.UpdateBy = "System"; // This should come from authentication context
+        service.UpdateBy = "System"; 
 
         await _context.SaveChangesAsync();
 
@@ -114,18 +114,18 @@ public class ServiceService : IServiceService
 
     public async Task<bool> DeleteServiceAsync(int id)
     {
-        var service = await _context.Set<SWP391_SE1914_ManageHospital.Models.Entities.Servicess>().FindAsync(id);
+        var service = await _context.Set<Servicess>().FindAsync(id);
         if (service == null)
             return false;
 
-        _context.Set<SWP391_SE1914_ManageHospital.Models.Entities.Servicess>().Remove(service);
+        _context.Set<Servicess>().Remove(service);
         await _context.SaveChangesAsync();
         return true;
     }
 
     public async Task<List<ServiceResponseDTO>> GetServicesByDepartmentAsync(int departmentId)
     {
-        var services = await _context.Set<SWP391_SE1914_ManageHospital.Models.Entities.Servicess>()
+        var services = await _context.Set<Servicess>()
             .Include(s => s.Department)
             .Where(s => s.DepartmentId == departmentId)
             .Select(s => new ServiceResponseDTO

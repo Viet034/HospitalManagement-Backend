@@ -107,4 +107,11 @@ public class GenerateCode
         int roleRand = random.Next(100000, 999999);
         return "ROL" + roleRand;
     }
+
+    public static string GenerateAppointmentCode()
+    {
+
+        int roleRand = random.Next(100000, 999999);
+        return "APP" + roleRand;
+    }
 }
