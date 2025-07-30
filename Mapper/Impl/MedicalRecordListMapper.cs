@@ -10,6 +10,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             return new MedicalRecordResponse
             {
                 Id = entity.Id,
+                AppointmentId = entity.AppointmentId,
                 Diagnosis = entity.Diagnosis,
                 Status = entity.Status.ToString(),
                 CreateDate = entity.CreateDate,
