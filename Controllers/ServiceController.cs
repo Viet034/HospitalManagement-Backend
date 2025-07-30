@@ -15,7 +15,7 @@ public class ServiceController : ControllerBase
         _serviceService = serviceService;
     }
 
-    [HttpGet]
+    [HttpGet("get-all")]
     public async Task<IActionResult> GetAllServices()
     {
         try
@@ -29,7 +29,7 @@ public class ServiceController : ControllerBase
         }
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("get-by/{id}")]
     public async Task<IActionResult> GetServiceById(int id)
     {
         try
@@ -60,7 +60,7 @@ public class ServiceController : ControllerBase
         }
     }
 
-    [HttpPost]
+    [HttpPost("add-service")]
     public async Task<IActionResult> CreateService([FromBody] ServiceRequestDTO request)
     {
         try
@@ -77,7 +77,7 @@ public class ServiceController : ControllerBase
         }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("update/{id}")]
     public async Task<IActionResult> UpdateService(int id, [FromBody] ServiceRequestDTO request)
     {
         try
