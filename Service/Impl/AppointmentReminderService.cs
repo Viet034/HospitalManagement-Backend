@@ -20,8 +20,8 @@ public class AppointmentReminderService : IAppointmentReminderService
 
     public async Task<List<Appointment>> SendEmailReminder()
     {
-        
-        var now = DateTime.Now; 
+
+        var now = DateTime.Now;
         var reminderThreshold = now.AddMinutes(30);
         Console.WriteLine(TimeZoneInfo.Local.DisplayName);
         var appointmentsToRemind = await _context.Appointments
@@ -43,7 +43,7 @@ public class AppointmentReminderService : IAppointmentReminderService
             if (!string.IsNullOrEmpty(email))
             {
                 await _emailService.SendAppointmentReminderEmailAsync(email, name, appointment.AppointmentDate.Date.Add(appointment.StartTime));
-                appointment.isSend = true; 
+                appointment.isSend = true;
             }
         }
 

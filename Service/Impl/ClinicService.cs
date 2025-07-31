@@ -137,6 +137,10 @@ public class ClinicService : IClinicService
         coId.UpdateDate = result.UpdateDate;
         coId.CreateBy = result.CreateBy;
         coId.UpdateBy = result.UpdateBy;
+        coId.Type = result.Type;
+        coId.Address = result.Address;
+        coId.Email = result.Email;
+        coId.ImageUrl = result.ImageUrl;
         await _context.SaveChangesAsync();
 
         var response =  _mapper.EntityToResponse(coId);
