@@ -4,10 +4,11 @@ using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl;
 
-public class InvoiceService : IInvoiceService
+public class InvoiceService :   IInvoiceService
 {
     private readonly ApplicationDBContext _context;
 
@@ -266,16 +267,50 @@ public async Task<decimal> GetTotalRevenueByYearAsync()
     }
 
     // Lấy tất cả hóa đơn (Invoice)
-    public async Task<List<Invoice>> GetAllInvoicesAsync()
+    public async Task<List<InvoiceResponseDTO>> GetAllInvoicesAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
-        // Include các entity liên quan để có thể lấy tên
-        var invoices = await _context.Invoices
+        var query = _context.Invoices
             .Include(i => i.Appointment)
             .Include(i => i.Insurance)
             .Include(i => i.Patient)
-            .ToListAsync();
+            .AsQueryable();
 
-        return invoices;
+        if (startDate.HasValue)
+            query = query.Where(i => i.CreateDate >= startDate.Value);
+
+        if (endDate.HasValue)
+        {
+            var endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1); // Lấy hết ngày endDate
+            query = query.Where(i => i.CreateDate <= endOfDay);
+        }
+
+        var invoices = await query.ToListAsync();
+
+        // Mapping sang DTO
+        var invoiceResponseDTOs = invoices.Select(i => new InvoiceResponseDTO
+        {
+            Id = i.Id,
+            Name = i.Name,
+            Code = i.Code,
+            CreateDate = i.CreateDate,
+            UpdateDate = i.UpdateDate,
+            CreateBy = i.CreateBy,
+            UpdateBy = i.UpdateBy,
+            InitialAmount = i.InitialAmount,
+            DiscountAmount = i.DiscountAmount,
+            TotalAmount = i.TotalAmount,
+            Notes = i.Notes,
+            Status = i.Status,
+            AppointmentId = i.AppointmentId,
+            AppointmentName = i.Appointment != null ? i.Appointment.Name : "",
+            InsuranceId = i.InsuranceId,
+            InsuranceName = i.Insurance != null ? i.Insurance.Name : "",
+            PatientId = i.PatientId,
+            PatientName = i.Patient != null ? i.Patient.Name : ""
+        }).ToList();
+
+        return invoiceResponseDTOs;
     }
+
 
 }

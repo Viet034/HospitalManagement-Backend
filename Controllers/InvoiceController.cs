@@ -105,12 +105,11 @@ public class InvoiceController : ControllerBase
     }
 
     [HttpGet("GetAll")]
-    public async Task<IActionResult> GetAllInvoices()
+    public async Task<IActionResult> GetAllInvoices([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
         try
         {
-            var invoices = await _service.GetAllInvoicesAsync();
-            var invoiceResponseDTOs = _mapper.ListEntityToResponse(invoices);
+            var invoiceResponseDTOs = await _service.GetAllInvoicesAsync(startDate, endDate);
             return Ok(invoiceResponseDTOs);
         }
         catch (Exception ex)
@@ -118,6 +117,7 @@ public class InvoiceController : ControllerBase
             return BadRequest($"Error occurred: {ex.Message}");
         }
     }
+
 
 
 }
