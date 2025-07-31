@@ -17,5 +17,6 @@ namespace SWP391_SE1914_ManageHospital.Service
         public Task<PatientRespone> FindPatientByUserIdAsync(int id);
         public Task<string> CheckUniqueCodeAsync();
         public Task<IEnumerable<PatientInfoAdmin>> PatientInfoAdAsync();
+        Task<decimal> GetNewPatientsGrowthPercentageAsync();
     }
 }

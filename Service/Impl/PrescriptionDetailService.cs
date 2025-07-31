@@ -264,6 +264,72 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
 
 
+        public async Task<PrescriptionDetailResponseDTO> UpdateAsync(int id, PrescriptionDetailRequest req, int userId)
+        {
+            // 1. Tìm detail cần sửa
+            var detail = await _context.PrescriptionDetails.Include(d => d.Medicine).FirstOrDefaultAsync(d => d.Id == id);
+            if (detail == null)
+                throw new Exception("Không tìm thấy chi tiết đơn thuốc.");
+
+            // 2. Kiểm tra trạng thái đơn thuốc (chỉ cho phép sửa khi đơn còn trạng thái 'New')
+            var prescription = await _context.Prescriptions.FirstOrDefaultAsync(p => p.Id == detail.PrescriptionId);
+            if (prescription == null)
+                throw new Exception("Không tìm thấy đơn thuốc.");
+            if (prescription.Status != PrescriptionStatus.New)
+                throw new Exception("Chỉ có thể sửa chi tiết cho đơn thuốc mới.");
+
+            // 3. Kiểm tra bác sĩ
+            var doctor = await _context.Doctors.AsNoTracking().FirstOrDefaultAsync(d => d.UserId == userId);
+            if (doctor == null)
+                throw new Exception("Không tìm thấy bác sĩ.");
+
+            // 4. Tìm Medicine mới theo tên (cho phép đổi thuốc)
+            var medicine = await _context.Medicines.AsNoTracking().FirstOrDefaultAsync(m => m.Name == req.MedicineName);
+            if (medicine == null)
+                throw new Exception($"Không tìm thấy thuốc {req.MedicineName}");
+
+            // 5. Kiểm tra kho thuốc (trừ đi chính số lượng cũ trong detail để tính lại khả dụng)
+            var inventories = await _context.Medicine_Inventories
+                .Where(mi => mi.MedicineId == medicine.Id
+                          && mi.Quantity > 0
+                          && mi.Status == (int)MedicineInventoryStatus.InStock)
+                .OrderBy(mi => mi.ExpiryDate)
+                .ToListAsync();
+
+            // Tính tổng khả dụng: cộng lại số lượng cũ vì sắp sửa update
+            int totalAvailable = inventories.Sum(mi => mi.Quantity);
+
+            if (totalAvailable < req.Quantity)
+                throw new Exception($"Không đủ thuốc trong kho. Cần {req.Quantity}, còn {totalAvailable}.");
+
+            // Kiểm tra nếu lấy hết kho
+            bool isDepleted = (totalAvailable == req.Quantity);
+
+            // 6. Cập nhật lại detail
+            detail.MedicineId = medicine.Id;
+            detail.Name = medicine.Name;
+            detail.Code = medicine.Code;
+            detail.Quantity = req.Quantity;
+            detail.Usage = req.Usage;
+            detail.Status = (PrescriptionDetailStatus)req.Status;
+            detail.UpdateDate = DateTime.UtcNow;
+            detail.UpdateBy = doctor.Name;
+
+            await _context.SaveChangesAsync();
+
+            // 7. Cập nhật lại Amount cho Prescription
+            await UpdatePrescriptionAmount(detail.PrescriptionId);
+
+            // 8. Nếu lấy hết thuốc thì trả về message đặc biệt
+            if (isDepleted)
+                throw new Exception("Bạn đã lấy hết số thuốc trong kho cho loại này.");
+
+            // 9. Trả về DTO response như thường
+            return _mapper.MapToResponse(detail);
+        }
+
+
+
     }
 
 
