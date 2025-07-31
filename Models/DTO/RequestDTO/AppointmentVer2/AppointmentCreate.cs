@@ -12,7 +12,6 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.AppointmentVer2
         public int ClinicId { get; set; }
         public int ServiceId { get; set; }
         public string? Name { get; set; }
-        public string? Code { get; set; }
         public int DoctorId { get; set; }
         public string ShiftType { get; set; }
         

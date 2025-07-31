@@ -44,14 +44,6 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 if (existingDoctorAppointment != null)
                     throw new Exception("Bác sĩ đã có lịch hẹn vào thời gian này.");
 
-                // Kiểm tra lịch hẹn phòng khám
-                var existingRoomAppointment = await _context.Appointments
-                    .Where(a => a.ClinicId == create.ClinicId && a.Status == (int)AppointmentStatus.Scheduled)
-                    .Where(a => a.AppointmentDate.Date == create.AppointmentDate.Date && a.StartTime == create.StartTime)
-                    .FirstOrDefaultAsync();
-
-                if (existingRoomAppointment != null)
-                    throw new Exception("Phòng này đã có lịch hẹn vào thời gian này. Vui lòng chọn phòng khác.");
 
                 // Tạo Appointment
                 var appointmentCode = await GenerateUniqueAppointmentCodeAsync();
@@ -92,7 +84,8 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                     DiscountAmount = 0,
                     TotalAmount = 0,
                     Status = InvoiceStatus.Unpaid,
-                    InsuranceId = 1,
+                    Notes = "",
+                    InsuranceId = null,
                     Name = "Chưa thêm",
                     Code = invoiceCode,
                     CreateDate = DateTime.UtcNow,
@@ -119,21 +112,21 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
                 // Trả kết quả
                 var appointmentResponse = new List<AppointmentResponseDTOVer2>
-        {
-            new AppointmentResponseDTOVer2
-            {
-                AppointmentDate = appointment.AppointmentDate,
-                StartTime = appointment.StartTime,
-                Status = (AppointmentStatus)appointment.Status,
-                PatientId = appointment.PatientId,
-                ClinicId = appointment.ClinicId,
-                ServiceId = appointment.ServiceId ?? 0,
-                ReceptionId = appointment.ReceptionId,
-                Name = appointment.Name,
-                Code = appointment.Code,
-                DoctorId = doctorAppointment.DoctorId
-            }
-        };
+                {
+                    new AppointmentResponseDTOVer2
+                    {
+                        AppointmentDate = appointment.AppointmentDate,
+                        StartTime = appointment.StartTime,
+                        Status = (AppointmentStatus)appointment.Status,
+                        PatientId = appointment.PatientId,
+                        ClinicId = appointment.ClinicId,
+                        ServiceId = appointment.ServiceId ?? 0,
+                        ReceptionId = appointment.ReceptionId,
+                        Name = appointment.Name,
+                        Code = appointment.Code,
+                        DoctorId = doctorAppointment.DoctorId
+                    }
+                 };
 
                 return appointmentResponse;
             }

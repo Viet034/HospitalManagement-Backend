@@ -13,6 +13,9 @@ public class ClinicMapper : IClinicMapper
         clinic.Name = create.Name;
         clinic.Code = create.Code;
         clinic.Status = create.Status;
+        clinic.Type = create.Type;
+        clinic.Address = create.Address;
+        clinic.Email = create.Email;
         clinic.CreateDate = create.CreateDate;
         clinic.UpdateDate = create.UpdateDate;
         clinic.CreateBy = create.CreateBy;
@@ -63,6 +66,9 @@ public class ClinicMapper : IClinicMapper
         clinic.Name = update.Name;
         clinic.Code = update.Code;
         clinic.Status = update.Status;
+        clinic.Address = update.Address;
+        clinic.Type = update.Type;
+        clinic.ImageUrl = update.ImageUrl;
         clinic.CreateDate = update.CreateDate;
         clinic.UpdateDate = update.UpdateDate;
         clinic.CreateBy = update.CreateBy;
