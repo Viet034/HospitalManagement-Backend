@@ -207,5 +207,23 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                 return BadRequest(ex.Message); 
             }
         }
+
+
+        [HttpGet("calculate%")]
+        [ProducesResponseType(typeof(decimal), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetNewPatientGrowthPercentage()
+        {
+            try
+            {
+                var growthPercentage = await _service.GetNewPatientsGrowthPercentageAsync();
+                return Ok(growthPercentage);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred: {ex.Message}");
+            }
+        }
+
     }
 }

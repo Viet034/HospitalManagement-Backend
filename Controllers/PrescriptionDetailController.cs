@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using SWP391_SE1914_ManageHospital.Data;
 using Microsoft.EntityFrameworkCore;
 using DocumentFormat.OpenXml.InkML;
+using SWP391_SE1914_ManageHospital.Service.Impl;
 
 namespace SWP391_SE1914_ManageHospital.Controllers
 {
@@ -132,6 +133,24 @@ namespace SWP391_SE1914_ManageHospital.Controllers
             return NoContent();
         }
 
+        [HttpPut("update-detail/{id}")]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> UpdateDetail(int id, [FromBody] PrescriptionDetailRequest req)
+        {
+            var userId = GetUserIdFromClaims(); // hàm lấy id từ token/claims
+            if (userId == 0)
+                return Unauthorized();
+
+            try
+            {
+                var result = await _service.UpdateAsync(id, req, userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
     }
 }

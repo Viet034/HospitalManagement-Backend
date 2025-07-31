@@ -17,6 +17,11 @@ public class InvoiceResponseDTO
     public string? Notes { get; set; }
     public InvoiceStatus Status { get; set; }
     public int AppointmentId { get; set; }
-    public int? InsuranceId { get; set; } // Cho phép null
+    public string AppointmentName { get; set; }     // Thêm mới
+    public int? InsuranceId { get; set; }
+    public string InsuranceName { get; set; }       // Thêm mới
     public int PatientId { get; set; }
+    public string PatientName { get; set; }         // Thêm mới
+
+
 }

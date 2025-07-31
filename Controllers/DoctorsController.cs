@@ -169,5 +169,38 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                 return BadRequest(ex.ToString());
             }
         }
+
+        [HttpGet("doctor-calculate%")]
+        [ProducesResponseType(typeof(decimal), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetDoctorGrowthPercentage()
+        {
+            try
+            {
+                var growthPercentage = await _doctorService.GetDoctorGrowthPercentageAsync();
+                return Ok(growthPercentage);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred: {ex.Message}");
+            }
+        }
+
+        [HttpGet("top-prescriptions")]
+        [ProducesResponseType(typeof(List<DoctorPrescriptionTopDTO>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetTopDoctorsByPrescription([FromQuery] int top = 3)
+        {
+            try
+            {
+                var result = await _doctorService.GetTopDoctorsByPrescriptionAsync(top);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred: {ex.Message}");
+            }
+        }
+
     }
 }

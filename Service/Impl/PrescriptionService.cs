@@ -5,6 +5,7 @@ using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Mapper;
 using Microsoft.EntityFrameworkCore;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
+using System;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
 {
@@ -87,17 +88,20 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             if (patient == null)
                 throw new Exception("Không tìm thấy bệnh nhân với thông tin cung cấp.");
 
+            // Tạo mã đơn thuốc tự động, đảm bảo không trùng
+            string prescriptionCode = await GenerateUniquePrescriptionCodeAsync();
+
             // Tạo đơn thuốc mới
             var entity = new Prescription
             {
                 Note = request.Note,
-                Status = (PrescriptionStatus)request.Status,
-                PatientId = patient.Id,  // Gán PatientId từ bệnh nhân
-                DoctorId = doctor.Id,    // Gán DoctorId từ bác sĩ
+                Status = PrescriptionStatus.New, // Trạng thái mặc định là New
+                PatientId = patient.Id,          // Gán PatientId từ bệnh nhân
+                DoctorId = doctor.Id,            // Gán DoctorId từ bác sĩ
                 Name = request.Name,
-                Code = request.Code,
-                CreateDate = DateTime.UtcNow,  // Lấy thời gian hiện tại
-                UpdateDate = DateTime.UtcNow,  // Lấy thời gian hiện tại
+                Code = prescriptionCode,         // Mã đơn thuốc tự động
+                CreateDate = DateTime.UtcNow,    // Thời gian hiện tại
+                UpdateDate = DateTime.UtcNow,    // Thời gian hiện tại
                 CreateBy = doctor.Name,
                 UpdateBy = doctor.Name
             };
@@ -115,6 +119,28 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             return response;  // Trả về DTO với thông tin đơn thuốc đã tạo
         }
 
+        // Hàm sinh mã đơn thuốc duy nhất (ví dụ, tuỳ chỉnh lại theo chuẩn hệ thống của bạn)
+        private async Task<string> GenerateUniquePrescriptionCodeAsync()
+        {
+            string code;
+            int maxAttempts = 10;
+            int attempts = 0;
+            var random = new Random();
+
+            do
+            {
+                code = "PRE" + random.Next(0, 1000).ToString("D3");
+                attempts++;
+            }
+            while (await _context.Prescriptions.AnyAsync(p => p.Code == code) && attempts < maxAttempts);
+
+            if (attempts >= maxAttempts)
+                throw new Exception("Không thể tạo mã đơn thuốc duy nhất sau nhiều lần thử");
+
+            return code;
+        }
+
+
 
         public async Task<PrescriptionResponseDTO> UpdateAsync(int id, PrescriptionRequest request)
         {
@@ -126,9 +152,9 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 throw new Exception("Không tìm thấy bác sĩ.");
 
             entity.Note = request.Note;
-            entity.Status = (PrescriptionStatus)request.Status;
+            
             entity.Name = request.Name;
-            entity.Code = request.Code;
+            
             entity.UpdateDate = DateTime.UtcNow;
             entity.UpdateBy = doctor.Name;
 
