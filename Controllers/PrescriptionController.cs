@@ -111,33 +111,51 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         // Thêm đơn thuốc mới
         [HttpPost("add-prescription")]
         [Authorize(Roles = "Doctor")]
-        public async Task<IActionResult> Create([FromBody] PrescriptionRequest request)
+        public async Task<IActionResult> CreatePrescription([FromBody] PrescriptionRequest request)
         {
+            // Lấy UserId từ Claims
             var userId = GetUserIdFromClaims();
             if (userId == 0)
-                return Unauthorized("User chưa đăng nhập.");
+                return Unauthorized(new { message = "User chưa đăng nhập." });
 
+            // Kiểm tra quyền bác sĩ
             if (!await IsDoctor(userId))
                 return Forbid("Chỉ bác sĩ mới có quyền tạo đơn thuốc.");
 
-            request.UserId = userId;
+
+            request.UserId = userId; // Gán UserId cho request
+
             try
             {
-                var created = await _prescriptionService.CreateAsync(request);
-                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+                var createdPrescription = await _prescriptionService.CreateAsync(request);
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = createdPrescription.Id },
+                    createdPrescription
+                );
             }
             catch (Exception ex)
             {
-                // Kiểm tra lỗi do không tìm thấy bệnh nhân (nội dung giống bạn)
+                // Lỗi không tìm thấy bệnh nhân
                 if (ex.Message.Contains("Không tìm thấy bệnh nhân với thông tin cung cấp."))
                 {
-                    // Trả về lỗi gọn 1 dòng message
                     return BadRequest(new { message = "Không tìm thấy bệnh nhân với thông tin cung cấp." });
                 }
-                // Các lỗi khác: trả về lỗi mặc định hoặc log lại tùy nhu cầu
-                return BadRequest(new { message = ex.Message });
+                // Lỗi không tìm thấy bác sĩ
+                if (ex.Message.Contains("Không tìm thấy bác sĩ."))
+                {
+                    return BadRequest(new { message = "Không tìm thấy bác sĩ." });
+                }
+                // Lỗi trùng mã đơn thuốc hoặc các lỗi khác
+                if (ex.Message.Contains("Không thể tạo mã đơn thuốc duy nhất"))
+                {
+                    return BadRequest(new { message = "Không thể tạo mã đơn thuốc duy nhất, vui lòng thử lại." });
+                }
+                // Lỗi mặc định
+                return BadRequest(new { message = "Có lỗi xảy ra: " + ex.Message });
             }
         }
+
 
 
 

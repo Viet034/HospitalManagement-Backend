@@ -30,9 +30,9 @@ public class PrescriptionMapper : IPrescriptionMapper
         return new Prescription
         {
             Note = request.Note,
-            Status = (PrescriptionStatus)request.Status,
+            
             Name = request.Name,
-            Code = request.Code,
+            
             CreateDate = DateTime.UtcNow,
             UpdateDate = DateTime.UtcNow,
             CreateBy = "system",
@@ -43,9 +43,9 @@ public class PrescriptionMapper : IPrescriptionMapper
     public void MapToExistingEntity(PrescriptionRequest request, Prescription prescription)
     {
         prescription.Note = request.Note;
-        prescription.Status = (PrescriptionStatus)request.Status;
+        
         prescription.Name = request.Name;
-        prescription.Code = request.Code;
+        
         prescription.UpdateDate = DateTime.UtcNow;
         prescription.UpdateBy = "system";
     }

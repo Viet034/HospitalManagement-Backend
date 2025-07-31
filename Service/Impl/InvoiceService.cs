@@ -4,10 +4,11 @@ using SWP391_SE1914_ManageHospital.Models.DTO.EntitiesDTO;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl;
 
-public class InvoiceService : IInvoiceService
+public class InvoiceService :   IInvoiceService
 {
     private readonly ApplicationDBContext _context;
 
@@ -201,4 +202,115 @@ public class InvoiceService : IInvoiceService
 
         return invoiceDTOs;
     }
+
+    
+    
+
+    public async Task<decimal> GetTotalRevenueByMonthAsync()
+{
+    try
+    {
+        // Lấy ngày bắt đầu tháng này và tháng sau
+        var currentMonthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+        var currentMonthEnd = currentMonthStart.AddMonths(1).AddDays(-1); // End of the current month
+
+        // Tính tổng doanh thu trong tháng này
+        var totalRevenueThisMonth = await _context.Invoices
+            .Where(i => i.CreateDate >= currentMonthStart && i.CreateDate <= currentMonthEnd && (int)i.Status == 1)
+            .SumAsync(i => i.TotalAmount);
+
+        return totalRevenueThisMonth;
+    }
+    catch (Exception ex)
+    {
+        throw new Exception("Error calculating total revenue for the month: " + ex.Message);
+    }
+}
+
+public async Task<decimal> GetTotalRevenueByYearAsync()
+{
+    try
+    {
+        // Lấy ngày bắt đầu năm này và năm sau
+        var currentYearStart = new DateTime(DateTime.Now.Year, 1, 1);
+        var currentYearEnd = new DateTime(DateTime.Now.Year, 12, 31); // End of the current year
+
+        // Tính tổng doanh thu trong năm này
+        var totalRevenueThisYear = await _context.Invoices
+            .Where(i => i.CreateDate >= currentYearStart && i.CreateDate <= currentYearEnd && (int)i.Status == 1)
+            .SumAsync(i => i.TotalAmount);
+
+        return totalRevenueThisYear;
+    }
+    catch (Exception ex)
+    {
+        throw new Exception("Error calculating total revenue for the year: " + ex.Message);
+    }
+}
+
+    // Tính tổng doanh thu
+    public async Task<decimal> GetTotalRevenueAsync()
+    {
+        try
+        {
+            // Tính tổng doanh thu (TotalAmount) trong bảng Invoice chỉ với status = 1
+            var totalRevenue = await _context.Invoices
+                .Where(i => (int)i.Status == 1)
+                .SumAsync(i => i.TotalAmount);
+
+            return totalRevenue;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error calculating total revenue: " + ex.Message);
+        }
+    }
+
+    // Lấy tất cả hóa đơn (Invoice)
+    public async Task<List<InvoiceResponseDTO>> GetAllInvoicesAsync(DateTime? startDate = null, DateTime? endDate = null)
+    {
+        var query = _context.Invoices
+            .Include(i => i.Appointment)
+            .Include(i => i.Insurance)
+            .Include(i => i.Patient)
+            .AsQueryable();
+
+        if (startDate.HasValue)
+            query = query.Where(i => i.CreateDate >= startDate.Value);
+
+        if (endDate.HasValue)
+        {
+            var endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1); // Lấy hết ngày endDate
+            query = query.Where(i => i.CreateDate <= endOfDay);
+        }
+
+        var invoices = await query.ToListAsync();
+
+        // Mapping sang DTO
+        var invoiceResponseDTOs = invoices.Select(i => new InvoiceResponseDTO
+        {
+            Id = i.Id,
+            Name = i.Name,
+            Code = i.Code,
+            CreateDate = i.CreateDate,
+            UpdateDate = i.UpdateDate,
+            CreateBy = i.CreateBy,
+            UpdateBy = i.UpdateBy,
+            InitialAmount = i.InitialAmount,
+            DiscountAmount = i.DiscountAmount,
+            TotalAmount = i.TotalAmount,
+            Notes = i.Notes,
+            Status = i.Status,
+            AppointmentId = i.AppointmentId,
+            AppointmentName = i.Appointment != null ? i.Appointment.Name : "",
+            InsuranceId = i.InsuranceId,
+            InsuranceName = i.Insurance != null ? i.Insurance.Name : "",
+            PatientId = i.PatientId,
+            PatientName = i.Patient != null ? i.Patient.Name : ""
+        }).ToList();
+
+        return invoiceResponseDTOs;
+    }
+
+
 }

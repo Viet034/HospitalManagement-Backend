@@ -76,6 +76,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             respone.BloodType = entity.BloodType is DBNull ? null : entity.BloodType;
             respone.ImageURL = entity.ImageURL is DBNull ? null : entity.ImageURL;
             respone.UserId = entity.UserId;
+            respone.Status = entity.Status;
             respone.CreateDate = entity.CreateDate;
             respone.UpdateDate = entity.UpdateDate;
             respone.CreateBy = entity.CreateBy;
