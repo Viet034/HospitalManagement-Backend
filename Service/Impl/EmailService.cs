@@ -23,7 +23,11 @@ public class EmailService : IEmailService
         var password = smtpSettings["Password"];
         var websiteUrl = smtpSettings["WebsiteUrl"]?.TrimEnd('/');
 
-        var fullUrl = $"{websiteUrl}/frontend/reset-password-form.html?token={resetToken}&userType={userType}";
+        //var fullUrl = $"{websiteUrl}/frontend/reset-password-form.html?token={resetToken}&userType={userType}";
+        var fullUrl = userType.ToString() == "Doctor"
+    ? $"{websiteUrl}/dashboard/auth/doctor-reset-password.html?token={resetToken}&userType={userType}"
+    : $"{websiteUrl}/frontend/reset-password-form.html?token={resetToken}&userType={userType}";
+
 
         using var client = new SmtpClient
         {

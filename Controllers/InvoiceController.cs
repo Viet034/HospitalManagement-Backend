@@ -67,7 +67,7 @@ public class InvoiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest($"An error occurred: {ex.Message}");
+            return BadRequest($"Lỗi: {ex.Message}");
         }
     }
 
@@ -84,7 +84,7 @@ public class InvoiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest($"An error occurred: {ex.Message}");
+            return BadRequest($"Lỗi: {ex.Message}");
         }
     }
 
@@ -100,7 +100,7 @@ public class InvoiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest($"An error occurred: {ex.Message}");
+            return BadRequest($"Lỗi: {ex.Message}");
         }
     }
 
@@ -114,7 +114,7 @@ public class InvoiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest($"Error occurred: {ex.Message}");
+            return BadRequest($"Lỗi: {ex.Message}");
         }
     }
 

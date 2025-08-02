@@ -31,7 +31,7 @@ public class RoleController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.ToString());
+            return BadRequest(ex.Message);
         }
     }
 
@@ -47,7 +47,7 @@ public class RoleController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.ToString());
+            return BadRequest(ex.Message);
         }
     }
 
@@ -63,7 +63,7 @@ public class RoleController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.ToString());
+            return BadRequest(ex.Message);
         }
     }
 
@@ -96,7 +96,7 @@ public class RoleController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.ToString());
+            return BadRequest(ex.Message);
         }
     }
 
@@ -115,7 +115,7 @@ public class RoleController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.ToString());
+            return BadRequest(ex.Message);
         }
     }
 }
