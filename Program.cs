@@ -100,7 +100,7 @@ builder.Services.AddScoped<IMedicineManageForAdminMapper, MedicineManageForAdmin
 builder.Services.AddScoped<IMedicineImportExcelMapper, MedicineImportExcelMapper>();
 builder.Services.AddScoped<IMedicineImportExcelService, MedicineImportExcelService>();
 
-
+builder.Services.AddScoped<IMedicalRecordAdminService, MedicalRecordAdminService>();
 
 builder.Services.AddScoped<INurseService, NurseService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>();
