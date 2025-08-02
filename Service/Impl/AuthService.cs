@@ -352,16 +352,7 @@ public class AuthService : IAuthService
     {
         try
         {
-            Console.WriteLine($"=== AUTH SERVICE: RegisterPatientAsync ===");
-            Console.WriteLine($"Email: {request.Email}");
-            Console.WriteLine($"FullName: {request.FullName}");
-            Console.WriteLine($"Code: {request.Code}");
-            Console.WriteLine($"Gender: {request.Gender}");
-            Console.WriteLine($"Dob: {request.Dob}");
-            Console.WriteLine($"CCCD: {request.CCCD}");
-            Console.WriteLine($"Phone: {request.Phone}");
-            Console.WriteLine($"EmergencyContact: {request.EmergencyContact}");
-            Console.WriteLine($"Address: {request.Address}");
+            
 
             //  Kiểm tra Email tồn tại chưa
             if (await _context.Users.AnyAsync(x => x.Email == request.Email))
@@ -484,19 +475,12 @@ public class AuthService : IAuthService
             Email = newUser.Email
         };
         
-        Console.WriteLine($"=== AUTH SERVICE: Registration successful ===");
-        Console.WriteLine($"PatientId: {response.PatientId}");
-        Console.WriteLine($"FullName: {response.FullName}");
-        Console.WriteLine($"Email: {response.Email}");
         
         return response;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"=== AUTH SERVICE: Registration failed ===");
-            Console.WriteLine($"Error: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            throw;
+            throw new Exception("Lỗi không thể tạo tài khoản");
         }
     }
 

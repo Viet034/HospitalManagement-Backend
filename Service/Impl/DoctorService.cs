@@ -125,6 +125,18 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
         public async Task<DoctorRegisterResponse> DoctorRegisterAsync(DoctorRegisterRequest request)
         {
             var department = await _context.Departments.FirstOrDefaultAsync(d => d.Id == request.DepartmentId);
+            var dob = request.Dob;
+            var today = DateTime.Today;
+            var age = today.Year - dob.Year;
+
+            if(dob > today.AddYears(-age))
+            {
+                age--;
+            }
+            if(age < 18)
+            {
+                throw new Exception("Bác sĩ chưa đủ 18 tuổi");
+            }
             if (department == null)
             {
                 throw new Exception("DepartmentId không tồn tại.");

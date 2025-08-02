@@ -41,7 +41,7 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            return Unauthorized(ex.ToString());
+            return BadRequest(ex.Message);
         }
     }
     [HttpPost("register/patient")]
@@ -50,56 +50,13 @@ public class AuthenticationController : ControllerBase
     {
         try
         {
-            // Debug logging
-            Console.WriteLine($"=== PATIENT REGISTRATION DEBUG ===");
-            Console.WriteLine($"Request received: {System.Text.Json.JsonSerializer.Serialize(request)}");
-            Console.WriteLine($"Email: {request.Email}");
-            Console.WriteLine($"FullName: {request.FullName}");
-            Console.WriteLine($"Code: {request.Code}");
-            Console.WriteLine($"Gender: {request.Gender}");
-            Console.WriteLine($"Dob: {request.Dob}");
-            Console.WriteLine($"CCCD: {request.CCCD}");
-            Console.WriteLine($"Phone: {request.Phone}");
-            Console.WriteLine($"EmergencyContact: {request.EmergencyContact}");
-            Console.WriteLine($"Address: {request.Address}");
-            
-            // Validation
-            if (string.IsNullOrEmpty(request.Email))
-                return BadRequest(new { success = false, message = "Email không được để trống" });
-                
-            if (string.IsNullOrEmpty(request.FullName))
-                return BadRequest(new { success = false, message = "Họ tên không được để trống" });
-                
-            if (string.IsNullOrEmpty(request.Code))
-                return BadRequest(new { success = false, message = "Mã bệnh nhân không được để trống" });
-                
-            if (string.IsNullOrEmpty(request.CCCD))
-                return BadRequest(new { success = false, message = "CCCD không được để trống" });
-                
-            if (string.IsNullOrEmpty(request.Phone))
-                return BadRequest(new { success = false, message = "Số điện thoại không được để trống" });
-                
-            if (string.IsNullOrEmpty(request.EmergencyContact))
-                return BadRequest(new { success = false, message = "Liên hệ khẩn cấp không được để trống" });
-                
-            if (string.IsNullOrEmpty(request.Address))
-                return BadRequest(new { success = false, message = "Địa chỉ không được để trống" });
-            
             var response = await _service.RegisterPatientAsync(request);
             return Ok(response);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"=== PATIENT REGISTRATION ERROR ===");
-            Console.WriteLine($"Error: {ex.Message}");
-            Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            
-            _logger.LogError(ex, "Lỗi khi tạo tài khoản bệnh nhân!");
-            return BadRequest(new { 
-                success = false, 
-                message = "Lỗi khi đăng ký tài khoản bệnh nhân", 
-                error = ex.Message 
-            });
+            _logger.LogError(ex, "Tạo tài khoản lỗi!");
+            return BadRequest(ex.Message);
         }
     }
     [HttpPost("register/nurse")]
@@ -114,7 +71,7 @@ public class AuthenticationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Tạo tài khoản y tá lỗi!");
-            return BadRequest(ex.ToString());
+            return BadRequest(ex.Message);
         }
     }
 
@@ -130,7 +87,7 @@ public class AuthenticationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Tạo tài khoản bac si lỗi!");
-            return BadRequest(ex.ToString());
+            return BadRequest(ex.Message);
         }
     }
     [HttpPost("change-password")]
