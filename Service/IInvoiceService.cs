@@ -17,6 +17,7 @@ public interface IInvoiceService
     Task<decimal> GetTotalRevenueByYearAsync();
 
     Task<List<InvoiceResponseDTO>> GetAllInvoicesAsync(DateTime? startDate, DateTime? endDate);
+    Task<InvocieDetailFinalResponseDTO> GetInvoiceInfoByAppointmentId(int appointmentId);
 
 
 

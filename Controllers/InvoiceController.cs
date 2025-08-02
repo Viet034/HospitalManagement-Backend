@@ -118,6 +118,18 @@ public class InvoiceController : ControllerBase
         }
     }
 
-
+    [HttpGet("get-invoice/{appointmentId}")]
+    public async Task<IActionResult> GetInvoicesDetail(int appointmentId)
+    {
+        try
+        {
+            var invoiceResponseDTOs = await _service.GetInvoiceInfoByAppointmentId(appointmentId);
+            return Ok(invoiceResponseDTOs);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Lỗi: {ex.Message}");
+        }
+    }
 
 }
