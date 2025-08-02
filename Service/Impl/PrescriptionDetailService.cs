@@ -121,6 +121,14 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             if (medicine == null)
                 throw new InvalidOperationException($"Không tìm thấy thuốc {req.MedicineName}");
 
+            // ----------- KIỂM TRA ĐÃ CÓ CHI TIẾT THUỐC NÀY CHƯA -----------
+            var existedDetail = await _context.PrescriptionDetails
+                .AsNoTracking()
+                .FirstOrDefaultAsync(pd => pd.PrescriptionId == req.PrescriptionId && pd.MedicineId == medicine.Id);
+
+            if (existedDetail != null)
+                throw new InvalidOperationException($"Thuốc '{medicine.Name}' đã có trong đơn thuốc này. Vui lòng chọn thuốc khác hoặc sửa số lượng ở chi tiết đã có.");
+
             // Kiểm tra kho thuốc
             var inventories = await _context.Medicine_Inventories
                 .Where(mi => mi.MedicineId == medicine.Id
