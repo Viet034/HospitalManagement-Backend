@@ -1,5 +1,7 @@
 ﻿
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Ocsp;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Mapper;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Department;
@@ -7,6 +9,7 @@ using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
 using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl;
@@ -40,6 +43,12 @@ public class DepartmentService : IDepartmentService
 
     public async Task<DepartmentResponseDTO> CreateDepartmentAsync(DepartmentCreate create)
     {
+        create.Name = create.Name.Trim();
+        if (string.IsNullOrEmpty(create.Name))
+            throw new Exception("Không được để trống tên");
+
+        if (!Regex.IsMatch(create.Name, @"^[a-zA-ZÀ-ỹĂăÂâĐđÊêÔôƠơƯư\s]+$"))
+            throw new Exception("Tên không được chứa kí tự đặc biệt");
         if (await _context.Departments.AnyAsync(x => x.Name == create.Name))
         {
             throw new Exception("Tên đã được sử dụng");
@@ -131,7 +140,10 @@ public class DepartmentService : IDepartmentService
     {
         var coId = await _context.Departments.FindAsync(id)
             ?? throw new KeyNotFoundException($"Không có ID {id} tồn tại");
-
+        if (await _context.Departments.AnyAsync(x => x.Name == update.Name))
+        {
+            throw new Exception("Tên đã được sử dụng");
+        }
         var result = _mapper.UpdateToEntity(update);
         coId.Code = update.Code;
         coId.Name = result.Name;

@@ -39,7 +39,7 @@ public class InvoiceController : ControllerBase
         }
     }
 
-    [HttpPost("generate-invoice-details/{appointmentId}")]
+    [HttpPut("generate-invoice-details/{appointmentId}")]
     public async Task<IActionResult> GenerateInvoiceDetails(int appointmentId)
     {
         try
@@ -67,7 +67,7 @@ public class InvoiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest($"An error occurred: {ex.Message}");
+            return BadRequest($"Lỗi: {ex.Message}");
         }
     }
 
@@ -84,7 +84,7 @@ public class InvoiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest($"An error occurred: {ex.Message}");
+            return BadRequest($"Lỗi: {ex.Message}");
         }
     }
 
@@ -100,7 +100,7 @@ public class InvoiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest($"An error occurred: {ex.Message}");
+            return BadRequest($"Lỗi: {ex.Message}");
         }
     }
 
@@ -114,7 +114,7 @@ public class InvoiceController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest($"Error occurred: {ex.Message}");
+            return BadRequest($"Lỗi: {ex.Message}");
         }
     }
 
