@@ -22,6 +22,9 @@ public class AppointmentResponseDTO_1
     public int? ServiceId { get; set; }
     public string? ServiceName { get; set; }
 
+    public string? DoctorName { get; set; }
+
+
     public string Code { get; set; }
     public DateTime CreateDate { get; set; }
     public DateTime? UpdateDate { get; set; }
