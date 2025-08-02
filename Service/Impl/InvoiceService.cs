@@ -5,10 +5,11 @@ using static SWP391_SE1914_ManageHospital.Ultility.Status;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
+using ClosedXML;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl;
 
-public class InvoiceService :   IInvoiceService
+public class InvoiceService : IInvoiceService
 {
     private readonly ApplicationDBContext _context;
 
@@ -77,15 +78,7 @@ public class InvoiceService :   IInvoiceService
                         UpdateBy = "System",
                         CreateBy = "System"
                     };
-                        //Console.WriteLine("Adding InvoiceDetail for PrescriptionId: " + prescriptionId);
-
-                        //if (invoice.InvoiceDetails == null)
-                        //    invoice.InvoiceDetails = new List<InvoiceDetail>();
-
-                        //invoice.InvoiceDetails.Add(presDetail);
-
-                        //var entry = _context.Entry(presDetail);
-                        //Console.WriteLine("Entity state after adding: " + entry.State); // Phải là Added
+                        
                         _context.InvoiceDetails.Add(presDetail);
 
                     }
@@ -140,15 +133,7 @@ public class InvoiceService :   IInvoiceService
 
             invoice.InitialAmount = invoice.TotalAmount;
             await _context.SaveChangesAsync();
-            //foreach (var entry in _context.ChangeTracker.Entries<InvoiceDetail>())
-            //{
-            //    Console.WriteLine($"EntityState: {entry.State} - InvoiceId: {entry.Entity.InvoiceId}, " +
-            //                      $"PresId: {entry.Entity.PrescriptionsId}, ServiceId: {entry.Entity.ServiceId}");
-            //}
-            //var savedDetails = await _context.InvoiceDetails
-            //    .Where(d => d.InvoiceId == invoice.Id)
-            //    .ToListAsync();
-            //Console.WriteLine($"Saved InvoiceDetails count: {savedDetails.Count}");
+            
             return true;
         }
         catch (Exception ex)
@@ -312,5 +297,65 @@ public async Task<decimal> GetTotalRevenueByYearAsync()
         return invoiceResponseDTOs;
     }
 
+    public async Task<InvocieDetailFinalResponseDTO> GetInvoiceInfoByAppointmentId(int appointmentId)
+    {
+        var appointment = await _context.Appointments
+            .Include(a => a.Patient)
+            .Include(a => a.Medical_Record)
+            .Include(a => a.Doctor_Appointments)
+            .ThenInclude(a=>a.Doctor)
+            .FirstOrDefaultAsync(a => a.Id == appointmentId);
 
+        if (appointment == null)
+            throw new Exception("Không tìm thấy lịch hẹn");
+
+        var invoice = await _context.Invoices
+            .Include(a => a.InvoiceDetails)
+                .ThenInclude(a => a.Service)
+            .Include(a=>a.InvoiceDetails)
+                .ThenInclude(a=>a.Prescription)
+            .FirstOrDefaultAsync(a => a.AppointmentId == appointmentId);
+
+        if (invoice == null)
+            throw new Exception("Không tìm thấy hóa đơn");
+
+        var serviceItems = invoice.InvoiceDetails.Select(d =>
+        {
+            if (d.ServiceId != null)
+            {
+                return new ServiceItemDTO
+                {
+                    Type = "Dịch vụ",
+                    Name = d.Service?.Name,
+                    Price = d.TotalAmount
+                };
+            }
+            else if (d.PrescriptionsId != null)
+            {
+                return new ServiceItemDTO
+                {
+                    Type = "Thuốc",
+                    Name = d.Prescription?.Name, 
+                    Price = d.TotalAmount
+                };
+            }
+            return null;
+        }).Where(x => x != null).ToList();
+
+
+        return new InvocieDetailFinalResponseDTO
+        {
+            InvoiceId = invoice.Id,
+            AppointmentDate = appointment.AppointmentDate,
+            PatientName = appointment.Patient?.Name,
+            Address = appointment.Patient?.Address,
+            Phone = appointment.Patient?.Phone,
+            DoctorName = appointment.Doctor_Appointments?.FirstOrDefault()?.Doctor?.Name,
+            Diagnosis = appointment.Medical_Record?.Diagnosis,
+            Notes = appointment.Medical_Record?.Notes,
+            TotalAmount = invoice.TotalAmount,
+            ServiceItems = serviceItems!
+        };
+
+    }
 }
