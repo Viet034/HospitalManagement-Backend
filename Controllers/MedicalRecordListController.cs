@@ -47,5 +47,32 @@ namespace SWP391_SE1914_ManageHospital.Controllers
                 return StatusCode(500, "Đã xảy ra lỗi khi lấy danh sách Medical Records");
             }
         }
+        [HttpGet("doctor/{doctorId}")]
+        public IActionResult GetMedicalRecordsByDoctorId(int doctorId)
+        {
+            try
+            {
+                _logger.LogInformation("Đang lấy danh sách medical records do bác sĩ ID: {DoctorId} tạo", doctorId);
+                var records = _listService.GetMedicalRecordsByDoctorId(doctorId);
+
+                var response = new
+                {
+                    TotalCount = records.Count(),
+                    Records = records
+                };
+
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Dữ liệu đầu vào không hợp lệ: {Message}", ex.Message);
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Đã xảy ra lỗi khi lấy hồ sơ bệnh án do bác sĩ tạo, ID: {DoctorId}", doctorId);
+                return StatusCode(500, "Đã xảy ra lỗi khi lấy danh sách Medical Records");
+            }
+        }
     }
 }
