@@ -85,7 +85,7 @@ public class AuthService : IAuthService
         } 
         catch (Exception ex)
         {
-            // Xử lý lỗi nếu cần
+            
             throw new Exception("Quên mật khẩu không thành công", ex);
         }
     }
@@ -107,7 +107,7 @@ public class AuthService : IAuthService
             throw new Exception("Tài khoản đã bị khóa");
         }
 
-        // Kiểm tra người dùng có role phù hợp không
+        // check role
         var matchedRole = user.User_Roles
             .Select(ur => ur.Role.Name)
             .FirstOrDefault(roleName => roleName == request.UserType.ToString());
@@ -118,15 +118,15 @@ public class AuthService : IAuthService
         }
         else
         {
-            Console.WriteLine($"Xin chào {request.UserType}"); // Debug log
+            Console.WriteLine($"Xin chào {request.UserType}");
         }
 
             // Tạo JWT và Refresh Token
-            var token = GenerateJwtToken(user, request.UserType); // Cần truyền enum để tạo claim đúng
+            var token = GenerateJwtToken(user, request.UserType); 
         var refreshToken = GenerateRefreshToken();
 
         user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddHours(2);
         await _context.SaveChangesAsync();
 
         // Mapping Redirect URL theo role
@@ -210,8 +210,8 @@ public class AuthService : IAuthService
                 var user = await _context.Users.FindAsync(userId);
                 if (user != null)
                 {
-                    user.RefreshToken = null; // Xóa RefreshToken
-                    user.RefreshTokenExpiryTime = null; // Xóa thời gian hết hạn RefreshToken
+                    user.RefreshToken = null; 
+                    user.RefreshTokenExpiryTime = null; 
                 }
                 else
                 {
@@ -227,7 +227,7 @@ public class AuthService : IAuthService
         }
         catch (Exception ex)
         {
-            // Xử lý lỗi nếu cần
+           
             throw new Exception("Đăng xuất không thành công", ex);
         }
     }
@@ -351,33 +351,31 @@ public class AuthService : IAuthService
     public async Task<PatientRegisterResponse> RegisterPatientAsync(PatientRegisterRequest request)
     {
         try
-        {
+        { 
             
-
-            //  Kiểm tra Email tồn tại chưa
             if (await _context.Users.AnyAsync(x => x.Email == request.Email))
                 throw new Exception("Email đã tồn tại!");
 
-            //  Kiểm tra Phone và CCCD
+            
             if (await _context.Patients.AnyAsync(x => x.Phone == request.Phone))
                 throw new Exception("Số điện thoại đã tồn tại");
 
             if (await _context.Patients.AnyAsync(x => x.CCCD == request.CCCD))
                 throw new Exception("CCCD đã tồn tại");
                 
-            // Validation CCCD (12 số)
+            
             if (!Regex.IsMatch(request.CCCD, @"^\d{12}$"))
                 throw new Exception("CCCD phải có đúng 12 chữ số");
                 
-            // Validation Phone (10 số, bắt đầu bằng 0)
+            
             if (!Regex.IsMatch(request.Phone, @"^0\d{9}$"))
                 throw new Exception("Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số");
                 
-            // Validation EmergencyContact (10 số, bắt đầu bằng 0)
+            
             if (!Regex.IsMatch(request.EmergencyContact, @"^0\d{9}$"))
                 throw new Exception("Số điện thoại khẩn cấp phải bắt đầu bằng 0 và có 10 chữ số");
 
-            //  Kiểm tra và chuẩn hóa tên
+            
             request.FullName = request.FullName.Trim();
             if (string.IsNullOrEmpty(request.FullName))
                 throw new Exception("Không được để trống tên");
@@ -385,7 +383,7 @@ public class AuthService : IAuthService
             if (!Regex.IsMatch(request.FullName, @"^[a-zA-ZÀ-ỹĂăÂâĐđÊêÔôƠơƯư\s]+$"))
                 throw new Exception("Tên không được chứa kí tự đặc biệt");
         
-        //  Tạo User mới
+        
         var hashedPassword = _passwordHasher.HashPassword(request.Password);
         var newUser = new User
         {
@@ -410,7 +408,7 @@ public class AuthService : IAuthService
                 patientCode = await CheckUniqueCodeAsync();
             }
 
-            // Kiểm tra code có bị trùng không
+            
             int maxAttempts = 10;
             int attempts = 0;
             while (await _context.Patients.AnyAsync(p => p.Code == patientCode) && attempts < maxAttempts)
@@ -430,7 +428,7 @@ public class AuthService : IAuthService
             throw new Exception("Lỗi khi tạo mã bệnh nhân: " + ex.Message);
         }
 
-        //  Gán thông tin Patient
+       
         var patient = new Patient
         {
             Code = patientCode,
@@ -454,7 +452,7 @@ public class AuthService : IAuthService
         };
         await _context.Patients.AddAsync(patient);
 
-        //  Gán role PATIENT (nếu dùng User_Role)
+        
         var patientRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name.Trim().ToLower() == "patient");
         if (patientRole != null)
         {
@@ -467,7 +465,7 @@ public class AuthService : IAuthService
 
         await _context.SaveChangesAsync();
 
-        //  Trả về response
+        
         var response = new PatientRegisterResponse
         {
             PatientId = patient.Id,

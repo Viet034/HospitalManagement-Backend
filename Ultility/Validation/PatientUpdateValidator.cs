@@ -27,7 +27,7 @@ public class PatientUpdateValidator
         if (string.IsNullOrEmpty(update.Phone) || !PhoneRegex.IsMatch(update.Phone))
             throw new ArgumentException("Số điện thoại không hợp lệ (phải bắt đầu bằng 0 và có 10 chữ số)");
 
-        // Kiểm tra số điện thoại người liên hệ khẩn cấp
+        
         if (!string.IsNullOrEmpty(update.EmergencyContact))
         {
             if (!PhoneRegex.IsMatch(update.EmergencyContact))
