@@ -5,5 +5,6 @@ namespace SWP391_SE1914_ManageHospital.Service
     public interface IMedicalRecordListService
     {
         IEnumerable<MedicalRecordResponse> GetMedicalRecordsByPatientId(int patientId);
+        IEnumerable<MedicalRecordResponse> GetMedicalRecordsByDoctorId(int doctorId);
     }
 }

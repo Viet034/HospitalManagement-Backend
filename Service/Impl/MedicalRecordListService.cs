@@ -56,5 +56,36 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 throw new Exception("Lỗi khi lấy danh sách Medical Records", ex);
             }
         }
+        public IEnumerable<MedicalRecordResponse> GetMedicalRecordsByDoctorId(int doctorId)
+        {
+            try
+            {
+                if (doctorId <= 0)
+                    throw new ArgumentException("ID bác sĩ không hợp lệ", nameof(doctorId));
+
+                // Kiểm tra bác sĩ có tồn tại không
+                bool doctorExists = _context.Doctors.Any(d => d.Id == doctorId);
+                if (!doctorExists)
+                    throw new ArgumentException($"Không tìm thấy bác sĩ có ID: {doctorId}", nameof(doctorId));
+
+                var records = _context.Medical_Records
+                    .Include(mr => mr.Doctor)
+                    .Include(mr => mr.Patient)
+                    .Include(mr => mr.Disease)
+                    .Where(mr => mr.DoctorId == doctorId)
+                    .OrderByDescending(mr => mr.CreateDate)
+                    .ToList();
+
+                return _listMapper.ListEntityToResponse(records);
+            }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Lỗi khi lấy danh sách Medical Records của bác sĩ", ex);
+            }
+        }
     }
 }

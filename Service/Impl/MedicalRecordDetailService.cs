@@ -74,6 +74,12 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 var entity = _detailMapper.CreateRequestToEntity(request, doctorName);
                 _context.Medical_Records.Add(entity);
                 _context.SaveChanges();
+                var appointment = _context.Appointments.FirstOrDefault(a => a.Id == request.AppointmentId);
+                if (appointment != null)
+                {
+                    appointment.Status = SWP391_SE1914_ManageHospital.Ultility.Status.AppointmentStatus.Completed;
+                    _context.SaveChanges();
+                }
 
                 _context.Entry(entity).Reference(e => e.Doctor).Load();
                 _context.Entry(entity).Reference(e => e.Patient).Load();
@@ -124,6 +130,12 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 _detailMapper.UpdateEntityFromRequest(entity, request, doctorName);
 
                 _context.SaveChanges();
+                var appointment = _context.Appointments.FirstOrDefault(a => a.Id == request.AppointmentId);
+                if (appointment != null)
+                {
+                    appointment.Status = SWP391_SE1914_ManageHospital.Ultility.Status.AppointmentStatus.Completed;
+                    _context.SaveChanges();
+                }
 
                 _context.Entry(entity).Reference(e => e.Doctor).Load();
                 _context.Entry(entity).Reference(e => e.Patient).Load();
