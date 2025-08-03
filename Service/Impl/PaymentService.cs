@@ -25,7 +25,7 @@ public class PaymentService : IPaymentService
         using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
-            // 1. Lấy thông tin Invoice và liên kết liên quan
+            
             var invoice = await _context.Invoices
                 .Include(i => i.Payment_Invoices)
                 .Include(i => i.Appointment).Include(a => a.InvoiceDetails).ThenInclude(a=>a.Service)
@@ -34,13 +34,13 @@ public class PaymentService : IPaymentService
             if (invoice == null)
                 throw new Exception("Invoice not found");
 
-            // 2. Map DTO -> Entity (nên dùng mapper nếu có)
+            //DTO -> Entity 
             var payment = _mapper.CreateToEntity(create);
 
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
 
-            // 3. Tạo bản ghi Payment_Invoice
+            
             var paymentInvoice = new Payment_Invoice
             {
                 InvoiceId = invoice.Id,
@@ -50,7 +50,7 @@ public class PaymentService : IPaymentService
 
             _context.Payment_Invoices.Add(paymentInvoice);
 
-            // 4. Tính tổng tiền đã thanh toán (bao gồm cả payment vừa thêm)
+            
             decimal totalPaid = invoice.Payment_Invoices.Sum(pi => pi.AmountPaid) + create.Amount;
 
             if (totalPaid >= invoice.TotalAmount)
@@ -63,7 +63,7 @@ public class PaymentService : IPaymentService
                 invoice.Status = InvoiceStatus.PartiallyPaid;
             }
 
-            // 5. Cập nhật thông tin sửa đổi
+            
             invoice.UpdateDate = DateTime.UtcNow.AddHours(7);
             invoice.UpdateBy = create.Payer;
 

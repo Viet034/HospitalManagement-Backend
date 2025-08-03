@@ -91,7 +91,7 @@ public class AuthenticationController : ControllerBase
         }
     }
     [HttpPost("change-password")]
-    [Authorize] // Vẫn yêu cầu đăng nhập
+    [Authorize] 
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDTO request)
     {
         try

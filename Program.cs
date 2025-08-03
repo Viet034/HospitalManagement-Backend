@@ -30,7 +30,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IAppointmentService_1, AppointmentService_1>();
-
 builder.Services.AddScoped<IClinicMapper, ClinicMapper>();
 builder.Services.AddScoped<IClinicService, ClinicService>();
 builder.Services.AddScoped<IDepartmentMapper, DepartmentMapper>();
@@ -41,99 +40,68 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IRoleMapper, RoleMapper>();
 builder.Services.AddScoped<IRoleService, RoleService>();
-
 builder.Services.AddScoped<IDoctorMapper, DoctorMapper>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
-
 builder.Services.AddScoped<IEmailService, EmailService>();
-
 builder.Services.AddScoped<IMedicineInventoryMapper, MedicineInventoryMapper>();
 builder.Services.AddScoped<IMedicineInventoryService, MedicineInventoryService>();
-
 builder.Services.AddScoped<IMedicineAdminMapper, MedicineAdminMapper>();
 builder.Services.AddScoped<IMedicineAdminService, MedicineAdminService>();
-
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-
 builder.Services.AddScoped<IUnitMapper, UnitMapper>();
 builder.Services.AddScoped<IUnitService, UnitService>();
-
-
 builder.Services.AddScoped<IPatientFilterMapper, PatientFilterMapper>();
 builder.Services.AddScoped<IPatientFilterService, PatientFilterService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>();
 builder.Services.AddScoped<INurseService, NurseService>();
-
 builder.Services.AddScoped<IMedicineService, MedicineService>();
 builder.Services.AddScoped<IMedicineMapper, MedicineMapper>();
-
 builder.Services.AddScoped<IMedicineCategoryService, MedicineCategoryService>();
 builder.Services.AddScoped<IMedicineCategoryMapper, MedicineCategoryMapper>();
-
-builder.Services.AddScoped<IMedicineDetailService, MedicineDetailService>(); // Đăng ký service
-builder.Services.AddScoped<IMedicineDetailMapper, MedicineDetailMapper>(); // Đăng ký mapper
-
-builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();  // Đăng ký PrescriptionService
+builder.Services.AddScoped<IMedicineDetailService, MedicineDetailService>(); 
+builder.Services.AddScoped<IMedicineDetailMapper, MedicineDetailMapper>(); 
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();  
 builder.Services.AddScoped<IPrescriptionMapper, PrescriptionMapper>();
-
 builder.Services.AddScoped<IPrescriptionDetailMapper, PrescriptionDetailMapper>();
 builder.Services.AddScoped<IPrescriptionDetailService, PrescriptionDetailService>();
-
-
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IInvoiceMapper, InvoiceMapper>();
-
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IPaymentMapper, PaymentMapper>();
-//builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-
 builder.Services.AddScoped<ISupplierMapper, SupplierMapper>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<IMedicineImportMapper, MedicineImportMapper>();
 builder.Services.AddScoped<IMedicineImportService, MedicineImportService>();
 builder.Services.AddScoped<IMedicineImportDetailMapper, MedicineImportDetailMapper>();
 builder.Services.AddScoped<IMedicineImportDetailService, MedicineImportDetailService>();
-
 builder.Services.AddScoped<IMedicineManageForAdminService, MedicineManageForAdminService>();
 builder.Services.AddScoped<IMedicineManageForAdminMapper, MedicineManageForAdminMapper>();
-
 builder.Services.AddScoped<IMedicineImportExcelMapper, MedicineImportExcelMapper>();
 builder.Services.AddScoped<IMedicineImportExcelService, MedicineImportExcelService>();
-
 builder.Services.AddScoped<IMedicalRecordAdminService, MedicalRecordAdminService>();
-
 builder.Services.AddScoped<INurseService, NurseService>();
 builder.Services.AddScoped<INurseMapper, NurseMapper>();
-
 builder.Services.AddScoped<IMedicalRecordListMapper, MedicalRecordListMapper>();
 builder.Services.AddScoped<IMedicalRecordListService, MedicalRecordListService>();
-
 builder.Services.AddScoped<IMedicalRecordDetailMapper, MedicalRecordDetailMapper>();
 builder.Services.AddScoped<IMedicalRecordDetailService, MedicalRecordDetailService>();
 builder.Services.AddScoped<IAppointmentReminderService, AppointmentReminderService>();
 builder.Services.AddScoped<IFeedbackMapper, FeedbackMapper>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
-
 builder.Services.AddScoped<IDiseaseMapper, DiseaseMapper>();
 builder.Services.AddScoped<IDiseaseService, DiseaseService>();
-
 builder.Services.AddScoped<IDoctorShiftFillerMapper, DoctorShiftFillerMapper>();
 builder.Services.AddScoped<IDoctorShiftFillerService, DoctorShiftFillerService>();
-
 builder.Services.AddScoped<IDoctorScheduleMapper, DoctorScheduleMapper>();
 builder.Services.AddScoped<IDoctorScheduleService, DoctorScheduleService>();
-
 builder.Services.AddScoped<IShiftRequestService, ShiftRequestService>();
-
 builder.Services.AddScoped<IAppointmentMapperVer2,  AppointmentMapperVer2>();
 builder.Services.AddScoped<IAppoinrmentServicever2, AppointmentServiceVer2>();
 
+
 var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
 Console.WriteLine(hash);
-
-
-
 
 
 
