@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Supplier;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Service;
@@ -19,6 +20,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpPost("add-supplier")]
         [ProducesResponseType(typeof(IEnumerable<Supplier>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddSupplier([FromBody] SupplierCreate supplier)
         {
             try
@@ -35,6 +37,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpGet("get-all")]
         [ProducesResponseType(typeof(IEnumerable<Supplier>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+       
         public async Task<ActionResult<IEnumerable<Supplier>>> GetAllSupplier()
         {
             try
@@ -51,6 +54,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpGet("find-by-name/{name}")]
         [ProducesResponseType(typeof(IEnumerable<Supplier>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> FindByName(string name)
         {
             try
@@ -67,6 +71,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpPut("update/{id}")]
         [ProducesResponseType(typeof(IEnumerable<Supplier>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateSupplier([FromBody] SupplierUpdate supplier, int id)
         {
             try

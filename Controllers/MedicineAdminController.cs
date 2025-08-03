@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicineAdmin;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Service;
@@ -21,7 +22,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpGet("get-all")]
         [ProducesResponseType(typeof(IEnumerable<MedicineAdmin>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
-
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<MedicineAdmin>>> GetAll(int pageNumber = 1, int pageSize = 10)
         {
             try
@@ -38,6 +39,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpGet("search")]
         [ProducesResponseType(typeof(IEnumerable<MedicineAdmin>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SearchKeyword([FromQuery] string keyword ="",
                                                         [FromQuery] decimal? startPrice = null,
                                                         [FromQuery] decimal? endPrice = null,
@@ -58,6 +60,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpPut("update/{id}")]
         [ProducesResponseType(typeof(IEnumerable<MedicineAdmin>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateMedicineInfo([FromBody] MedicineAdminUpdate up, int id)
         {
             try
@@ -84,6 +87,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpPut("update-image/{id}")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateMedicineImage(int id, IFormFile file)
         {
             try
