@@ -1,9 +1,10 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SWP391_SE1914_ManageHospital.Data;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Service;
 using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Ultility;
+using System.Text.RegularExpressions;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl;
 
@@ -70,6 +71,46 @@ public class ServiceService : IServiceService
 
     public async Task<ServiceResponseDTO> CreateServiceAsync(ServiceRequestDTO request)
     {
+
+        if (await _context.Services.AnyAsync(x => x.Name == request.Name))
+        {
+            throw new Exception("Tên dịch vụ đã được sử dụng");
+        }
+
+        
+        if (await _context.Services.AnyAsync(x => x.Code == request.Code))
+        {
+            throw new Exception("Mã dịch vụ đã được sử dụng");
+        }
+
+
+        string specialCharPattern = @"^[\p{L}0-9\s\-.,]+$";
+
+
+        if (!Regex.IsMatch(request.Name, specialCharPattern))
+        {
+            throw new Exception("Tên dịch vụ chứa ký tự không hợp lệ.");
+        }
+
+        if (!Regex.IsMatch(request.Code, specialCharPattern))
+        {
+            throw new Exception("Mã dịch vụ chứa ký tự không hợp lệ.");
+        }
+        if (!Regex.IsMatch(request.Code, @"^S\d{5}$"))
+        {
+            throw new Exception("Mã dịch vụ không hợp lệ. Định dạng hợp lệ: S00001");
+        }
+        if (!string.IsNullOrEmpty(request.Description) &&
+            !Regex.IsMatch(request.Description, specialCharPattern))
+        {
+            throw new Exception("Mô tả dịch vụ chứa ký tự không hợp lệ.");
+        }
+
+       
+        if (request.Price <= 0)
+        {
+            throw new Exception("Giá dịch vụ phải lớn hơn 0.");
+        }
         var service = new Servicess
         {
             Name = request.Name,
@@ -96,6 +137,48 @@ public class ServiceService : IServiceService
         var service = await _context.Set<Servicess>().FindAsync(id);
         if (service == null)
             return null;
+
+        
+        if (await _context.Services.AnyAsync(x => x.Id != id && x.Name == request.Name))
+        {
+            throw new Exception("Tên dịch vụ đã được sử dụng");
+        }
+
+        
+        if (await _context.Services.AnyAsync(x => x.Id != id && x.Code == request.Code))
+        {
+            throw new Exception("Mã dịch vụ đã được sử dụng");
+        }
+
+        
+        if (!Regex.IsMatch(request.Code, @"^S\d{5}$"))
+        {
+            throw new Exception("Mã dịch vụ không hợp lệ. Định dạng hợp lệ: S00001");
+        }
+
+
+        string specialCharPattern = @"^[\p{L}0-9\s\-.,]+$";
+
+
+        if (!Regex.IsMatch(request.Name, specialCharPattern))
+        {
+            throw new Exception("Tên dịch vụ chứa ký tự không hợp lệ.");
+        }
+        if (!Regex.IsMatch(request.Code, @"^S\d{5}$"))
+        {
+            throw new Exception("Mã dịch vụ không hợp lệ. Định dạng hợp lệ: S00001");
+        }
+        if (!string.IsNullOrEmpty(request.Description) &&
+            !Regex.IsMatch(request.Description, specialCharPattern))
+        {
+            throw new Exception("Mô tả dịch vụ chứa ký tự không hợp lệ.");
+        }
+
+        
+        if (request.Price <= 0)
+        {
+            throw new Exception("Giá dịch vụ phải lớn hơn 0.");
+        }
 
         service.Name = request.Name;
         service.Code = request.Code;

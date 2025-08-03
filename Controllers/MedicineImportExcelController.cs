@@ -1,4 +1,5 @@
 ﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.ImportMedicineEX;
 using SWP391_SE1914_ManageHospital.Models.Entities;
@@ -27,6 +28,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpPost("import-excel-preview")]
         [ProducesResponseType(typeof(MedicineImportRequest), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ImportMedicinesPreview( IFormFile file, [FromForm] int supplierId, [FromForm] string importName)
         {
             try
@@ -51,6 +53,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpPost("confirm-import")]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ConfirmImport([FromBody] MedicineImportRequest request)
         {
             try

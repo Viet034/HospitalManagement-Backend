@@ -47,7 +47,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
                 // Tạo Appointment
                 var appointmentCode = await GenerateUniqueAppointmentCodeAsync();
-                //var note = string.IsNullOrWhiteSpace(create.Note) ? "Không có ghi chú" : create.Note;
+               
 
                 var appointment = new Appointment
                 {
