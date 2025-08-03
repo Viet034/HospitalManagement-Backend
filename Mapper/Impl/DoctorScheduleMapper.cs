@@ -17,7 +17,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
                 Notes = dto.Notes,
-                CreateBy = dto.CreateBy,
+                CreateBy = "admin",
                 CreateDate = DateTime.UtcNow
             };
         }
@@ -29,7 +29,7 @@ namespace SWP391_SE1914_ManageHospital.Mapper.Impl
             entity.StartTime = dto.StartTime;
             entity.EndTime = dto.EndTime;
             entity.Notes = dto.Notes;
-            entity.UpdateBy = dto.UpdateBy;
+            entity.UpdateBy = "admin";
             entity.UpdateDate = DateTime.UtcNow;
         }
 

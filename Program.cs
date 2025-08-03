@@ -129,6 +129,9 @@ builder.Services.AddScoped<IShiftRequestService, ShiftRequestService>();
 builder.Services.AddScoped<IAppointmentMapperVer2,  AppointmentMapperVer2>();
 builder.Services.AddScoped<IAppoinrmentServicever2, AppointmentServiceVer2>();
 
+builder.Services.AddScoped<IDoctorViewAllPatientMapper, DoctorViewAllPatientMapper>();
+builder.Services.AddScoped<IDoctorViewAllPatientService, DoctorViewAllPatientService>();
+
 var hash = BCrypt.Net.BCrypt.HashPassword("Admin1234$");
 Console.WriteLine(hash);
 

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SWP391_SE1914_ManageHospital.Service;
 using Microsoft.Extensions.Logging;
+using SWP391_SE1914_ManageHospital.Ultility;
 
 namespace SWP391_SE1914_ManageHospital.Service.Impl
 {
@@ -21,17 +22,26 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
         public PatientFilterService(ApplicationDBContext context, IPatientFilterMapper mapper, ILogger<PatientFilterService> logger)
         {
-            _context = context;
-            _mapper = mapper;
-            _logger = logger;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<List<PatientFilterResponse>> GetTodayScheduleByDoctorAsync(int doctorId)
         {
+            // Validation: DoctorId phải hợp lệ
             if (doctorId <= 0)
                 throw new ArgumentException("ID bác sĩ không hợp lệ", nameof(doctorId));
 
+            var doctorExists = await _context.Doctors.AnyAsync(d => d.Id == doctorId);
+            if (!doctorExists)
+                throw new ArgumentException("Bác sĩ không tồn tại", nameof(doctorId));
+
             var today = DateTime.UtcNow.AddHours(7).Date;
+            var validStatuses = new[] {
+                Status.AppointmentStatus.Scheduled,
+                Status.AppointmentStatus.Completed
+            };
 
             var doctorAppointments = await _context.Doctor_Appointments
                 .Where(da => da.DoctorId == doctorId)
@@ -41,7 +51,8 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                 .ToListAsync();
 
             var appointments = doctorAppointments
-                .Where(da => da.Appointment.AppointmentDate.Date == today)
+                .Where(da => da.Appointment.AppointmentDate.Date == today
+                    && validStatuses.Contains(da.Appointment.Status))
                 .OrderBy(da => da.Appointment.StartTime)
                 .Select(da => _mapper.EntityToResponse(
                     da.Appointment,
@@ -55,10 +66,49 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
         public async Task<List<PatientFilterResponse>> FilterScheduleAsync(PatientFilter filter)
         {
+            // Validation: filter không được null
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter), "Bộ lọc không được để trống.");
 
+            // Validation: kiểm tra ngày tháng
+            if (filter.FromDate.HasValue && filter.ToDate.HasValue && filter.FromDate > filter.ToDate)
+                throw new ArgumentException("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.");
+
+            // Validation: kiểm tra DoctorId nếu có
+            if (filter.DoctorId < 0)
+                throw new ArgumentException("ID bác sĩ không hợp lệ", nameof(filter.DoctorId));
+            if (filter.DoctorId > 0)
+            {
+                var doctorExists = await _context.Doctors.AnyAsync(d => d.Id == filter.DoctorId);
+                if (!doctorExists)
+                    throw new ArgumentException("Bác sĩ không tồn tại", nameof(filter.DoctorId));
+            }
+
+            // Validation: kiểm tra PatientId nếu có
+            if (filter.PatientId < 0)
+                throw new ArgumentException("ID bệnh nhân không hợp lệ", nameof(filter.PatientId));
+            if (filter.PatientId > 0)
+            {
+                var patientExists = await _context.Patients.AnyAsync(p => p.Id == filter.PatientId);
+                if (!patientExists)
+                    throw new ArgumentException("Bệnh nhân không tồn tại", nameof(filter.PatientId));
+            }
+
+            // Validation: kiểm tra AppointmentId nếu có
+            if (filter.AppointmentId < 0)
+                throw new ArgumentException("ID lịch hẹn không hợp lệ", nameof(filter.AppointmentId));
+            if (filter.AppointmentId > 0)
+            {
+                var appointmentExists = await _context.Appointments.AnyAsync(a => a.Id == filter.AppointmentId);
+                if (!appointmentExists)
+                    throw new ArgumentException("Lịch hẹn không tồn tại", nameof(filter.AppointmentId));
+            }
+
             List<PatientFilterResponse> result;
+            var validStatuses = new[] {
+                Status.AppointmentStatus.Scheduled,
+                Status.AppointmentStatus.Completed
+            };
 
             if (filter.DoctorId > 0)
             {
@@ -69,7 +119,9 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
                     .Include(da => da.Doctor)
                     .ToListAsync();
 
-                var filtered = doctorAppointments.AsQueryable();
+                var filtered = doctorAppointments
+                    .Where(da => validStatuses.Contains(da.Appointment.Status))
+                    .AsQueryable();
 
                 if (filter.AppointmentId > 0)
                     filtered = filtered.Where(da => da.AppointmentId == filter.AppointmentId);
@@ -99,6 +151,7 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
             else
             {
                 var query = _context.Appointments
+                    .Where(a => validStatuses.Contains(a.Status))
                     .Include(a => a.Patient)
                     .Include(a => a.Doctor_Appointments)
                         .ThenInclude(da => da.Doctor)
@@ -138,21 +191,27 @@ namespace SWP391_SE1914_ManageHospital.Service.Impl
 
         public async Task<List<PatientFilterResponse>> GetAllSchedulesAsync()
         {
+            var validStatuses = new[] {
+                Status.AppointmentStatus.Scheduled,
+                Status.AppointmentStatus.Completed
+            };
+
             var doctorAppointments = await _context.Doctor_Appointments
                 .Include(da => da.Appointment)
                     .ThenInclude(a => a.Patient)
                 .Include(da => da.Doctor)
-                .OrderBy(da => da.Appointment.AppointmentDate)
-                .ThenBy(da => da.Appointment.StartTime)
                 .ToListAsync();
 
-            var result = doctorAppointments.Select(da =>
-                _mapper.EntityToResponse(
+            var result = doctorAppointments
+                .Where(da => validStatuses.Contains(da.Appointment.Status))
+                .OrderBy(da => da.Appointment.AppointmentDate)
+                .ThenBy(da => da.Appointment.StartTime)
+                .Select(da => _mapper.EntityToResponse(
                     da.Appointment,
                     da.DoctorId,
                     da.Doctor.Name
-                )
-            ).ToList();
+                ))
+                .ToList();
 
             return result;
         }

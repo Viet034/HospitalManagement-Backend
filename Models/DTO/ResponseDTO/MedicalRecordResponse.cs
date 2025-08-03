@@ -4,7 +4,6 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 
 public class MedicalRecordResponse
 {
-    // Chỉ lấy các trường cần thiết cho danh sách
     public int Id { get; set; }
     public int AppointmentId { get; set; }
     public string Diagnosis { get; set; } = default!;

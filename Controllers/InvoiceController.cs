@@ -39,7 +39,7 @@ public class InvoiceController : ControllerBase
         }
     }
 
-    [HttpPost("generate-invoice-details/{appointmentId}")]
+    [HttpPut("generate-invoice-details/{appointmentId}")]
     public async Task<IActionResult> GenerateInvoiceDetails(int appointmentId)
     {
         try
