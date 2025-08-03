@@ -181,8 +181,13 @@ public class AppointmentService_1 : IAppointmentService_1
         {
             throw new Exception("ID lịch hẹn không tồn tại!");
         }
+        var appointmentDateTime = appointment.AppointmentDate.Date
+        .Add(appointment.StartTime); 
+        if (DateTime.Now > appointmentDateTime)
+        {
+            throw new Exception("Không thể hủy lịch hẹn đã qua thời gian bắt đầu.");
+        }
 
-        
         appointment.Status = newStatus;
         appointment.UpdateDate = DateTime.UtcNow; 
 

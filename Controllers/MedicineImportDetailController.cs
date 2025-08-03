@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.MedicineImport;
@@ -23,6 +24,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpPost("add-medicine-import-detail")]
         [ProducesResponseType(typeof(IEnumerable<MedicineImportDetail>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddMedicineImportdetail([FromBody] MedicineImportDetailCreate create)
         {
             try
@@ -39,6 +41,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpGet("get-all")]
         [ProducesResponseType(typeof(IEnumerable<MedicineImportDetail>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<MedicineImportDetail>>> GetAllMID(int pageNumber = 1, int pageSize = 10)
         {
             try
@@ -56,6 +59,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         [HttpGet("search")]
         [ProducesResponseType(typeof(IEnumerable<MedicineImportDetail>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Search([FromQuery] string keyword = "",
                                                 [FromQuery] DateTime? startDate = null,
                                                 [FromQuery] DateTime? endDate = null,
@@ -77,6 +81,7 @@ namespace SWP391_SE1914_ManageHospital.Controllers
         }
 
         [HttpPut("update/{id}")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(typeof(IEnumerable<MedicineImportDetail>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateMID([FromBody] MedicineImportDetailUpdate detail, int id)
