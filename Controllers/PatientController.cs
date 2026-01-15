@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using SWP391_SE1914_ManageHospital.Models.DTO.RequestDTO.Patient;
+using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
 using SWP391_SE1914_ManageHospital.Models.Entities;
 using SWP391_SE1914_ManageHospital.Service;
+using SWP391_SE1914_ManageHospital.Service.Impl;
 using System.Net;
 using static SWP391_SE1914_ManageHospital.Ultility.Status;
-using SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO;
-using SWP391_SE1914_ManageHospital.Service.Impl;
 
 namespace SWP391_SE1914_ManageHospital.Controllers
 {

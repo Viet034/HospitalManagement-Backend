@@ -52,8 +52,8 @@ namespace SWP391_SE1914_ManageHospital.Models.DTO.ResponseDTO
             BloodType = bloodType;
             ImageURL = imageURL;
             UserId = userId;
+            Reason = reason;
+            DoctorName = doctorName;
         }
     }
-
-
 }
